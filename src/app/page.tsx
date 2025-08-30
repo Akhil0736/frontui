@@ -19,7 +19,7 @@ export default function Home() {
       <div className="relative z-20 h-full w-full">
         <Sidebar />
 
-        <div className="h-full ml-[180px] relative">
+        <div className="h-full ml-[80px] relative">
           <h1 
             className="font-headline font-black text-[220px] leading-none tracking-tighter text-white/20 absolute top-1/2 left-1/2" 
             style={{ transform: 'translate(-50%, calc(-50% - 120px))' }}
