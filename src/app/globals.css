@@ -163,4 +163,121 @@
       background-position: 350% 50%, 350% 50%;
     }
   }
+
+  .animate-first {
+      animation: first 15s ease infinite;
+  }
+  .animate-second {
+      animation: second 15s ease infinite;
+  }
+  .animate-third {
+      animation: third 15s ease infinite;
+  }
+  .animate-fourth {
+      animation: fourth 15s ease infinite;
+  }
+  .animate-fifth {
+      animation: fifth 15s ease infinite;
+  }
+
+  @keyframes first {
+    0% {
+      transform: translate(0px, 0px);
+    }
+    20% {
+      transform: translate(80px, -100px);
+    }
+    40% {
+      transform: translate(140px, 40px);
+    }
+    60% {
+      transform: translate(80px, 120px);
+    }
+    80% {
+      transform: translate(-40px, 80px);
+    }
+    100% {
+      transform: translate(0px, 0px);
+    }
+  }
+  @keyframes second {
+    0% {
+      transform: translate(0px, 0px);
+    }
+    20% {
+      transform: translate(-100px, 80px);
+    }
+    40% {
+      transform: translate(40px, 140px);
+    }
+    60% {
+      transform: translate(120px, 90px);
+    }
+    80% {
+      transform: translate(80px, -40px);
+    }
+    100% {
+      transform: translate(0px, 0px);
+    }
+  }
+  @keyframes third {
+    0% {
+      transform: translate(0px, 0px);
+    }
+    20% {
+      transform: translate(100px, -80px);
+    }
+    40% {
+      transform: translate(-40px, -140px);
+    }
+    60% {
+      transform: translate(-120px, -90px);
+    }
+    80% {
+      transform: translate(-80px, 40px);
+    }
+    100% {
+      transform: translate(0px, 0px);
+    }
+  }
+  @keyframes fourth {
+    0% {
+      transform: translate(0px, 0px);
+    }
+    20% {
+      transform: translate(-20px, -120px);
+    }
+    40% {
+      transform: translate(100px, -40px);
+    }
+    60% {
+      transform: translate(120px, 60px);
+    }
+    80% {
+      transform: translate(40px, 80px);
+    }
+    100% {
+      transform: translate(0px, 0px);
+    }
+  }
+  @keyframes fifth {
+    0% {
+      transform: translate(0px, 0px);
+    }
+    20% {
+      transform: translate(40px, 120px);
+    }
+    40% {
+      transform: translate(-100px, 60px);
+    }
+    60% {
+      transform: translate(-120px, -80px);
+    }
+    80% {
+      transform: translate(-60px, -40px);
+    }
+    100% {
+      transform: translate(0px, 0px);
+    }
+  }
 }

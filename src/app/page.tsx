@@ -7,7 +7,7 @@ import { useState } from 'react';
 import { chat } from '@/ai/flows/chat';
 import { useToast } from '@/hooks/use-toast';
 import { AnimatePresence, motion } from 'framer-motion';
-import { AnimatedGradientBackground } from '@/components/ui/animated-gradient-background';
+import { BackgroundGradientAnimation } from '@/components/ui/background-gradient-animation';
 
 interface Message {
   role: 'user' | 'assistant';
@@ -46,7 +46,7 @@ export default function Home() {
 
   return (
     <main className="w-full h-screen bg-[#21283C] overflow-hidden">
-      <AnimatedGradientBackground>
+      <BackgroundGradientAnimation>
         <div className="relative z-20 h-full w-full">
           <Sidebar />
 
@@ -105,7 +105,7 @@ export default function Home() {
             </div>
           </div>
         </div>
-      </AnimatedGradientBackground>
+      </BackgroundGradientAnimation>
     </main>
   );
 }
