@@ -1,12 +1,37 @@
 import Image from 'next/image';
 import Sidebar from '@/components/dashboard/sidebar';
 import { PromptInputBox } from '@/components/ui/ai-prompt-box';
+import { motion } from 'framer-motion';
 
-export default function Home() {
+async function getDailyWallpaper() {
+    try {
+        const res = await fetch('https://api.unsplash.com/photos/random?query=mac-wallpaper&orientation=landscape&content_filter=high', {
+            headers: {
+                Authorization: `Client-ID ${process.env.UNSPLASH_ACCESS_KEY}`
+            },
+            next: { revalidate: 86400 } // Revalidate once per day (86400 seconds)
+        });
+
+        if (!res.ok) {
+            console.error('Failed to fetch wallpaper from Unsplash:', await res.text());
+            return "https://images.unsplash.com/photo-1554034483-04fda0d3507b?q=80&w=2070";
+        }
+
+        const data = await res.json();
+        return data.urls.full;
+    } catch (error) {
+        console.error('Error fetching wallpaper:', error);
+        return "https://images.unsplash.com/photo-1554034483-04fda0d3507b?q=80&w=2070";
+    }
+}
+
+export default async function Home() {
+  const wallpaperUrl = await getDailyWallpaper();
+
   return (
     <main className="w-full h-screen bg-[#21283C] overflow-hidden">
       <Image
-        src="https://images.unsplash.com/photo-1554034483-04fda0d3507b?q=80&w=2070"
+        src={wallpaperUrl}
         alt="mac wallpaper"
         fill
         className="object-cover w-full h-full absolute inset-0 z-0"
