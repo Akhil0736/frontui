@@ -92,11 +92,7 @@ export default function Home() {
                             </div>
                           )}
                           <div
-                            className={`max-w-xl p-4 rounded-2xl ${
-                              message.role === 'user'
-                                ? 'bg-primary text-primary-foreground'
-                                : 'bg-muted text-muted-foreground'
-                            }`}
+                            className={`max-w-xl p-4 rounded-2xl bg-primary text-primary-foreground`}
                           >
                             <p className="whitespace-pre-wrap">{message.content}</p>
                           </div>
@@ -110,14 +106,14 @@ export default function Home() {
             <div 
               className={`mx-auto w-full px-4 transition-all duration-500 ease-in-out ${
                 messages.length === 0
-                  ? 'absolute bottom-[30%]'
+                  ? 'absolute bottom-[228px] left-1/2 -translate-x-1/2'
                   : 'pb-8'
               }`}
             >
               <div
                 className={`mx-auto transition-all duration-500 ${
                   messages.length === 0
-                    ? 'max-w-2xl'
+                    ? 'w-[calc(100%-216px)] max-w-[1330px]'
                     : 'max-w-4xl'
                 }`}
               >
