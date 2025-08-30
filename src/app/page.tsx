@@ -62,7 +62,7 @@ export default function Home() {
             
             {messages.length === 0 ? (
                 <div className="flex-1 flex flex-col items-center justify-center text-center">
-                    <div className="w-full max-w-4xl mx-auto flex flex-col items-center justify-center gap-6 -mt-20">
+                    <div className="w-full max-w-4xl mx-auto flex flex-col items-center justify-center gap-6 mt-28">
                         <h1 className="text-8xl font-headline font-black text-white">Luna</h1>
                         <p className="text-3xl font-cursive text-white/80">Welcome, how can I help you today?</p>
                         <div className="mt-4">
@@ -72,7 +72,7 @@ export default function Home() {
                 </div>
             ) : (
                 <>
-                    <div className="flex-1 overflow-y-auto p-8 pt-6 space-y-6 max-w-4xl mx-auto w-full">
+                    <div className="flex-1 overflow-y-auto p-8 pt-6 space-y-6 max-w-4xl mx-auto w-full pb-32">
                         <AnimatePresence>
                             {messages.map((message, index) => (
                             <motion.div
@@ -85,7 +85,7 @@ export default function Home() {
                                 }`}
                             >
                                 {message.role === 'assistant' && (
-                                <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-primary-foreground text-sm font-bold shrink-0">
+                                <div className="w-8 h-8 rounded-full bg-primary/80 backdrop-blur-sm flex items-center justify-center text-primary-foreground text-sm font-bold shrink-0">
                                     L
                                 </div>
                                 )}
@@ -98,7 +98,7 @@ export default function Home() {
                             ))}
                         </AnimatePresence>
                     </div>
-                     <div className="w-full max-w-4xl mx-auto py-6">
+                     <div className="chatbox">
                         <PromptInputBox onSend={handleSend} isLoading={isLoading} />
                     </div>
                 </>

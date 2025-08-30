@@ -1,3 +1,4 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -279,5 +280,18 @@
     100% {
       transform: translate(0px, 0px);
     }
+  }
+
+  /* Chatbox positioning */
+  .chatbox {
+    position: fixed;          /* Fix it to the viewport */
+    bottom: 80px;             /* Distance from bottom — adjust until it sits in the pink glow */
+    left: 50%;                /* Start at the center horizontally */
+    transform: translateX(-50%);  /* Perfectly center it */
+    width: 60%;               /* Adjust width (e.g., 60% of screen) */
+    max-width: 800px;         /* Keep it from being too wide */
+    border-radius: 16px;      /* Rounded corners */
+    box-shadow: 0 8px 24px rgba(0,0,0,0.2); /* Floating shadow */
+    z-index: 9999;            /* Keep it above other elements */
   }
 }
