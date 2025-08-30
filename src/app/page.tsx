@@ -58,67 +58,35 @@ export default function Home() {
           <Sidebar />
 
           <div className="h-full ml-[80px] relative flex flex-col">
-              <div className="flex-1 overflow-y-auto p-8 space-y-6 max-w-4xl mx-auto w-full">
-                <AnimatePresence>
-                  {messages.length === 0 ? (
-                    <motion.div 
-                      key="luna-title"
-                      initial={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -20 }}
-                      transition={{ duration: 0.3 }}
-                      className="flex-1 flex flex-col items-center justify-center h-full"
-                    >
-                      <h1 
-                        className="gradient-glow font-headline font-black text-[220px] leading-none tracking-tighter"
-                      >
-                        Luna
-                      </h1>
-                    </motion.div>
-                  ) : (
-                    <>
-                      {messages.map((message, index) => (
-                        <motion.div
-                          key={index}
-                          initial={{ opacity: 0, y: 20 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          transition={{ duration: 0.3 }}
-                          className={`flex items-start gap-4 ${
-                            message.role === 'user' ? 'justify-end' : 'justify-start'
-                          }`}
-                        >
-                          {message.role === 'assistant' && (
-                            <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-primary-foreground text-sm font-bold shrink-0">
-                              L
-                            </div>
-                          )}
-                          <div
-                            className={`max-w-xl p-4 rounded-2xl bg-primary text-primary-foreground`}
-                          >
-                            <p className="whitespace-pre-wrap">{message.content}</p>
-                          </div>
-                        </motion.div>
-                      ))}
-                    </>
-                  )}
-                </AnimatePresence>
-              </div>
-            
-            <div 
-              className={`mx-auto w-full px-4 transition-all duration-500 ease-in-out ${
-                messages.length === 0
-                  ? 'absolute bottom-[228px] left-[calc(50%+40px)] -translate-x-1/2 w-[calc(100%-216px)] max-w-[1330px]'
-                  : 'pb-8'
-              }`}
-            >
-              <div
-                className={`mx-auto transition-all duration-500 ${
-                  messages.length === 0
-                    ? ''
-                    : 'max-w-4xl'
-                }`}
-              >
+            <div className="w-full max-w-4xl mx-auto pt-6">
                 <PromptInputBox onSend={handleSend} isLoading={isLoading} />
-              </div>
+            </div>
+            
+            <div className="flex-1 overflow-y-auto p-8 pt-6 space-y-6 max-w-4xl mx-auto w-full">
+                <AnimatePresence>
+                    {messages.map((message, index) => (
+                    <motion.div
+                        key={index}
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.3 }}
+                        className={`flex items-start gap-4 ${
+                        message.role === 'user' ? 'justify-end' : 'justify-start'
+                        }`}
+                    >
+                        {message.role === 'assistant' && (
+                        <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-primary-foreground text-sm font-bold shrink-0">
+                            L
+                        </div>
+                        )}
+                        <div
+                        className={`max-w-xl p-4 rounded-2xl bg-primary/80 backdrop-blur-sm text-primary-foreground`}
+                        >
+                        <p className="whitespace-pre-wrap">{message.content}</p>
+                        </div>
+                    </motion.div>
+                    ))}
+                </AnimatePresence>
             </div>
           </div>
         </div>
