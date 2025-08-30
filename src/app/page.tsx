@@ -108,7 +108,7 @@ export default function Home() {
             <div 
               className={`mx-auto pb-8 transition-all duration-500 ${
                 messages.length === 0
-                  ? 'w-[46.18%] -translate-y-[9.72rem]'
+                  ? 'w-[46.18%] -translate-y-[6.5rem]'
                   : 'w-[90%] max-w-[1692px]'
               }`}
             >
