@@ -47,12 +47,12 @@ export default function Home() {
   return (
     <main className="w-full h-screen bg-[#21283C] overflow-hidden">
       <BackgroundGradientAnimation
-        firstColor="255, 255, 255"
-        secondColor="255, 182, 193"
-        thirdColor="255, 105, 180"
-        fourthColor="255, 255, 255"
+        firstColor="255, 182, 193"
+        secondColor="255, 105, 180"
+        thirdColor="255, 182, 193"
+        fourthColor="255, 105, 180"
         fifthColor="255, 182, 193"
-        pointerColor="255, 255, 255"
+        pointerColor="255, 105, 180"
       >
         <div className="relative z-20 h-full w-full">
           <Sidebar />
