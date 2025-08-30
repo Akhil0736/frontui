@@ -8,6 +8,7 @@ import { chat } from '@/ai/flows/chat';
 import { useToast } from '@/hooks/use-toast';
 import { AnimatePresence, motion } from 'framer-motion';
 import { BackgroundGradientAnimation } from '@/components/ui/background-gradient-animation';
+import InputPanel from '@/components/dashboard/input-panel';
 
 interface Message {
   role: 'user' | 'assistant';
@@ -58,36 +59,50 @@ export default function Home() {
           <Sidebar />
 
           <div className="h-full ml-[80px] relative flex flex-col">
-            <div className="w-full max-w-4xl mx-auto pt-6">
-                <PromptInputBox onSend={handleSend} isLoading={isLoading} />
-            </div>
             
-            <div className="flex-1 overflow-y-auto p-8 pt-6 space-y-6 max-w-4xl mx-auto w-full">
-                <AnimatePresence>
-                    {messages.map((message, index) => (
-                    <motion.div
-                        key={index}
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.3 }}
-                        className={`flex items-start gap-4 ${
-                        message.role === 'user' ? 'justify-end' : 'justify-start'
-                        }`}
-                    >
-                        {message.role === 'assistant' && (
-                        <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-primary-foreground text-sm font-bold shrink-0">
-                            L
+            {messages.length === 0 ? (
+                <div className="flex-1 flex flex-col items-center justify-center text-center">
+                    <div className="w-full max-w-4xl mx-auto flex flex-col items-center justify-center gap-6 -mt-20">
+                        <h1 className="text-8xl font-headline font-black text-white">Luna</h1>
+                        <p className="text-3xl font-cursive text-white/80">Welcome, how can I help you today?</p>
+                        <div className="mt-4">
+                            <InputPanel />
                         </div>
-                        )}
-                        <div
-                        className={`max-w-xl p-4 rounded-2xl bg-primary/80 backdrop-blur-sm text-primary-foreground`}
-                        >
-                        <p className="whitespace-pre-wrap">{message.content}</p>
-                        </div>
-                    </motion.div>
-                    ))}
-                </AnimatePresence>
-            </div>
+                    </div>
+                </div>
+            ) : (
+                <>
+                    <div className="flex-1 overflow-y-auto p-8 pt-6 space-y-6 max-w-4xl mx-auto w-full">
+                        <AnimatePresence>
+                            {messages.map((message, index) => (
+                            <motion.div
+                                key={index}
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ duration: 0.3 }}
+                                className={`flex items-start gap-4 ${
+                                message.role === 'user' ? 'justify-end' : 'justify-start'
+                                }`}
+                            >
+                                {message.role === 'assistant' && (
+                                <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-primary-foreground text-sm font-bold shrink-0">
+                                    L
+                                </div>
+                                )}
+                                <div
+                                className={`max-w-xl p-4 rounded-2xl bg-primary/80 backdrop-blur-sm text-primary-foreground`}
+                                >
+                                <p className="whitespace-pre-wrap">{message.content}</p>
+                                </div>
+                            </motion.div>
+                            ))}
+                        </AnimatePresence>
+                    </div>
+                     <div className="w-full max-w-4xl mx-auto py-6">
+                        <PromptInputBox onSend={handleSend} isLoading={isLoading} />
+                    </div>
+                </>
+            )}
           </div>
         </div>
       </BackgroundGradientAnimation>
