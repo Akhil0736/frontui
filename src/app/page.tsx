@@ -4,6 +4,11 @@ import { PromptInputBox } from '@/components/ui/ai-prompt-box';
 import { motion } from 'framer-motion';
 
 async function getDailyWallpaper() {
+    // If Unsplash credentials aren't provided, return a default wallpaper.
+    if (!process.env.UNSPLASH_ACCESS_KEY) {
+        return "https://images.unsplash.com/photo-1554034483-04fda0d3507b?q=80&w=2070";
+    }
+
     try {
         const res = await fetch('https://api.unsplash.com/photos/random?query=mac-wallpaper&orientation=landscape&content_filter=high', {
             headers: {
