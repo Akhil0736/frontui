@@ -1,6 +1,6 @@
 
 'use client';
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import BlurFade from '@/components/ui/blur-fade';
@@ -8,6 +8,48 @@ import BlurFade from '@/components/ui/blur-fade';
 interface LunaLogoProps {
   className?: string;
 }
+
+const Particles = () => {
+  // We only want to render particles on the client, after hydration
+  // to avoid server/client mismatch from Math.random()
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  if (!isMounted) {
+    return null;
+  }
+
+  return (
+    <>
+      {/* Floating particles */}
+      {[...Array(8)].map((_, i) => (
+        <motion.div
+          key={`particle-${i}`}
+          className="absolute w-0.5 h-0.5 bg-pink-200 rounded-full opacity-60"
+          style={{
+            left: `${Math.random() * 100}%`,
+            top: `${Math.random() * 100}%`,
+          }}
+          animate={{
+            y: [-20, -40, -20],
+            x: [0, Math.random() * 20 - 10, 0],
+            opacity: [0, 0.6, 0],
+          }}
+          transition={{
+            duration: 4 + Math.random() * 2,
+            repeat: Infinity,
+            delay: Math.random() * 2,
+            ease: 'easeInOut',
+          }}
+        />
+      ))}
+    </>
+  );
+};
+
 
 export default function LunaLogo({ className }: LunaLogoProps = {}) {
   return (
@@ -105,28 +147,8 @@ export default function LunaLogo({ className }: LunaLogoProps = {}) {
           />
         ))}
 
-        {/* Floating particles */}
-        {[...Array(8)].map((_, i) => (
-          <motion.div
-            key={`particle-${i}`}
-            className="absolute w-0.5 h-0.5 bg-pink-200 rounded-full opacity-60"
-            style={{
-              left: `${Math.random() * 100}%`,
-              top: `${Math.random() * 100}%`,
-            }}
-            animate={{
-              y: [-20, -40, -20],
-              x: [0, Math.random() * 20 - 10, 0],
-              opacity: [0, 0.6, 0],
-            }}
-            transition={{
-              duration: 4 + Math.random() * 2,
-              repeat: Infinity,
-              delay: Math.random() * 2,
-              ease: "easeInOut",
-            }}
-          />
-        ))}
+        <Particles />
+
       </div>
     </div>
   );
