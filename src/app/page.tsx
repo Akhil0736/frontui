@@ -22,15 +22,17 @@ export default function Home() {
 
   useEffect(() => {
     async function getDailyWallpaper() {
+        const unsplashApiKey = process.env.NEXT_PUBLIC_UNSPLASH_ACCESS_KEY;
         // If Unsplash credentials aren't provided, return a default wallpaper.
-        if (!process.env.NEXT_PUBLIC_UNSPLASH_ACCESS_KEY) {
+        if (!unsplashApiKey) {
+            console.log("Unsplash API key not found. Using default wallpaper.");
             return "https://images.unsplash.com/photo-1554034483-04fda0d3507b?q=80&w=2070";
         }
 
         try {
-            const res = await fetch('https://api.unsplash.com/photos/random?query=mac-wallpaper&orientation=landscape&content_filter=high', {
+            const res = await fetch('https://api.unsplash.com/photos/random?query=mac-wallpaper&orientation=landscape&content_filter=high&license=free', {
                 headers: {
-                    Authorization: `Client-ID ${process.env.NEXT_PUBLIC_UNSPLASH_ACCESS_KEY}`
+                    Authorization: `Client-ID ${unsplashApiKey}`
                 },
                 next: { revalidate: 86400 } // Revalidate once per day (86400 seconds)
             });
@@ -94,13 +96,19 @@ export default function Home() {
         <div className="h-full ml-[80px] relative flex flex-col">
           <AnimatePresence>
             {messages.length === 0 ? (
-              <div className="flex-1 flex flex-col items-center justify-center">
+              <motion.div 
+                key="luna-title"
+                initial={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                transition={{ duration: 0.3 }}
+                className="flex-1 flex flex-col items-center justify-center"
+              >
                 <h1 
                   className="gradient-glow font-headline font-black text-[220px] leading-none tracking-tighter"
                 >
                   Luna
                 </h1>
-              </div>
+              </motion.div>
             ) : (
               <div className="flex-1 overflow-y-auto p-8 space-y-6 max-w-4xl mx-auto w-full">
                 {messages.map((message, index) => (
