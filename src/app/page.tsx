@@ -6,12 +6,12 @@ export default function Home() {
   return (
     <main className="w-full h-screen bg-[#21283C] overflow-hidden">
       <Image
-        src="https://picsum.photos/1280/800"
-        alt="Mountain lake background"
-        width={1280}
-        height={800}
+        src="https://picsum.photos/1920/1080"
+        alt="mac wallpaper"
+        width={1920}
+        height={1080}
         className="object-cover w-full h-full absolute inset-0 z-0"
-        data-ai-hint="mountain lake"
+        data-ai-hint="mac wallpaper"
         priority
       />
       <div className="absolute inset-0 bg-black/40 z-10" />
