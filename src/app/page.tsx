@@ -45,7 +45,7 @@ export default function Home() {
 
 
   return (
-    <main className="w-full h-screen bg-white overflow-hidden">
+    <main className="w-full h-screen bg-background overflow-hidden">
       <BackgroundGradientAnimation
         firstColor="255, 255, 255"
         secondColor="255, 182, 193"
@@ -57,7 +57,7 @@ export default function Home() {
         <div className="relative z-20 h-full w-full">
           <Sidebar />
 
-          <div className="h-full ml-[80px] relative flex flex-col">
+          <div className="h-full ml-[80px] relative flex flex-col justify-between">
               <div className="flex-1 overflow-y-auto p-8 space-y-6 max-w-4xl mx-auto w-full">
                 <AnimatePresence>
                   {messages.length === 0 ? (
@@ -108,7 +108,11 @@ export default function Home() {
               </div>
             
             <div 
-              className="mx-auto pb-8 w-full px-4"
+              className={`mx-auto w-full px-4 transition-all duration-500 ease-in-out ${
+                messages.length === 0
+                  ? 'pb-24'
+                  : 'pb-8'
+              }`}
             >
               <div
                 className={`mx-auto transition-all duration-500 ${
