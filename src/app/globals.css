@@ -5,48 +5,48 @@
 
 @layer base {
   :root {
-    --background: 0 0% 100%; /* #FFFFFF */
-    --foreground: 225 29% 10%; /* Darker background */
-    --card: 0 0% 100%;
-    --card-foreground: 225 29% 10%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 225 29% 10%;
-    --primary: 336 82% 57%; /* #F43F86 */
-    --primary-foreground: 0 0% 98%; /* #FAFAFA */
-    --secondary: 336 82% 47%; /* Darker primary */
+    --background: 240 10% 3.9%;
+    --foreground: 0 0% 98%;
+    --card: 240 10% 3.9%;
+    --card-foreground: 0 0% 98%;
+    --popover: 240 10% 3.9%;
+    --popover-foreground: 0 0% 98%;
+    --primary: 346.8 98.3% 49.6%;
+    --primary-foreground: 0 0% 98%;
+    --secondary: 240 3.7% 15.9%;
     --secondary-foreground: 0 0% 98%;
-    --muted: 336 82% 95%; /* Lighter primary */
-    --muted-foreground: 225 29% 10%;
-    --accent: 336 82% 57%;
+    --muted: 240 3.7% 15.9%;
+    --muted-foreground: 240 5% 64.9%;
+    --accent: 240 3.7% 15.9%;
     --accent-foreground: 0 0% 98%;
-    --destructive: 0 63% 31%;
+    --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 0 0% 98%;
-    --border: 336 82% 87%; /* Lighter primary */
-    --input: 336 82% 87%;
-    --ring: 336 82% 57%;
+    --border: 240 3.7% 15.9%;
+    --input: 240 3.7% 15.9%;
+    --ring: 346.8 98.3% 49.6%;
     --radius: 0.5rem;
   }
 
   .dark {
-    --background: 225 29% 10%;
+    --background: 240 10% 3.9%;
     --foreground: 0 0% 98%;
-    --card: 225 29% 10%;
+    --card: 240 10% 3.9%;
     --card-foreground: 0 0% 98%;
-    --popover: 225 29% 10%;
+    --popover: 240 10% 3.9%;
     --popover-foreground: 0 0% 98%;
-    --primary: 336 82% 57%;
+    --primary: 346.8 98.3% 49.6%;
     --primary-foreground: 0 0% 98%;
-    --secondary: 336 82% 47%;
+    --secondary: 240 3.7% 15.9%;
     --secondary-foreground: 0 0% 98%;
-    --muted: 336 82% 25%;
-    --muted-foreground: 0 0% 98%;
-    --accent: 336 82% 57%;
+    --muted: 240 3.7% 15.9%;
+    --muted-foreground: 240 5% 64.9%;
+    --accent: 240 3.7% 15.9%;
     --accent-foreground: 0 0% 98%;
-    --destructive: 0 63% 31%;
+    --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 0 0% 98%;
-    --border: 336 82% 37%;
-    --input: 336 82% 37%;
-    --ring: 336 82% 57%;
+    --border: 240 3.7% 15.9%;
+    --input: 240 3.7% 15.9%;
+    --ring: 346.8 98.3% 49.6%;
   }
 }
 
@@ -280,5 +280,18 @@
     100% {
       transform: translate(0px, 0px);
     }
+  }
+
+  /* Chatbox positioning */
+  .chatbox {
+    position: fixed;          /* Fix it to the viewport */
+    bottom: 80px;             /* Distance from bottom — adjust until it sits in the pink glow */
+    left: 50%;                /* Start at the center horizontally */
+    transform: translateX(-50%);  /* Perfectly center it */
+    width: 60%;               /* Adjust width (e.g., 60% of screen) */
+    max-width: 800px;         /* Keep it from being too wide */
+    border-radius: 16px;      /* Rounded corners */
+    box-shadow: 0 8px 24px rgba(0,0,0,0.2); /* Floating shadow */
+    z-index: 9999;            /* Keep it above other elements */
   }
 }

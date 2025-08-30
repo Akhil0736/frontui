@@ -7,8 +7,8 @@ import { chat } from '@/ai/flows/chat';
 import { useToast } from '@/hooks/use-toast';
 import { AnimatePresence, motion } from 'framer-motion';
 import { BackgroundGradientAnimation } from '@/components/ui/background-gradient-animation';
-import InputPanel from '@/components/dashboard/input-panel';
 import AIInputField from '@/components/ui/ai-input';
+import LunaLogo from '@/components/ui/luna-logo';
 
 interface Message {
   role: 'user' | 'assistant';
@@ -61,13 +61,10 @@ export default function Home() {
           <div className="h-full ml-[80px] relative flex flex-col">
             
             {messages.length === 0 ? (
-                <div className="flex-1 flex flex-col items-center justify-center text-center">
-                    <div className="w-full max-w-4xl mx-auto flex flex-col items-center justify-center gap-6 mt-28">
-                        <h1 className="text-8xl font-headline font-black text-white">Luna</h1>
-                        <p className="text-3xl font-cursive text-white/80">Welcome, how can I help you today?</p>
-                        <div className="mt-8 w-full">
-                            <AIInputField onSend={handleSend} isLoading={isLoading}/>
-                        </div>
+                <div className="flex-1 flex flex-col items-center justify-center">
+                    <LunaLogo />
+                    <div className="chatbox">
+                        <AIInputField onSend={handleSend} isLoading={isLoading}/>
                     </div>
                 </div>
             ) : (
