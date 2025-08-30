@@ -20,7 +20,7 @@ function NavItem({ name, href, icon: Icon, isActive }: { name: string; href: str
         isActive ? 'bg-white/10 text-white' : 'text-white/70 hover:bg-white/5 hover:text-white'
       }`}
     >
-      <Icon size={20} className="text-[#00FFFF] drop-shadow-[0_0_5px_#00FFFF]" />
+      <Icon size={20} className="text-[#FF69B4] drop-shadow-[0_0_5px_#FF69B4]" />
       <span className="sr-only">{name}</span>
     </Link>
   );
