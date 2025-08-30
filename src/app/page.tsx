@@ -69,7 +69,7 @@ export default function Home() {
                 </div>
             ) : (
                 <>
-                    <div className="flex-1 overflow-y-auto p-8 pt-6 space-y-6 max-w-4xl mx-auto w-full pb-32">
+                    <div className="chat-scroll flex-1 overflow-y-auto p-8 pt-6 space-y-6 max-w-4xl mx-auto w-full">
                         <AnimatePresence>
                             {messages.map((message, index) => (
                             <motion.div
@@ -95,7 +95,7 @@ export default function Home() {
                             ))}
                         </AnimatePresence>
                     </div>
-                     <div className="chatbox">
+                     <div className="chat-composer">
                         <AIInputField onSend={handleSend} isLoading={isLoading} />
                     </div>
                 </>
