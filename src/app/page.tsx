@@ -1,7 +1,6 @@
 import Image from 'next/image';
 import Sidebar from '@/components/dashboard/sidebar';
 import { PromptInputBox } from '@/components/ui/ai-prompt-box';
-import { motion } from 'framer-motion';
 
 async function getDailyWallpaper() {
     // If Unsplash credentials aren't provided, return a default wallpaper.
@@ -50,7 +49,7 @@ export default async function Home() {
 
         <div className="h-full ml-[80px] relative">
           <h1 
-            className="glow font-headline font-black text-[220px] leading-none tracking-tighter text-white absolute top-1/2 left-1/2" 
+            className="gradient-glow font-headline font-black text-[220px] leading-none tracking-tighter absolute top-1/2 left-1/2" 
             style={{ transform: 'translate(-50%, calc(-50% - 120px))' }}
           >
             Luna
