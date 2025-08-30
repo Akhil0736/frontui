@@ -6,12 +6,12 @@ export default function Home() {
   return (
     <main className="w-full h-screen bg-[#21283C] overflow-hidden">
       <Image
-        src="https://picsum.photos/1920/1080"
+        src="https://images.unsplash.com/photo-1554034483-04fda0d3507b?q=80&w=2070"
         alt="mac wallpaper"
         width={1920}
         height={1080}
         className="object-cover w-full h-full absolute inset-0 z-0"
-        data-ai-hint="mac wallpaper"
+        data-ai-hint="abstract gradient"
         priority
       />
       <div className="absolute inset-0 bg-black/40 z-10" />
@@ -19,7 +19,7 @@ export default function Home() {
       <div className="relative z-20 h-full w-full">
         <Sidebar />
 
-        <div className="h-full ml-[220px] relative">
+        <div className="h-full ml-[180px] relative">
           <h1 
             className="font-headline font-black text-[220px] leading-none tracking-tighter text-white/20 absolute top-1/2 left-1/2" 
             style={{ transform: 'translate(-50%, calc(-50% - 120px))' }}
