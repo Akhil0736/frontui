@@ -16,6 +16,7 @@ import { ShiningText } from '@/components/ui/shining-text';
 interface Message {
   role: 'user' | 'assistant';
   content: string;
+  id: string;
 }
 
 const Logo = () => {
@@ -69,18 +70,27 @@ export default function Home() {
 
   useEffect(() => {
     scrollToBottom();
-  }, [messages, isLoading]);
+  }, [messages]);
 
   const handleSend = async (prompt: string) => {
     if (!prompt.trim()) return;
 
     setIsLoading(true);
-    const newMessages: Message[] = [...messages, { role: 'user', content: prompt }];
+    const userMessageId = Date.now().toString();
+    const assistantMessageId = (Date.now() + 1).toString();
+
+    const newMessages: Message[] = [
+      ...messages,
+      { role: 'user', content: prompt, id: userMessageId },
+      { role: 'assistant', content: '...', id: assistantMessageId }
+    ];
     setMessages(newMessages);
 
     try {
       const response = await chat(prompt);
-      setMessages([...newMessages, { role: 'assistant', content: response }]);
+      setMessages(prevMessages => prevMessages.map(msg => 
+        msg.id === assistantMessageId ? { ...msg, content: response } : msg
+      ));
     } catch (error) {
       console.error("Failed to get response from AI:", error);
       toast({
@@ -88,7 +98,7 @@ export default function Home() {
         title: "Error",
         description: "Failed to get a response from the AI. Please try again.",
       });
-       // remove the user message if the call fails
+      // Remove the user and "thinking" messages if the call fails
       setMessages(messages);
     } finally {
       setIsLoading(false);
@@ -126,9 +136,9 @@ export default function Home() {
                 <div className="flex-1 flex flex-col justify-between h-full">
                     <div className="chat-scroll flex-1 overflow-y-auto p-8 pt-6 space-y-6 max-w-4xl mx-auto w-full">
                         <AnimatePresence>
-                            {messages.map((message, index) => (
+                            {messages.map((message) => (
                             <motion.div
-                                key={index}
+                                key={message.id}
                                 initial={{ opacity: 0, y: 20 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ duration: 0.3 }}
@@ -148,25 +158,14 @@ export default function Home() {
                                     : 'bg-primary/80 backdrop-blur-sm text-primary-foreground'
                                 }`}
                                 >
-                                <p className="whitespace-pre-wrap">{message.content}</p>
+                                {message.role === 'assistant' && message.content === '...' ? (
+                                    <ShiningText text="Luna is thinking..." />
+                                ) : (
+                                    <p className="whitespace-pre-wrap">{message.content}</p>
+                                )}
                                 </div>
                             </motion.div>
                             ))}
-                            {isLoading && (
-                                <motion.div
-                                    initial={{ opacity: 0, y: 20 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    transition={{ duration: 0.3 }}
-                                    className="flex items-start gap-4 justify-start"
-                                >
-                                    <div className="w-8 h-8 rounded-full bg-primary/80 backdrop-blur-sm flex items-center justify-center text-primary-foreground text-sm font-bold shrink-0">
-                                        L
-                                    </div>
-                                    <div className="max-w-xl p-4 rounded-2xl bg-primary/80 backdrop-blur-sm text-primary-foreground">
-                                        <ShiningText text="Luna is thinking..." />
-                                    </div>
-                                </motion.div>
-                            )}
                             <div ref={messagesEndRef} />
                         </AnimatePresence>
                     </div>
