@@ -1,6 +1,6 @@
 import Image from 'next/image';
 import Sidebar from '@/components/dashboard/sidebar';
-import InputPanel from '@/components/dashboard/input-panel';
+import { PromptInputBox } from '@/components/ui/ai-prompt-box';
 
 export default function Home() {
   return (
@@ -36,10 +36,10 @@ export default function Home() {
           </div>
           
           <div 
-            className="absolute left-1/2"
-            style={{ top: '430px', transform: 'translateX(-50%)' }}
+            className="absolute left-1/2 w-[560px]"
+            style={{ top: '450px', transform: 'translateX(-50%)' }}
           >
-              <InputPanel />
+              <PromptInputBox />
           </div>
         </div>
       </div>
