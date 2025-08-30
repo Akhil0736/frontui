@@ -11,6 +11,7 @@ import LunaLogo from '@/components/ui/luna-logo';
 import { Sidebar, SidebarBody, SidebarLink } from '@/components/ui/sidebar';
 import { Home as HomeIcon, BarChart2, Settings, CreditCard, LogOut } from 'lucide-react';
 import Link from 'next/link';
+import { ShiningText } from '@/components/ui/shining-text';
 
 interface Message {
   role: 'user' | 'assistant';
@@ -68,7 +69,7 @@ export default function Home() {
 
   useEffect(() => {
     scrollToBottom();
-  }, [messages]);
+  }, [messages, isLoading]);
 
   const handleSend = async (prompt: string) => {
     if (!prompt.trim()) return;
@@ -151,6 +152,21 @@ export default function Home() {
                                 </div>
                             </motion.div>
                             ))}
+                            {isLoading && (
+                                <motion.div
+                                    initial={{ opacity: 0, y: 20 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ duration: 0.3 }}
+                                    className="flex items-start gap-4 justify-start"
+                                >
+                                    <div className="w-8 h-8 rounded-full bg-primary/80 backdrop-blur-sm flex items-center justify-center text-primary-foreground text-sm font-bold shrink-0">
+                                        L
+                                    </div>
+                                    <div className="max-w-xl p-4 rounded-2xl bg-primary/80 backdrop-blur-sm text-primary-foreground">
+                                        <ShiningText text="Luna is thinking..." />
+                                    </div>
+                                </motion.div>
+                            )}
                             <div ref={messagesEndRef} />
                         </AnimatePresence>
                     </div>
