@@ -2,13 +2,13 @@
 'use client';
 
 import Sidebar from '@/components/dashboard/sidebar';
-import { PromptInputBox } from '@/components/ui/ai-prompt-box';
 import { useState } from 'react';
 import { chat } from '@/ai/flows/chat';
 import { useToast } from '@/hooks/use-toast';
 import { AnimatePresence, motion } from 'framer-motion';
 import { BackgroundGradientAnimation } from '@/components/ui/background-gradient-animation';
 import InputPanel from '@/components/dashboard/input-panel';
+import AIInputField from '@/components/ui/ai-input';
 
 interface Message {
   role: 'user' | 'assistant';
@@ -65,8 +65,8 @@ export default function Home() {
                     <div className="w-full max-w-4xl mx-auto flex flex-col items-center justify-center gap-6 mt-28">
                         <h1 className="text-8xl font-headline font-black text-white">Luna</h1>
                         <p className="text-3xl font-cursive text-white/80">Welcome, how can I help you today?</p>
-                        <div className="mt-4">
-                            <InputPanel />
+                        <div className="mt-8 w-full">
+                            <AIInputField onSend={handleSend} isLoading={isLoading}/>
                         </div>
                     </div>
                 </div>
@@ -99,7 +99,7 @@ export default function Home() {
                         </AnimatePresence>
                     </div>
                      <div className="chatbox">
-                        <PromptInputBox onSend={handleSend} isLoading={isLoading} />
+                        <AIInputField onSend={handleSend} isLoading={isLoading} />
                     </div>
                 </>
             )}
