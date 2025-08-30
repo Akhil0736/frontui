@@ -45,13 +45,13 @@ export default function Home() {
 
 
   return (
-    <main className="w-full h-screen bg-[#21283C] overflow-hidden">
+    <main className="w-full h-screen bg-white overflow-hidden">
       <BackgroundGradientAnimation
-        firstColor="255, 182, 193"
-        secondColor="255, 105, 180"
-        thirdColor="255, 182, 193"
+        firstColor="255, 255, 255"
+        secondColor="255, 182, 193"
+        thirdColor="255, 255, 255"
         fourthColor="255, 105, 180"
-        fifthColor="255, 182, 193"
+        fifthColor="255, 255, 255"
         pointerColor="255, 105, 180"
       >
         <div className="relative z-20 h-full w-full">
