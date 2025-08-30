@@ -57,3 +57,20 @@
     @apply bg-background text-foreground;
   }
 }
+
+@layer utilities {
+  .glow {
+    animation: glow-fade 8s ease-in-out infinite;
+  }
+
+  @keyframes glow-fade {
+    0%, 100% {
+      opacity: 0.2;
+      text-shadow: 0 0 10px hsla(var(--primary), 0.2), 0 0 20px hsla(var(--primary), 0.2), 0 0 30px hsla(var(--primary), 0.1);
+    }
+    50% {
+      opacity: 0.4;
+      text-shadow: 0 0 20px hsla(var(--primary), 0.5), 0 0 40px hsla(var(--primary), 0.3), 0 0 60px hsla(var(--primary), 0.2);
+    }
+  }
+}

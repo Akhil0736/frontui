@@ -8,8 +8,7 @@ export default function Home() {
       <Image
         src="https://images.unsplash.com/photo-1554034483-04fda0d3507b?q=80&w=2070"
         alt="mac wallpaper"
-        width={1920}
-        height={1080}
+        fill
         className="object-cover w-full h-full absolute inset-0 z-0"
         data-ai-hint="abstract gradient"
         priority
@@ -21,7 +20,7 @@ export default function Home() {
 
         <div className="h-full ml-[80px] relative">
           <h1 
-            className="font-headline font-black text-[220px] leading-none tracking-tighter text-white/20 absolute top-1/2 left-1/2" 
+            className="glow font-headline font-black text-[220px] leading-none tracking-tighter text-white absolute top-1/2 left-1/2" 
             style={{ transform: 'translate(-50%, calc(-50% - 120px))' }}
           >
             Luna
