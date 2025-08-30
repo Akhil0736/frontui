@@ -1,5 +1,5 @@
 "use client";
-import { Home, BarChart2, Settings, CreditCard, LogOut, Zap } from 'lucide-react';
+import { Home, BarChart2, Settings, CreditCard, LogOut } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
@@ -31,7 +31,7 @@ export default function Sidebar() {
   return (
     <aside className="w-[80px] h-screen fixed top-0 left-0 z-30 flex flex-col items-center bg-[#0B0B0B]/[0.28] backdrop-blur-[20px] border-r border-white/[0.12] p-4">
       <div className="p-2 mb-6">
-        <Zap size={28} className="text-white/80" />
+        <h1 className="font-headline font-black text-2xl tracking-tighter gradient-glow">L</h1>
       </div>
       <nav className="flex flex-col gap-3">
         {navLinks.map((link) => (
