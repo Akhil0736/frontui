@@ -64,10 +64,10 @@ export default function Home() {
         fifthColor="255, 255, 255"
         pointerColor="255, 105, 180"
       >
-        <div className="relative z-20 h-full w-full">
+        <div className="relative z-20 h-full w-full flex">
           <Sidebar />
 
-          <div className="h-full ml-[80px] relative flex flex-col">
+          <div className="flex-1 flex flex-col h-full ml-[80px] relative">
             
             {messages.length === 0 ? (
                 <div className="flex-1 flex flex-col items-center justify-center">
@@ -77,7 +77,7 @@ export default function Home() {
                     </div>
                 </div>
             ) : (
-                <>
+                <div className="flex-1 flex flex-col justify-between h-full">
                     <div className="chat-scroll flex-1 overflow-y-auto p-8 pt-6 space-y-6 max-w-4xl mx-auto w-full">
                         <AnimatePresence>
                             {messages.map((message, index) => (
@@ -112,7 +112,7 @@ export default function Home() {
                      <div className="chat-composer w-full px-4">
                         <AIInputField onSend={handleSend} isLoading={isLoading} />
                     </div>
-                </>
+                </div>
             )}
           </div>
         </div>
