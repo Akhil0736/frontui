@@ -332,7 +332,8 @@ const PromptInput = React.forwardRef<HTMLDivElement, PromptInputProps>(
           <div
             ref={ref}
             className={cn(
-              "rounded-3xl border border-[#444444] bg-[#1F2023] p-2 shadow-[0_8px_30px_rgba(0,0,0,0.24)] transition-all duration-300",
+              "rounded-3xl border-transparent p-2 transition-all duration-300",
+              "shimmer-border",
               isLoading && "border-red-500/70",
               className
             )}
@@ -340,7 +341,9 @@ const PromptInput = React.forwardRef<HTMLDivElement, PromptInputProps>(
             onDragLeave={onDragLeave}
             onDrop={onDrop}
           >
-            {children}
+             <div className="rounded-[22px] bg-[#1F2023] w-full h-full">
+              {children}
+            </div>
           </div>
         </PromptInputContext.Provider>
       </TooltipProvider>
@@ -565,7 +568,7 @@ export const PromptInputBox = React.forwardRef((props: PromptInputBoxProps, ref:
         isLoading={isLoading}
         onSubmit={handleSubmit}
         className={cn(
-          "w-full bg-[#1F2023] border-[#444444] shadow-[0_8px_30px_rgba(0,0,0,0.24)] transition-all duration-300 ease-in-out",
+          "w-full bg-transparent shadow-none transition-all duration-300 ease-in-out",
           isRecording && "border-red-500/70",
           className
         )}
@@ -575,6 +578,7 @@ export const PromptInputBox = React.forwardRef((props: PromptInputBoxProps, ref:
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
       >
+        <div className="p-2">
         {files.length > 0 && !isRecording && (
           <div className="flex flex-wrap gap-2 p-0 pb-1 transition-all duration-300">
             {files.map((file, index) => (
@@ -810,6 +814,7 @@ export const PromptInputBox = React.forwardRef((props: PromptInputBoxProps, ref:
             </Button>
           </PromptInputAction>
         </PromptInputActions>
+        </div>
       </PromptInput>
 
       <ImageViewDialog imageUrl={selectedImage} onClose={() => setSelectedImage(null)} />

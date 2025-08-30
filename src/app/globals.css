@@ -73,4 +73,40 @@
       text-shadow: 0 0 20px hsla(var(--primary), 0.5), 0 0 40px hsla(var(--primary), 0.3), 0 0 60px hsla(var(--primary), 0.2);
     }
   }
+
+  .shimmer-border {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .shimmer-border::before {
+    content: "";
+    position: absolute;
+    z-index: -1;
+    top: -150%;
+    left: -150%;
+    width: 400%;
+    height: 400%;
+    background: conic-gradient(
+      transparent,
+      transparent,
+      hsla(var(--primary), 0.8),
+      transparent,
+      transparent,
+      transparent,
+      transparent,
+      transparent,
+      transparent,
+      transparent,
+      transparent,
+      hsla(var(--primary), 0.8)
+    );
+    animation: rotate 6s linear infinite;
+  }
+
+  @keyframes rotate {
+    100% {
+      transform: rotate(360deg);
+    }
+  }
 }
