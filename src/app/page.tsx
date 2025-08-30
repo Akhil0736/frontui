@@ -6,7 +6,7 @@ import { useState, useEffect, useRef } from 'react';
 import { chat } from '@/ai/flows/chat';
 import { useToast } from '@/hooks/use-toast';
 import { AnimatePresence, motion } from 'framer-motion';
-import { BackgroundGradientAnimation } from '@/components/ui/background-gradient-animation';
+import { AuroraBackground } from '@/components/ui/aurora-background';
 import AIInputField from '@/components/ui/ai-input';
 import LunaLogo from '@/components/ui/luna-logo';
 
@@ -56,14 +56,7 @@ export default function Home() {
 
   return (
     <main className="w-full h-screen bg-background overflow-hidden">
-      <BackgroundGradientAnimation
-        firstColor="255, 255, 255"
-        secondColor="255, 182, 193"
-        thirdColor="255, 255, 255"
-        fourthColor="255, 105, 180"
-        fifthColor="255, 255, 255"
-        pointerColor="255, 105, 180"
-      >
+      <AuroraBackground>
         <div className="relative z-20 h-full w-full flex">
           <Sidebar />
 
@@ -116,7 +109,7 @@ export default function Home() {
             )}
           </div>
         </div>
-      </BackgroundGradientAnimation>
+      </AuroraBackground>
     </main>
   );
 }
