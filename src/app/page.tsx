@@ -2,7 +2,7 @@
 'use client';
 
 import Sidebar from '@/components/dashboard/sidebar';
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { chat } from '@/ai/flows/chat';
 import { useToast } from '@/hooks/use-toast';
 import { AnimatePresence, motion } from 'framer-motion';
@@ -19,6 +19,15 @@ export default function Home() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
 
   const handleSend = async (prompt: string) => {
     if (!prompt.trim()) return;
@@ -97,9 +106,10 @@ export default function Home() {
                                 </div>
                             </motion.div>
                             ))}
+                            <div ref={messagesEndRef} />
                         </AnimatePresence>
                     </div>
-                     <div className="chat-composer">
+                     <div className="chat-composer w-full px-4">
                         <AIInputField onSend={handleSend} isLoading={isLoading} />
                     </div>
                 </>
