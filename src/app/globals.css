@@ -286,7 +286,7 @@
   .chatbox {
     position: fixed;          /* Fix it to the viewport */
     bottom: 80px;             /* Distance from bottom — adjust until it sits in the pink glow */
-    left: 50%;                /* Start at the center horizontally */
+    left: calc(50% + 40px);   /* Start at the center horizontally, then offset by half the sidebar width */
     transform: translateX(-50%);  /* Perfectly center it */
     width: 60%;               /* Adjust width (e.g., 60% of screen) */
     max-width: 800px;         /* Keep it from being too wide */
