@@ -106,13 +106,17 @@ export default function Home() {
             </AnimatePresence>
             
             <div 
-              className={`mx-auto pb-8 transition-all duration-500 ${
-                messages.length === 0
-                  ? 'w-[46.18%] -translate-y-[6.5rem]'
-                  : 'w-[90%] max-w-[1692px]'
-              }`}
+              className="mx-auto pb-8 w-full px-4"
             >
+              <div
+                className={`mx-auto transition-all duration-500 ${
+                  messages.length === 0
+                    ? 'max-w-2xl'
+                    : 'max-w-4xl'
+                }`}
+              >
                 <PromptInputBox onSend={handleSend} isLoading={isLoading} />
+              </div>
             </div>
           </div>
         </div>
