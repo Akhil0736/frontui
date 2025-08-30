@@ -87,7 +87,11 @@ export default function Home() {
                                 </div>
                                 )}
                                 <div
-                                className={`max-w-xl p-4 rounded-2xl bg-primary/80 backdrop-blur-sm text-primary-foreground`}
+                                className={`max-w-xl p-4 rounded-2xl ${
+                                    message.role === 'user'
+                                    ? 'bg-pink-500/80 text-white'
+                                    : 'bg-primary/80 backdrop-blur-sm text-primary-foreground'
+                                }`}
                                 >
                                 <p className="whitespace-pre-wrap">{message.content}</p>
                                 </div>

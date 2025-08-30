@@ -297,7 +297,7 @@
 
   /* Reserve space for the fixed composer */
   .chat-scroll {
-    padding-bottom: calc(var(--composer-height, 88px) + env(safe-area-inset-bottom, 0px));
+    padding-bottom: calc(var(--composer-height, 140px) + env(safe-area-inset-bottom, 20px));
   }
 
   /* Pin composer above safe area */
@@ -308,8 +308,7 @@
     bottom: env(safe-area-inset-bottom, 0px);
     width: 60%;
     max-width: 800px;
-    margin-left: auto;
-    margin-right: auto;
+    margin: 0 auto 20px;
     z-index: 9999;
   }
 
