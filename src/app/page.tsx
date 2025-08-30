@@ -100,9 +100,6 @@ export default function Home() {
                 >
                   Luna
                 </h1>
-                <h2 className="font-cursive text-[44px] text-white/70 italic -mt-8">
-                  welcome back Priyam,
-                </h2>
               </div>
             ) : (
               <div className="flex-1 overflow-y-auto p-8 space-y-6 max-w-4xl mx-auto w-full">
