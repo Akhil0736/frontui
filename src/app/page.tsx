@@ -106,14 +106,14 @@ export default function Home() {
             <div 
               className={`mx-auto w-full px-4 transition-all duration-500 ease-in-out ${
                 messages.length === 0
-                  ? 'absolute bottom-[228px] left-1/2 -translate-x-1/2'
+                  ? 'absolute bottom-[228px] left-[calc(50%+40px)] -translate-x-1/2 w-[calc(100%-216px)] max-w-[1330px]'
                   : 'pb-8'
               }`}
             >
               <div
                 className={`mx-auto transition-all duration-500 ${
                   messages.length === 0
-                    ? 'w-[calc(100%-216px)] max-w-[1330px]'
+                    ? ''
                     : 'max-w-4xl'
                 }`}
               >
