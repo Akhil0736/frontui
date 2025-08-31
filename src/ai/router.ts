@@ -80,10 +80,15 @@ class EnhancedLunaRouter {
       response = await this.callModel(modelConfig.primary, userMessage, routingDecision);
       modelUsed = modelConfig.primary;
     } catch (error: any) {
-      console.log(`Primary model failed: ${error.message}, using backup`);
-      // @ts-ignore
-      response = await this.callModel(modelConfig.backup, userMessage, routingDecision);
-      modelUsed = modelConfig.backup;
+      console.log(`Primary model ${modelConfig.primary} failed: ${error.message}, attempting backup ${modelConfig.backup}.`);
+      try {
+        // @ts-ignore
+        response = await this.callModel(modelConfig.backup, userMessage, routingDecision);
+        modelUsed = modelConfig.backup;
+      } catch (backupError: any) {
+        console.error(`Backup model ${modelConfig.backup} also failed: ${backupError.message}`);
+        throw backupError; // Re-throw the error to be caught by the flow
+      }
     }
     
     // Step 6: Log the routing decision for optimization
@@ -253,7 +258,14 @@ Return ONLY this JSON:
     }
 
     const data = await response.json();
-    return data.choices[0].message.content;
+    const content = data?.choices?.[0]?.message?.content;
+
+    if (!content) {
+      console.error("Invalid response structure from model:", data);
+      throw new Error("Received an invalid response structure from the model.");
+    }
+    
+    return content;
   }
 }
 

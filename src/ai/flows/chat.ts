@@ -25,9 +25,12 @@ const chatFlow = ai.defineFlow(
     async (prompt) => {
         try {
             const result = await routeRequest(prompt);
-            return result.response || "I'm sorry, I encountered an issue while processing your request.";
-        } catch (error) {
-            console.error("Error in EnhancedLunaRouter flow:", error);
+            // Ensure there is always a response.
+            return result?.response || "I'm sorry, I encountered an issue while processing your request.";
+        } catch (error: any) {
+            // Log the detailed error for debugging.
+            console.error("Error in EnhancedLunaRouter flow:", error.message || error);
+            // Return a user-friendly error message.
             return "I'm sorry, I'm having trouble responding right now. Please try again in a moment.";
         }
     }
