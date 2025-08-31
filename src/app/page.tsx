@@ -152,11 +152,7 @@ export default function Home() {
                                 </div>
                                 )}
                                 <div
-                                className={`max-w-xl py-4 ${
-                                    message.role === 'user'
-                                    ? 'text-white'
-                                    : 'text-primary-foreground'
-                                }`}
+                                className={'max-w-xl py-4 text-black'}
                                 >
                                 {message.role === 'assistant' && message.content === '...' ? (
                                     <ShiningText text="Luna is thinking..." />
