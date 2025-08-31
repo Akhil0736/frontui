@@ -36,7 +36,7 @@ export class BrowserController {
     // Block unnecessary resources for speed
     await this.page.setRequestInterception(true);
     this.page.on('request', (req) => {
-      if(req.resourceType() == 'stylesheet' || req.resourceType() == 'font'){
+      if(req.resourceType() == 'stylesheet' || req.resourceType() == 'font' || req.resourceType() == 'image'){
         req.abort();
       } else {
         req.continue();
@@ -97,9 +97,6 @@ export class BrowserController {
   }
   
   private async randomDelay(min: number, max: number): Promise<void> {
-    if (!this.page) {
-        throw new Error("Browser not initialized. Call initialize() first.");
-    }
     const delay = Math.floor(Math.random() * (max - min + 1)) + min;
     await new Promise(resolve => setTimeout(resolve, delay));
   }
