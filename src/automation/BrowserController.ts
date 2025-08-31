@@ -24,7 +24,8 @@ export class BrowserController {
         '--disable-setuid-sandbox',
         '--disable-blink-features=AutomationControlled',
         '--disable-features=VizDisplayCompositor',
-        `--user-agent=${this.userAgent}`
+        `--user-agent=${this.userAgent}`,
+        '--incognito'
       ]
     });
     
