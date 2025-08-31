@@ -3,6 +3,7 @@
 
 import { ActionResult } from "@/automation/InstagramActions";
 import { StrategyAction, StrategicPlan } from "@/agents/AgentTypes";
+import { routeRequest } from "@/ai/router";
 
 // Manages creating and updating strategic plans.
 export class StrategyPlanner {
@@ -14,27 +15,46 @@ export class StrategyPlanner {
    * (e.g., "grow my followers") into a concrete series of actions.
    */
   async createPlan(goal: string): Promise<StrategicPlan> {
-    console.log(`Creating plan for goal: ${goal}`);
+    const planningPrompt = `
+Create a safe Instagram growth strategy for: "${goal}"
+
+Generate 8-12 specific actions with these types:
+- like_posts: Like posts from specific hashtags
+- follow_users: Follow users from competitor accounts  
+- comment_posts: Leave authentic comments
+- analyze_account: Review performance metrics
+
+Focus on safety: max 60 likes/hour, 15 follows/hour, 20 comments/hour.
+
+Return JSON format:
+{
+  "steps": [
+    {
+      "id": "step1",
+      "description": "Like 15 posts from #fitness hashtag",
+      "actionType": "like_posts",
+      "parameters": {"hashtag": "fitness", "count": 15},
+      "completed": false
+    }
+  ]
+}`;
     
-    // In a real implementation, this would call an LLM.
-    // For now, returning a mock plan.
-    const mockPlan: StrategicPlan = {
+    // Call your LLM router here
+    const planResponse = await this.callPlanningModel(planningPrompt);
+    
+    const plan: StrategicPlan = {
       planId: `plan_${Date.now()}`,
       userId: this.userId,
       goal: goal,
+      steps: planResponse.steps,
       status: 'active',
-      createdAt: new Date(),
-      steps: [
-        { id: 'step1', actionType: 'like_posts', description: 'Like posts with #marketing', parameters: { hashtag: 'marketing', count: 5 }, completed: false },
-        { id: 'step2', actionType: 'follow_users', description: 'Follow users from #entrepreneur', parameters: { hashtag: 'entrepreneur', count: 3 }, completed: false },
-        { id: 'step3', actionType: 'comment_posts', description: 'Comment on posts with #saas', parameters: { hashtag: 'saas', comments: ['Great post!', 'Love this.'], count: 2 }, completed: false },
-      ],
+      createdAt: new Date()
     };
     
     // Placeholder for saving to Firestore
-    // await this.db.collection('strategy_plans').add(mockPlan);
+    // await this.db.collection('strategy_plans').add(plan);
     
-    return mockPlan;
+    return plan;
   }
 
   /**
@@ -52,5 +72,33 @@ export class StrategyPlanner {
   async updateProgress(actionId: string, results: ActionResult[]): Promise<void> {
     console.log(`Updating progress for action ${actionId} with ${results.length} results.`);
     // This would update the status of the action in a database like Firestore.
+  }
+
+  private async callPlanningModel(prompt: string): Promise<{steps: StrategyAction[]}> {
+    // Use your existing router system
+    const response = await routeRequest(prompt, [], []);
+    
+    try {
+      // The router returns a string, which we expect to be JSON.
+      const parsedResponse = JSON.parse(response.response);
+      if (parsedResponse && Array.isArray(parsedResponse.steps)) {
+        return parsedResponse;
+      }
+      throw new Error("Invalid plan structure in LLM response");
+    } catch (error) {
+      console.error("Failed to parse planning model response, using fallback.", error);
+      // Fallback plan if LLM response isn't valid JSON
+      return {
+        steps: [
+          {
+            id: 'fallback_step_1',
+            description: "Like 10 posts from #marketing hashtag", 
+            actionType: "like_posts",
+            parameters: { hashtag: "marketing", count: 10 },
+            completed: false
+          }
+        ]
+      };
+    }
   }
 }

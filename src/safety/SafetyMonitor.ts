@@ -3,15 +3,19 @@
 
 import { StrategyAction } from "@/planning/StrategyPlanner";
 import { SafetyResult } from "@/agents/AgentTypes";
+import { firestore } from 'firebase-admin';
+import { EventStream } from "@/memory/EventStream";
 
 /**
  * Monitors and validates actions to ensure they comply with safety rules
  * and avoid triggering Instagram's anti-bot mechanisms.
  */
 export class SafetyMonitor {
-  // private db = firestore();
+  private eventStream: EventStream;
   
-  constructor(private userId: string) {}
+  constructor(private userId: string) {
+    this.eventStream = new EventStream(userId);
+  }
 
   /**
    * Validates if an action is safe to perform right now.
@@ -44,20 +48,11 @@ export class SafetyMonitor {
       'comment_posts': 20
     };
     
-    const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000);
+    const recentEvents = await this.eventStream.getRecentEvents(1);
     
-    // const recentActions = await this.db.collection('luna_events')
-    //   .where('userId', '==', this.userId)
-    //   .where('eventType', '==', 'action_complete')
-    //   .where('timestamp', '>', oneHourAgo)
-    //   .get();
-    
-    // const actionCount = recentActions.docs.filter(doc => 
-    //   doc.data().eventData?.actionType === actionType
-    // ).length;
-    
-    // MOCK: Replace with real data when DB is connected
-    const actionCount = 0;
+    const actionCount = recentEvents.filter(event => 
+      event.eventType === 'action_completed' && event.eventData?.action?.actionType === actionType
+    ).length;
     
     const limit = limits[actionType] || 10;
     
