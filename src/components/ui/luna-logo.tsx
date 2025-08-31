@@ -1,155 +1,137 @@
 
 'use client';
-import React, { useState, useEffect } from 'react';
+
+import * as React from 'react';
 import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
-import BlurFade from '@/components/ui/blur-fade';
 
 interface LunaLogoProps {
   className?: string;
+  size?: 'sm' | 'md' | 'lg' | 'xl';
 }
 
-const Particles = () => {
-  // We only want to render particles on the client, after hydration
-  // to avoid server/client mismatch from Math.random()
-  const [isMounted, setIsMounted] = useState(false);
+const sizeClasses = {
+  sm: 'text-4xl',
+  md: 'text-6xl',
+  lg: 'text-8xl',
+  xl: 'text-9xl'
+};
 
-  useEffect(() => {
-    setIsMounted(true);
-  }, []);
-
-  if (!isMounted) {
-    return null;
-  }
-
+export default function LunaLogo({ className, size = 'lg' }: LunaLogoProps = {}) {
   return (
-    <>
-      {/* Floating particles */}
-      {[...Array(8)].map((_, i) => (
-        <motion.div
-          key={`particle-${i}`}
-          className="absolute w-0.5 h-0.5 bg-pink-200 rounded-full opacity-60"
-          style={{
-            left: `${Math.random() * 100}%`,
-            top: `${Math.random() * 100}%`,
+    <div className={cn("relative flex items-center justify-center", className)}>
+      {/* Background glow effect */}
+      <motion.div
+        className="absolute inset-0 flex items-center justify-center"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: [0, 0.3, 0] }}
+        transition={{
+          duration: 4,
+          repeat: Infinity,
+          ease: "easeInOut"
+        }}
+      >
+        <div className="absolute w-96 h-96 bg-pink-300/20 rounded-full blur-3xl" />
+      </motion.div>
+
+      {/* Secondary glow layer */}
+      <motion.div
+        className="absolute inset-0 flex items-center justify-center"
+        initial={{ opacity: 0, scale: 0.8 }}
+        animate={{ 
+          opacity: [0, 0.4, 0],
+          scale: [0.8, 1.2, 0.8]
+        }}
+        transition={{
+          duration: 5,
+          repeat: Infinity,
+          ease: "easeInOut",
+          delay: 1
+        }}
+      >
+        <div className="absolute w-64 h-64 bg-pink-200/30 rounded-full blur-2xl" />
+      </motion.div>
+
+      {/* Main LUNA text */}
+      <motion.div
+        className="relative z-10"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 1, ease: "easeOut" }}
+      >
+        <motion.h1
+          className={cn(
+            sizeClasses[size],
+            "font-light tracking-[0.2em] text-center select-none",
+            "bg-gradient-to-r from-pink-200 via-pink-100 to-pink-200",
+            "bg-clip-text text-transparent",
+            "drop-shadow-[0_0_30px_rgba(251,207,232,0.3)]"
+          )}
+          initial={{ 
+            filter: "blur(2px) brightness(0.8)",
+            textShadow: "0 0 20px rgba(251,207,232,0.5)"
           }}
-          animate={{
-            y: [-20, -40, -20],
-            x: [0, Math.random() * 20 - 10, 0],
-            opacity: [0, 0.6, 0],
+          animate={{ 
+            filter: [
+              "blur(2px) brightness(0.8)",
+              "blur(0px) brightness(1.2)",
+              "blur(1px) brightness(0.9)",
+              "blur(0px) brightness(1)",
+              "blur(2px) brightness(0.8)"
+            ],
+            textShadow: [
+              "0 0 20px rgba(251,207,232,0.5)",
+              "0 0 40px rgba(251,207,232,0.8)",
+              "0 0 30px rgba(251,207,232,0.6)",
+              "0 0 35px rgba(251,207,232,0.7)",
+              "0 0 20px rgba(251,207,232,0.5)"
+            ]
           }}
           transition={{
-            duration: 4 + Math.random() * 2,
+            duration: 6,
             repeat: Infinity,
-            delay: Math.random() * 2,
-            ease: 'easeInOut',
+            ease: "easeInOut"
+          }}
+        >
+          LUNA
+        </motion.h1>
+
+        {/* Subtle shimmer effect */}
+        <motion.div
+          className="absolute inset-0 bg-gradient-to-r from-transparent via-pink-100/20 to-transparent"
+          initial={{ x: "-100%" }}
+          animate={{ x: "200%" }}
+          transition={{
+            duration: 3,
+            repeat: Infinity,
+            ease: "linear",
+            delay: 2
+          }}
+        />
+      </motion.div>
+
+      {/* Ambient particles */}
+      {[...Array(6)].map((_, i) => (
+        <motion.div
+          key={i}
+          className="absolute w-1 h-1 bg-pink-200/40 rounded-full"
+          style={{
+            left: `${20 + i * 12}%`,
+            top: `${30 + (i % 3) * 20}%`,
+          }}
+          animate={{
+            opacity: [0, 0.6, 0],
+            scale: [0, 1, 0],
+            y: [-20, 20, -20]
+          }}
+          transition={{
+            duration: 4 + i * 0.5,
+            repeat: Infinity,
+            ease: "easeInOut",
+            delay: i * 0.8
           }}
         />
       ))}
-    </>
-  );
-};
-
-
-export default function LunaLogo({ className }: LunaLogoProps = {}) {
-  return (
-    <div className={cn("flex items-center justify-center", className)}>
-      <div className="relative">
-        {/* Background glow layers */}
-        <div className="absolute inset-0 -m-20">
-          <motion.div
-            className="absolute left-1/2 top-1/2 h-96 w-96 -translate-x-1/2 -translate-y-1/2 rounded-full"
-            style={{
-              background: 'radial-gradient(circle, rgba(251, 207, 232, 0.3) 0%, rgba(251, 207, 232, 0.1) 40%, transparent 70%)',
-              filter: 'blur(40px)',
-            }}
-            animate={{
-              scale: [1, 1.2, 1],
-              opacity: [0.3, 0.6, 0.3],
-            }}
-            transition={{
-              duration: 4,
-              repeat: Infinity,
-              ease: "easeInOut",
-            }}
-          />
-          <motion.div
-            className="absolute left-1/2 top-1/2 h-64 w-64 -translate-x-1/2 -translate-y-1/2 rounded-full"
-            style={{
-              background: 'radial-gradient(circle, rgba(244, 114, 182, 0.4) 0%, rgba(244, 114, 182, 0.2) 50%, transparent 80%)',
-              filter: 'blur(30px)',
-            }}
-            animate={{
-              scale: [1.1, 0.9, 1.1],
-              opacity: [0.4, 0.7, 0.4],
-            }}
-            transition={{
-              duration: 3,
-              repeat: Infinity,
-              ease: "easeInOut",
-              delay: 0.5,
-            }}
-          />
-          <motion.div
-            className="absolute left-1/2 top-1/2 h-32 w-32 -translate-x-1/2 -translate-y-1/2 rounded-full"
-            style={{
-              background: 'radial-gradient(circle, rgba(236, 72, 153, 0.5) 0%, rgba(236, 72, 153, 0.3) 60%, transparent 90%)',
-              filter: 'blur(20px)',
-            }}
-            animate={{
-              scale: [0.8, 1.3, 0.8],
-              opacity: [0.5, 0.8, 0.5],
-            }}
-            transition={{
-              duration: 2.5,
-              repeat: Infinity,
-              ease: "easeInOut",
-              delay: 1,
-            }}
-          />
-        </div>
-
-        {/* Main LUNA text */}
-        <BlurFade delay={0.2} duration={1.2} inView>
-          <motion.h1
-            className="relative z-10 text-8xl md:text-9xl lg:text-[12rem] font-bold tracking-wider text-transparent bg-clip-text"
-            style={{
-              backgroundImage: 'linear-gradient(135deg, #fce7f3 0%, #f9a8d4 25%, #f472b6 50%, #ec4899 75%, #be185d 100%)',
-              textShadow: '0 0 40px rgba(244, 114, 182, 0.3), 0 0 80px rgba(236, 72, 153, 0.2)',
-            }}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 1.5, ease: "easeOut" }}
-          >
-            LUNA
-          </motion.h1>
-        </BlurFade>
-
-        {/* Subtle sparkle effects */}
-        {[...Array(6)].map((_, i) => (
-          <motion.div
-            key={i}
-            className="absolute w-1 h-1 bg-pink-300 rounded-full"
-            style={{
-              left: `${20 + i * 15}%`,
-              top: `${30 + (i % 2) * 40}%`,
-            }}
-            animate={{
-              opacity: [0, 1, 0],
-              scale: [0, 1, 0],
-            }}
-            transition={{
-              duration: 2,
-              repeat: Infinity,
-              delay: i * 0.3,
-              ease: "easeInOut",
-            }}
-          />
-        ))}
-
-        <Particles />
-
-      </div>
     </div>
   );
 }
