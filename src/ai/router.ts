@@ -62,7 +62,20 @@ class EnhancedLunaRouter {
 
   private isSimpleGreeting(message: string): boolean {
     const lowerMessage = message.toLowerCase().trim();
-    return /^(hi|hello|hey)\.?!?$/.test(lowerMessage) || /how are you|what's up|how's it going/.test(lowerMessage);
+    return /^(hi|hello|hey|thanks|thank you)\.?!?$/.test(lowerMessage) || /how are you|what's up|how's it going/.test(lowerMessage);
+  }
+
+  private isOffTopic(message: string): boolean {
+    const lowerMessage = message.toLowerCase();
+    const onTopicKeywords = ['instagram', 'growth', 'follow', 'engagement', 'post', 'story', 'reel', 'analytics', 'hashtag', 'account', 'audience'];
+    
+    // If the message is very short, it's likely a greeting or simple phrase we handle elsewhere.
+    if (message.length < 20 && !onTopicKeywords.some(keyword => lowerMessage.includes(keyword))) {
+        return true;
+    }
+
+    // If the message is longer, it must contain at least one of the keywords to be on-topic.
+    return !onTopicKeywords.some(keyword => lowerMessage.includes(keyword));
   }
 
   private async handleSimpleCase(input: string): Promise<RouterResponse> {
@@ -77,7 +90,7 @@ class EnhancedLunaRouter {
         "Doing great and ready to cut through the noise. Are we talking follower growth, engagement rates, or turning your audience into actual revenue?",
         "All charged up! I've been analyzing what actually works vs the Instagram guru garbage. What's your growth goal?"
       ],
-      'other': [
+      'redirect': [
         "I'm here to help you dominate Instagram growth, not chat about random stuff. What's your biggest Instagram challenge right now?",
         "Let's keep this focused on building your Instagram empire. What part of your growth strategy needs work?"
       ]
@@ -86,16 +99,18 @@ class EnhancedLunaRouter {
     const lowerInput = input.toLowerCase().trim();
     let responseArray;
     
-    if (lowerInput.match(/^(hi|hello|hey)\.?!?$/)) {
+    if (lowerInput.match(/^(hi|hello|hey|thanks|thank you)\.?!?$/)) {
       responseArray = codieSanchezResponses.hi;
     } else if (lowerInput.match(/how are you|what's up|how's it going/)) {
       responseArray = codieSanchezResponses['how are you'];
     } else {
-      responseArray = codieSanchezResponses.other;
+      // This will now handle the off-topic cases as well
+      responseArray = codieSanchezResponses.redirect;
     }
     
     const response = responseArray[Math.floor(Math.random() * responseArray.length)];
-    return { response, model: 'personality', route: 'simple' };
+    const route = lowerInput.match(/^(hi|hello|hey|thanks|thank you|how are you|what's up|how's it going)\.?!?$/) ? 'greeting' : 'redirect';
+    return { response, model: 'personality-static', route: route };
   }
 
   private getEmergencyResponse(message: string, route: string): string {
@@ -127,6 +142,10 @@ class EnhancedLunaRouter {
     
     if (this.isSimpleGreeting(userMessage)) {
       return this.handleSimpleCase(userMessage);
+    }
+
+    if (this.isOffTopic(userMessage)) {
+        return this.handleSimpleCase(userMessage); // Use the same handler to get a redirect response
     }
 
     const routingDecision = await this.analyzeRequest(userMessage, attachments, context);
@@ -400,3 +419,5 @@ export async function routeRequest(prompt: string, attachments: any[] = [], cont
   const router = new EnhancedLunaRouter();
   return await router.route(prompt, attachments, context);
 }
+
+    
