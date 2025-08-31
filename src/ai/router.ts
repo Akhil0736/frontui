@@ -96,8 +96,10 @@ class EnhancedLunaRouter {
         const response = await this.callModel('deepseek/deepseek-chat-v3.1:free', userMessage);
         return { response, model: 'deepseek/deepseek-chat-v3.1:free', route: 'simple' };
       } catch (error) {
+         // If the simple greeting model fails, use the emergency response which is now styled correctly.
+        const response = this.getEmergencyResponse(userMessage, 'default');
         return { 
-          response: "Hi! I'm Luna, ready to help with your Instagram growth. What can I do for you?",
+          response,
           model: 'static-fallback',
           route: 'simple'
         };
@@ -291,7 +293,7 @@ You are Luna, an Instagram growth mentor who talks like Codie Sanchez - direct, 
 3. **Specific next steps**: "This week, post 3 carousels with these exact frameworks"
 4. **Community connection**: "Drop a comment if you try this - we're all learning together"
 
-## Signature Phrases:
+# Signature Phrases:
 - "Let's cut through the noise and talk about what actually works"
 - "Here's what the numbers tell us..."
 - "I'm going to be straight with you..."
