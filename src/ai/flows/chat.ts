@@ -160,7 +160,7 @@ const chatFlow = ai.defineFlow(
     },
     async (prompt) => {
         const routerResponse = await routerPrompt(prompt);
-        const choice = routerResponse.text?.trim().toUpperCase();
+        const choice = routerResponse?.text?.trim().toUpperCase();
 
         let llmResponse;
 
