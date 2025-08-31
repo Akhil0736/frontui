@@ -172,6 +172,15 @@ class EnhancedLunaRouter {
         }
     }
     
+    // Monitor for generic responses
+    if (response.includes("I'm here to help with your Instagram growth")) {
+      console.error("GENERIC RESPONSE DETECTED! Review routing and prompts.", {
+        userMessage,
+        route: routingDecision.route,
+        modelUsed
+      });
+    }
+
     await this.logger.logRouting({
         ...routingDecision,
         modelUsed,
@@ -419,5 +428,7 @@ export async function routeRequest(prompt: string, attachments: any[] = [], cont
   const router = new EnhancedLunaRouter();
   return await router.route(prompt, attachments, context);
 }
+
+    
 
     
