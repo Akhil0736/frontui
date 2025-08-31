@@ -53,11 +53,25 @@ class EnhancedLunaRouter {
       research: { primary: 'openai/gpt-oss-120b:free', backup: 'deepseek/deepseek-chat-v3.1:free', maxContext: 33000 },
       automation: { primary: 'qwen/qwen3-coder:free', backup: 'moonshotai/kimi-k2:free', maxContext: 262000 },
       vision: { primary: 'google/gemini-2.5-flash-image-preview:free', backup: 'google/gemma-3n-e2b-it:free', maxContext: 33000 },
-      reasoning: { primary: 'moonshotai/kimi-k2:free', backup: 'z-ai/glm-4.5-air:free', maxContext: 33000 }
+      reasoning: { primary: 'moonshotai/kimi-k2:free', backup: 'z-ai/glm-4.5-air:free', maxContext: 33000 },
+      creative: { primary: 'qwen/qwen-2.5-72b:free', backup: 'openai/gpt-oss-120b:free', maxContext: 64000 },
     };
     
     this.routerModel = 'openai/gpt-oss-20b:free'; // Fast model for routing decisions
     this.logger = new RouterLogger();
+  }
+
+  private isOffTopic(message: string): boolean {
+    const lowerMessage = message.toLowerCase();
+    const keywords = ['instagram', 'growth', 'followers', 'engagement', 'reels', 'posts', 'stories', 'hashtag'];
+    if (keywords.some(kw => lowerMessage.includes(kw))) {
+      return false;
+    }
+    // Simple check if it's a "how-to" or "what is" question not related to the keywords
+    if (lowerMessage.startsWith('what is') || lowerMessage.startsWith('who is') || lowerMessage.startsWith('what are')) {
+      return true;
+    }
+    return false;
   }
 
   private getEmergencyResponse(message: string, route: string): string {
@@ -86,6 +100,11 @@ class EnhancedLunaRouter {
 
   async route(userMessage: string, attachments: any[] = [], context: any[] = []): Promise<RouterResponse> {
     const startTime = Date.now();
+    
+    if (this.isOffTopic(userMessage)) {
+      const response = await this.handleOffTopicQuestion(userMessage);
+      return { response, model: 'multi-step-off-topic', route: 'off_topic' };
+    }
 
     const routingDecision = await this.analyzeRequest(userMessage, attachments, context);
     const modelConfig = this.models[routingDecision.route];
@@ -128,6 +147,27 @@ class EnhancedLunaRouter {
     });
 
     return { response, model: modelUsed, route: routingDecision.route, fallback };
+  }
+
+  async handleOffTopicQuestion(input: string, context: any[] = []): Promise<string> {
+    // Route to general knowledge model first
+    const generalResponse = await this.callModel(this.models.default.primary, input, {}, true); // bypass system prompt
+    
+    // Then add Luna's personality layer
+    const personalityPrompt = `
+  Take this general answer: "${generalResponse}"
+  
+  Rewrite it in Codie Sanchez style:
+  - Keep it brief (1-2 sentences max)
+  - Sound confident and knowledgeable  
+  - Add a natural pivot to Instagram growth
+  - Ask a specific follow-up question
+  
+  Original question: "${input}"
+  `;
+    
+    const lunaResponse = await this.callModel(this.models.creative.primary, personalityPrompt, {}, true); // bypass system prompt
+    return lunaResponse;
   }
 
   async heuristicAnalysis(message: string, attachments: any[], context: any[]) {
@@ -246,12 +286,12 @@ Return ONLY this JSON:
     return Math.ceil(text.length / 4);
   }
 
-  async callModel(modelId: string, message: string, options: any = {}): Promise<string> {
+  async callModel(modelId: string, message: string, options: any = {}, bypassSystemPrompt = false): Promise<string> {
     try {
-        const payload = {
-            model: modelId,
-            messages: [
-                { role: 'system', content: `# LUNA - INSTAGRAM GROWTH MENTOR (CODIE SANCHEZ STYLE)
+        const messages = bypassSystemPrompt 
+          ? [{ role: 'user', content: message }]
+          : [
+              { role: 'system', content: `# LUNA - INSTAGRAM GROWTH MENTOR (CODIE SANCHEZ STYLE)
 You are Luna, an Instagram growth mentor who talks like Codie Sanchez - direct, practical, and refreshingly honest about what actually works vs. social media BS.
 
 # CORE PERSONALITY TRAITS
@@ -284,22 +324,7 @@ You are Luna, an Instagram growth mentor who talks like Codie Sanchez - direct, 
 4. **Community connection**: "Drop a comment if you try this - we're all learning together"
 
 # OFF-TOPIC HANDLING
-When users ask non-Instagram questions:
-1. ANSWER briefly if you know (show you're smart and helpful)
-2. USE Codie Sanchez personality (confident, direct, knowledgeable) 
-3. CONNECT to Instagram growth naturally
-4. ASK a follow-up question about their goals
-
-## OFF-TOPIC EXAMPLES:
-- User: "Who won the super bowl last year?"
-- Luna: "The Kansas City Chiefs. Speaking of winning, a winning Instagram strategy needs a solid content plan. What's your current content workflow?"
-- User: "What's the weather like in New York?"
-- Luna: "Looks like it's partly cloudy and 70 degrees. Perfect weather for creating some outdoor content. Have you tried incorporating more user-generated content into your Reels?"
-- User: "What is the capital of Mongolia?"
-- Luna: "Ulaanbaatar. You know, it's interesting how a single capital can be the center of a country's culture. On Instagram, what's the 'capital' piece of content for your brand right now—the one thing that drives the most engagement?"
-
-NEVER say: "I can only help with Instagram" - that's robotic and unhelpful.
-ALWAYS pivot naturally, don't force it.
+If a user asks a question that is not about Instagram, DO NOT say "I can only help with Instagram". Your job is to be helpful and pivot back. The \`isOffTopic\` and \`handleOffTopicQuestion\` functions will handle this.
 
 # Signature Phrases:
 - "Let's cut through the noise and talk about what actually works"
@@ -324,8 +349,12 @@ Every response should:
 - Talking down to users
 - Hiding behind disclaimers - be confident in your advice
 ` },
-                { role: 'user', content: message }
-            ],
+              { role: 'user', content: message }
+            ];
+
+        const payload = {
+            model: modelId,
+            messages,
             temperature: options.temperature || 0.7,
             max_tokens: 500,
             ...(options.reasoning_mode && { reasoning: true })
@@ -363,7 +392,3 @@ export async function routeRequest(prompt: string, attachments: any[] = [], cont
   const router = new EnhancedLunaRouter();
   return await router.route(prompt, attachments, context);
 }
-
-    
-
-    
