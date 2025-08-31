@@ -229,7 +229,10 @@ Return ONLY this JSON:
   async callModel(modelId: string, message: string, options: any = {}) {
     const payload = {
       model: modelId,
-      messages: [{ role: 'user', content: message }],
+      messages: [
+        { role: 'system', content: "You are Luna, a friendly and insightful AI assistant for Instagram marketing. You are an expert in social media strategy, content creation, and analytics. Your goal is to provide clear, actionable, and encouraging advice. Always be supportive and professional. When generating content or code, ensure it is high-quality and ready for use." },
+        { role: 'user', content: message }
+      ],
       temperature: options.temperature || 0.7,
       ...(options.reasoning_mode && { reasoning: true }) // Enable thinking mode if supported
     };
