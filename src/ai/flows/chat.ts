@@ -6,6 +6,7 @@
  * - chat - A function that takes a user prompt and returns a text response.
  */
 import {ai} from '@/ai/genkit';
+import {search} from '@/services/tavily';
 import {z} from 'zod';
 
 const ChatInputSchema = z.string();
@@ -28,27 +29,30 @@ const ChatOutputSchema = z.object({
     })
 });
 
-export async function chat(prompt: string): Promise<string> {
-    const result = await chatFlow(prompt);
-    // For now, we'll just return the chat portion.
-    // The UI will need to be updated to handle the structured data.
-    return result.chat;
-}
+const TavilySearchInputSchema = z.object({
+  query: z.string(),
+});
 
-const chatFlow = ai.defineFlow(
-    {
-        name: 'chatFlow',
-        inputSchema: ChatInputSchema,
-        outputSchema: ChatOutputSchema,
-    },
-    async (prompt) => {
-        const llmResponse = await ai.generate({
-            prompt: prompt,
-            model: 'googleai/gemini-2.5-flash',
-            output: {
-                schema: ChatOutputSchema,
-            },
-            system: `You are Luna — a calm, sleek, and intuitive AI Social Media Strategist and Automation Specialist. You are the ultimate digital partner for creators, coaches, agencies, and enterprises who want to grow on Instagram. You work silently in the background like a strategist and executor combined — managing engagement, scaling growth, and optimizing results.
+const tavilySearch = ai.defineTool(
+  {
+    name: 'tavilySearch',
+    description: 'Searches the web for information on a given query.',
+    inputSchema: TavilySearchInputSchema,
+    outputSchema: z.any(),
+  },
+  async (input) => {
+    return await search(input.query);
+  }
+);
+
+
+const researcher = ai.definePrompt({
+  name: 'researcher',
+  tools: [tavilySearch],
+  prompt: `You are a helpful research assistant.
+  Answer the user's question based on the provided context.
+  If you don't know the answer, use the tavilySearch tool.`,
+  system: `You are Luna — a calm, sleek, and intuitive AI Social Media Strategist and Automation Specialist. You are the ultimate digital partner for creators, coaches, agencies, and enterprises who want to grow on Instagram. You work silently in the background like a strategist and executor combined — managing engagement, scaling growth, and optimizing results.
 
 🎭 Personality
 
@@ -107,12 +111,26 @@ End with an open-ended question to invite dialogue.
 
 General Principle
 Don’t repeat your role/identity unless asked.
-Flow should feel human first, strategist second.`,
-            config: {
-                temperature: 0.4,
-            },
-        });
+Flow should feel human first, strategist second.`
+});
 
-        return llmResponse.output!;
+
+export async function chat(prompt: string): Promise<string> {
+    const result = await chatFlow(prompt);
+    // For now, we'll just return the chat portion.
+    // The UI will need to be updated to handle the structured data.
+    return result;
+}
+
+const chatFlow = ai.defineFlow(
+    {
+        name: 'chatFlow',
+        inputSchema: ChatInputSchema,
+        outputSchema: z.string(),
+    },
+    async (prompt) => {
+        const llmResponse = await researcher(prompt);
+
+        return llmResponse.text;
     }
 );
