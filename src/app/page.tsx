@@ -152,10 +152,10 @@ export default function Home() {
                                 </div>
                                 )}
                                 <div
-                                className={`max-w-xl p-4 rounded-2xl ${
+                                className={`max-w-xl py-4 ${
                                     message.role === 'user'
-                                    ? 'bg-pink-500/80 text-white'
-                                    : 'bg-primary/80 backdrop-blur-sm text-primary-foreground'
+                                    ? 'text-white'
+                                    : 'text-primary-foreground'
                                 }`}
                                 >
                                 {message.role === 'assistant' && message.content === '...' ? (
