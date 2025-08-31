@@ -61,7 +61,41 @@ class EnhancedLunaRouter {
   }
 
   private isSimpleGreeting(message: string): boolean {
-    return /^(hi|hello|hey|thanks|ok|okay)\.?!?$/i.test(message.trim());
+    const lowerMessage = message.toLowerCase().trim();
+    return /^(hi|hello|hey)\.?!?$/.test(lowerMessage) || /how are you|what's up|how's it going/.test(lowerMessage);
+  }
+
+  private async handleSimpleCase(input: string): Promise<RouterResponse> {
+    const codieSanchezResponses = {
+      'hi': [
+        "Hey! Ready to cut through the Instagram BS and actually grow your account? What's your biggest challenge right now?",
+        "What's up! Let's skip the guru nonsense and talk real strategy. Are you stuck at a certain follower count or is engagement the issue?",
+        "Hey builder! I'm here to help you actually move the needle, not just look pretty on the feed. What's your current growth situation?"
+      ],
+      'how are you': [
+        "I'm fired up and ready to help you build something real. Most people are stuck posting pretty pictures - let's talk actual strategy.",
+        "Doing great and ready to cut through the noise. Are we talking follower growth, engagement rates, or turning your audience into actual revenue?",
+        "All charged up! I've been analyzing what actually works vs the Instagram guru garbage. What's your growth goal?"
+      ],
+      'other': [
+        "I'm here to help you dominate Instagram growth, not chat about random stuff. What's your biggest Instagram challenge right now?",
+        "Let's keep this focused on building your Instagram empire. What part of your growth strategy needs work?"
+      ]
+    };
+    
+    const lowerInput = input.toLowerCase().trim();
+    let responseArray;
+    
+    if (lowerInput.match(/^(hi|hello|hey)\.?!?$/)) {
+      responseArray = codieSanchezResponses.hi;
+    } else if (lowerInput.match(/how are you|what's up|how's it going/)) {
+      responseArray = codieSanchezResponses['how are you'];
+    } else {
+      responseArray = codieSanchezResponses.other;
+    }
+    
+    const response = responseArray[Math.floor(Math.random() * responseArray.length)];
+    return { response, model: 'personality', route: 'simple' };
   }
 
   private getEmergencyResponse(message: string, route: string): string {
@@ -92,18 +126,7 @@ class EnhancedLunaRouter {
     const startTime = Date.now();
     
     if (this.isSimpleGreeting(userMessage)) {
-      try {
-        const response = await this.callModel('deepseek/deepseek-chat-v3.1:free', userMessage);
-        return { response, model: 'deepseek/deepseek-chat-v3.1:free', route: 'simple' };
-      } catch (error) {
-         // If the simple greeting model fails, use the emergency response which is now styled correctly.
-        const response = this.getEmergencyResponse(userMessage, 'default');
-        return { 
-          response,
-          model: 'static-fallback',
-          route: 'simple'
-        };
-      }
+      return this.handleSimpleCase(userMessage);
     }
 
     const routingDecision = await this.analyzeRequest(userMessage, attachments, context);
