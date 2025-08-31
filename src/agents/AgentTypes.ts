@@ -23,6 +23,7 @@ export interface SafetyResult {
     score: number;
     reason?: string;
     suggestedWait?: number; // in seconds
+    remainingActions?: number;
 }
 
 export interface ActionRecord {
@@ -31,5 +32,6 @@ export interface ActionRecord {
     action: StrategyAction;
     results: ActionResult[];
     safetyScore: number;
+
     timestamp: Date;
 }
