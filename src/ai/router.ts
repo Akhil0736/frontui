@@ -1,6 +1,13 @@
 
 'use server';
 
+interface RouterResponse {
+  response: string;
+  model: string;
+  route: string;
+  fallback?: 'backup' | 'emergency';
+}
+
 class RouterLogger {
   async logRouting(data: any) {
     // Store routing decisions for analysis and optimization
@@ -53,82 +60,106 @@ class EnhancedLunaRouter {
     this.logger = new RouterLogger();
   }
 
-  async route(userMessage: string, attachments: any[] = [], context: any[] = []) {
-    const startTime = Date.now();
+  private isSimpleGreeting(message: string): boolean {
+    return /^(hi|hello|hey|thanks|ok|okay)\.?!?$/i.test(message.trim());
+  }
+
+  private getEmergencyResponse(message: string, route: string): string {
+    const responses: { [key: string]: string } = {
+      vision: "I'd love to help analyze that! Could you describe what you're looking at or try uploading the image again?",
+      research: "I can help research that topic! What specifically would you like me to look into?",
+      automation: "I can help set up Instagram automation! What kind of workflow are you trying to create?",
+      reasoning: "I can help you strategize! Could you share more details about what you're planning?",
+      default: "I'm here to help with your Instagram growth! What would you like to focus on today?"
+    };
     
-    // Step 1: Fast heuristic analysis
+    return responses[route] || responses.default;
+  }
+
+  private async analyzeRequest(userMessage: string, attachments: any[] = [], context: any[] = []) {
     let routingDecision = await this.heuristicAnalysis(userMessage, attachments, context);
-    
-    // Step 2: If confidence is low, use LLM classification
     if (routingDecision.confidence < 0.8) {
-      routingDecision = await this.llmClassification(userMessage, attachments, context);
+        routingDecision = await this.llmClassification(userMessage, attachments, context);
     }
-    
-    // Step 3: Context-aware routing override
     routingDecision = this.contextAwareRouting(routingDecision, userMessage, context);
-    
-    // Step 4: Determine reasoning mode
     // @ts-ignore
     routingDecision.reasoning_mode = this.shouldUseReasoningMode(userMessage, routingDecision.route);
+    return routingDecision;
+  }
+
+
+  async route(userMessage: string, attachments: any[] = [], context: any[] = []): Promise<RouterResponse> {
+    const startTime = Date.now();
     
-    // Step 5: Get model configuration and execute
-    const modelConfig = this.models[routingDecision.route];
-    let response, modelUsed;
-    
-    try {
-      // @ts-ignore
-      response = await this.callModel(modelConfig.primary, userMessage, routingDecision);
-      modelUsed = modelConfig.primary;
-    } catch (error: any) {
-      console.log(`Primary model ${modelConfig.primary} failed: ${error.message}, attempting backup ${modelConfig.backup}.`);
+    if (this.isSimpleGreeting(userMessage)) {
       try {
-        // @ts-ignore
-        response = await this.callModel(modelConfig.backup, userMessage, routingDecision);
-        modelUsed = modelConfig.backup;
-      } catch (backupError: any) {
-        console.error(`Backup model ${modelConfig.backup} also failed: ${backupError.message}`);
-        throw backupError; // Re-throw the error to be caught by the flow
+        const response = await this.callModel('deepseek/deepseek-chat-v3.1:free', userMessage);
+        return { response, model: 'deepseek/deepseek-chat-v3.1:free', route: 'simple' };
+      } catch (error) {
+        return { 
+          response: "Hi! I'm Luna, ready to help with your Instagram growth. What can I do for you?",
+          model: 'static-fallback',
+          route: 'simple'
+        };
       }
     }
+
+    const routingDecision = await this.analyzeRequest(userMessage, attachments, context);
+    const modelConfig = this.models[routingDecision.route];
+
+    let response: string;
+    let modelUsed: string;
+    let fallback: 'backup' | 'emergency' | undefined = undefined;
+
+    try {
+        response = await this.callModel(modelConfig.primary, userMessage, routingDecision);
+        modelUsed = modelConfig.primary;
+    } catch (error: any) {
+        console.log(`Primary model ${modelConfig.primary} failed: ${error.message}, trying backup...`);
+        try {
+            response = await this.callModel(modelConfig.backup, userMessage, routingDecision);
+            modelUsed = modelConfig.backup;
+            fallback = 'backup';
+        } catch (backupError: any) {
+            console.error(`Both models failed. Primary: ${error.message}, Backup: ${backupError.message}`);
+            response = this.getEmergencyResponse(userMessage, routingDecision.route);
+            modelUsed = 'emergency-fallback';
+            fallback = 'emergency';
+        }
+    }
     
-    // Step 6: Log the routing decision for optimization
     await this.logger.logRouting({
-      ...routingDecision,
-      modelUsed,
-      responseTime: Date.now() - startTime,
-      success: !!response
+        ...routingDecision,
+        modelUsed,
+        responseTime: Date.now() - startTime,
+        success: true 
     });
-    
-    return { response, model: modelUsed, route: routingDecision.route };
+
+    return { response, model: modelUsed, route: routingDecision.route, fallback };
   }
 
   async heuristicAnalysis(message: string, attachments: any[], context: any[]) {
     const lowerMessage = message.toLowerCase();
     
-    // Vision: High confidence if attachments present
     if (attachments.length > 0) {
       return { route: 'vision', confidence: 0.95, method: 'heuristic', reasoning: 'Image/media attachments detected' };
     }
     
-    // Automation: Code/technical keywords
     const codeKeywords = ['code', 'api', 'automation', 'function', 'implement', 'build system', 'webhook', 'json', 'create a bot'];
     if (this.hasKeywords(lowerMessage, codeKeywords)) {
       return { route: 'automation', confidence: 0.9, method: 'heuristic', reasoning: 'Technical implementation keywords detected' };
     }
     
-    // Research: Analysis keywords
     const researchKeywords = ['analyze', 'research', 'compare', 'study', 'trends', 'benchmarks', 'data analysis', 'statistics'];
     if (this.hasKeywords(lowerMessage, researchKeywords)) {
       return { route: 'research', confidence: 0.85, method: 'heuristic', reasoning: 'Research/analysis keywords detected' };
     }
     
-    // Reasoning: Strategy/planning keywords
     const reasoningKeywords = ['strategy', 'plan', 'decide', 'optimize', 'best approach', 'what should i', 'how to approach'];
     if (this.hasKeywords(lowerMessage, reasoningKeywords)) {
       return { route: 'reasoning', confidence: 0.8, method: 'heuristic', reasoning: 'Strategic planning keywords detected' };
     }
     
-    // Default: Low confidence, needs LLM classification
     return { route: 'default', confidence: 0.6, method: 'heuristic', reasoning: 'No clear pattern detected' };
   }
 
@@ -164,7 +195,6 @@ Return ONLY this JSON:
       const parsed = JSON.parse(response.trim());
       return { ...parsed, method: 'llm_classification' };
     } catch (error) {
-      // Fallback to default if LLM classification fails
       return { route: 'default', confidence: 0.5, method: 'fallback', reasoning: 'LLM classification failed' };
     }
   }
@@ -172,9 +202,7 @@ Return ONLY this JSON:
   contextAwareRouting(routingDecision: any, message: string, context: any[]) {
     const totalContext = this.estimateTokenCount(message) + this.estimateTokenCount(context.join(' '));
     
-    // Override routing based on context size
     if (totalContext > 200000) {
-      // Only Qwen3-Coder can handle this
       return {
         ...routingDecision,
         route: 'automation',
@@ -184,12 +212,11 @@ Return ONLY this JSON:
     }
     
     if (totalContext > 128000) {
-      // Route to models with >128K context
-      const highContextModels = ['automation', 'default']; // Qwen3-Coder (262K), GLM 4.5 Air (131K)
+      const highContextModels = ['automation', 'default']; 
       if (!highContextModels.includes(routingDecision.route)) {
         return {
           ...routingDecision,
-          route: 'default', // DeepSeek V3.1 has good context handling
+          route: 'default', 
           contextOverride: true,
           reasoning: `Medium context (${totalContext} tokens) requires capable model`
         };
@@ -202,10 +229,8 @@ Return ONLY this JSON:
   shouldUseReasoningMode(message: string, route: string) {
     const lowerMessage = message.toLowerCase();
     
-    // Always use reasoning for complex strategy tasks
     if (route === 'reasoning') return true;
     
-    // Use reasoning for multi-step requests
     const multiStepIndicators = [
       'first', 'then', 'after that', 'next', 'step by step',
       'analyze then', 'compare and decide', 'evaluate and recommend'
@@ -213,7 +238,6 @@ Return ONLY this JSON:
     
     if (this.hasKeywords(lowerMessage, multiStepIndicators)) return true;
     
-    // Use reasoning for optimization/planning tasks
     const reasoningTriggers = [
       'optimize', 'best strategy', 'most effective', 'should i',
       'pros and cons', 'think through', 'work out'
@@ -227,45 +251,46 @@ Return ONLY this JSON:
   }
 
   estimateTokenCount(text: string) {
-    // Rough estimation: ~4 characters per token for English
     return Math.ceil(text.length / 4);
   }
 
-  async callModel(modelId: string, message: string, options: any = {}) {
-    const payload = {
-      model: modelId,
-      messages: [
-        { role: 'system', content: "You are Luna, a friendly and insightful AI assistant for Instagram marketing. You are an expert in social media strategy, content creation, and analytics. Your goal is to provide clear, actionable, and encouraging advice. Always be supportive and professional. When generating content or code, ensure it is high-quality and ready for use." },
-        { role: 'user', content: message }
-      ],
-      temperature: options.temperature || 0.7,
-      ...(options.reasoning_mode && { reasoning: true }) // Enable thinking mode if supported
-    };
-    
-    // Your OpenRouter API call here
-    const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${process.env.OPENROUTER_API_KEY}`,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(payload)
-    });
-    
-    if (!response.ok) {
-        const errorBody = await response.text();
-        throw new Error(`API call failed with status ${response.status}: ${errorBody}`);
-    }
+  async callModel(modelId: string, message: string, options: any = {}): Promise<string> {
+    try {
+        const payload = {
+            model: modelId,
+            messages: [
+                { role: 'system', content: "You are Luna, a friendly and insightful AI assistant for Instagram marketing. You are an expert in social media strategy, content creation, and analytics. Your goal is to provide clear, actionable, and encouraging advice. Always be supportive and professional. When generating content or code, ensure it is high-quality and ready for use." },
+                { role: 'user', content: message }
+            ],
+            temperature: options.temperature || 0.7,
+            max_tokens: 500,
+            ...(options.reasoning_mode && { reasoning: true })
+        };
 
-    const data = await response.json();
-    const content = data?.choices?.[0]?.message?.content;
+        const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${process.env.OPENROUTER_API_KEY}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(payload)
+        });
 
-    if (!content) {
-      console.error("Invalid response structure from model:", data);
-      throw new Error("Received an invalid response structure from the model.");
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}: ${await response.text()}`);
+        }
+
+        const data = await response.json();
+
+        if (!data.choices?.[0]?.message?.content) {
+            throw new Error('Invalid response format from model');
+        }
+
+        return data.choices[0].message.content;
+    } catch (error) {
+        console.error(`Model ${modelId} failed:`, error);
+        throw error;
     }
-    
-    return content;
   }
 }
 
