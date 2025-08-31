@@ -132,7 +132,7 @@ const chatFlow = ai.defineFlow(
     async (prompt) => {
         const llmResponse = await researcher(prompt);
 
-        if (!llmResponse) {
+        if (!llmResponse.text) {
           return "Sorry, I couldn't generate a response. Please try again.";
         }
 
