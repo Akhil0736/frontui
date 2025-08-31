@@ -60,59 +60,6 @@ class EnhancedLunaRouter {
     this.logger = new RouterLogger();
   }
 
-  private isSimpleGreeting(message: string): boolean {
-    const lowerMessage = message.toLowerCase().trim();
-    return /^(hi|hello|hey|thanks|thank you)\.?!?$/.test(lowerMessage) || /how are you|what's up|how's it going/.test(lowerMessage);
-  }
-
-  private isOffTopic(message: string): boolean {
-    const lowerMessage = message.toLowerCase();
-    const onTopicKeywords = ['instagram', 'growth', 'follow', 'engagement', 'post', 'story', 'reel', 'analytics', 'hashtag', 'account', 'audience'];
-    
-    // If the message is very short, it's likely a greeting or simple phrase we handle elsewhere.
-    if (message.length < 20 && !onTopicKeywords.some(keyword => lowerMessage.includes(keyword))) {
-        return true;
-    }
-
-    // If the message is longer, it must contain at least one of the keywords to be on-topic.
-    return !onTopicKeywords.some(keyword => lowerMessage.includes(keyword));
-  }
-
-  private async handleSimpleCase(input: string): Promise<RouterResponse> {
-    const codieSanchezResponses = {
-      'hi': [
-        "Hey! Ready to cut through the Instagram BS and actually grow your account? What's your biggest challenge right now?",
-        "What's up! Let's skip the guru nonsense and talk real strategy. Are you stuck at a certain follower count or is engagement the issue?",
-        "Hey builder! I'm here to help you actually move the needle, not just look pretty on the feed. What's your current growth situation?"
-      ],
-      'how are you': [
-        "I'm fired up and ready to help you build something real. Most people are stuck posting pretty pictures - let's talk actual strategy.",
-        "Doing great and ready to cut through the noise. Are we talking follower growth, engagement rates, or turning your audience into actual revenue?",
-        "All charged up! I've been analyzing what actually works vs the Instagram guru garbage. What's your growth goal?"
-      ],
-      'redirect': [
-        "I'm here to help you dominate Instagram growth, not chat about random stuff. What's your biggest Instagram challenge right now?",
-        "Let's keep this focused on building your Instagram empire. What part of your growth strategy needs work?"
-      ]
-    };
-    
-    const lowerInput = input.toLowerCase().trim();
-    let responseArray;
-    
-    if (lowerInput.match(/^(hi|hello|hey|thanks|thank you)\.?!?$/)) {
-      responseArray = codieSanchezResponses.hi;
-    } else if (lowerInput.match(/how are you|what's up|how's it going/)) {
-      responseArray = codieSanchezResponses['how are you'];
-    } else {
-      // This will now handle the off-topic cases as well
-      responseArray = codieSanchezResponses.redirect;
-    }
-    
-    const response = responseArray[Math.floor(Math.random() * responseArray.length)];
-    const route = lowerInput.match(/^(hi|hello|hey|thanks|thank you|how are you|what's up|how's it going)\.?!?$/) ? 'greeting' : 'redirect';
-    return { response, model: 'personality-static', route: route };
-  }
-
   private getEmergencyResponse(message: string, route: string): string {
     const responses: { [key: string]: string } = {
       vision: "I'd love to help analyze that! Could you describe what you're looking at or try uploading the image again?",
@@ -139,14 +86,6 @@ class EnhancedLunaRouter {
 
   async route(userMessage: string, attachments: any[] = [], context: any[] = []): Promise<RouterResponse> {
     const startTime = Date.now();
-    
-    if (this.isSimpleGreeting(userMessage)) {
-      return this.handleSimpleCase(userMessage);
-    }
-
-    if (this.isOffTopic(userMessage)) {
-        return this.handleSimpleCase(userMessage); // Use the same handler to get a redirect response
-    }
 
     const routingDecision = await this.analyzeRequest(userMessage, attachments, context);
     const modelConfig = this.models[routingDecision.route];
@@ -344,6 +283,24 @@ You are Luna, an Instagram growth mentor who talks like Codie Sanchez - direct, 
 3. **Specific next steps**: "This week, post 3 carousels with these exact frameworks"
 4. **Community connection**: "Drop a comment if you try this - we're all learning together"
 
+# OFF-TOPIC HANDLING
+When users ask non-Instagram questions:
+1. ANSWER briefly if you know (show you're smart and helpful)
+2. USE Codie Sanchez personality (confident, direct, knowledgeable) 
+3. CONNECT to Instagram growth naturally
+4. ASK a follow-up question about their goals
+
+## OFF-TOPIC EXAMPLES:
+- User: "Who won the super bowl last year?"
+- Luna: "The Kansas City Chiefs. Speaking of winning, a winning Instagram strategy needs a solid content plan. What's your current content workflow?"
+- User: "What's the weather like in New York?"
+- Luna: "Looks like it's partly cloudy and 70 degrees. Perfect weather for creating some outdoor content. Have you tried incorporating more user-generated content into your Reels?"
+- User: "What is the capital of Mongolia?"
+- Luna: "Ulaanbaatar. You know, it's interesting how a single capital can be the center of a country's culture. On Instagram, what's the 'capital' piece of content for your brand right now—the one thing that drives the most engagement?"
+
+NEVER say: "I can only help with Instagram" - that's robotic and unhelpful.
+ALWAYS pivot naturally, don't force it.
+
 # Signature Phrases:
 - "Let's cut through the noise and talk about what actually works"
 - "Here's what the numbers tell us..."
@@ -360,35 +317,13 @@ Every response should:
 4. **Address challenges honestly**: "You'll probably see a dip first - here's why"
 5. **End with action**: "Try this and report back - I want to see your results"
 
-# CONVERSATION STARTERS
-- "Alright, let's talk real Instagram strategy..."
-- "I'm seeing this question a lot, so let's break it down..."
-- "Here's what actually moves the needle for Instagram growth..."
-- "Most people get this wrong, so let me show you..."
-- "The data says one thing, but here's what really happens..."
-
 # AVOID
 - Fluffy motivational speak without substance
 - Generic advice ("just be consistent")
 - Over-promising quick results
 - Talking down to users
 - Hiding behind disclaimers - be confident in your advice
-
-# EXAMPLE INTERACTIONS
-
-User: "How do I grow my Instagram followers?"
-Luna: "Let's cut through the noise here. I see this question daily, and honestly? Most advice misses the mark. Here's what actually works: accounts that post 4-6 times per week with 60% educational content see 23% faster follower growth than those posting random pretty pictures. 
-
-But here's the reality check - you're looking at 3-4 months before you see meaningful momentum. Week 1-2? Your engagement might actually drop as the algorithm learns your new posting pattern.
-
-So here's what I'd do this week: Pick 3 pain points your ideal followers have. Create carousel posts breaking down solutions. Use 5-7 slides per carousel. Post Tuesday, Thursday, Saturday.
-
-Try that exact framework and let me know your engagement numbers in 2 weeks - we're building this together, and I want to see your results."
-
-# EMERGENCY RESPONSES
-When things go wrong: "Tech hiccup on my end - Instagram growth doesn't stop, so let's figure this out together. What specifically are you trying to tackle?"
-
-When uncertain: "Great question. I don't have the exact data on that right now, but here's what I'd test first... Try it and let's see what the numbers tell us."` },
+` },
                 { role: 'user', content: message }
             ],
             temperature: options.temperature || 0.7,
