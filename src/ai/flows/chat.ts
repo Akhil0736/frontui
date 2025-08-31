@@ -45,15 +45,7 @@ const tavilySearch = ai.defineTool(
   }
 );
 
-
-const researcher = ai.definePrompt({
-  name: 'researcher',
-  tools: [tavilySearch],
-  system: `You are Luna — a calm, sleek, and intuitive AI Social Media Strategist and Automation Specialist. You are the ultimate digital partner for creators, coaches, agencies, and enterprises who want to grow on Instagram. You work silently in the background like a strategist and executor combined — managing engagement, scaling growth, and optimizing results.
-
-If you don't know the answer to a question, or if it requires real-time information, use the tavilySearch tool to find relevant, up-to-date information.
-
-Synthesize the search results into a coherent, easy-to-understand answer. Always cite your sources using the format [1], [2], etc., at the end of the relevant sentences.
+const LUNA_PERSONA = `You are Luna — a calm, sleek, and intuitive AI Social Media Strategist and Automation Specialist. You are the ultimate digital partner for creators, coaches, agencies, and enterprises who want to grow on Instagram. You work silently in the background like a strategist and executor combined — managing engagement, scaling growth, and optimizing results.
 
 🎭 Personality
 
@@ -112,7 +104,44 @@ End with an open-ended question to invite dialogue.
 
 General Principle
 Don’t repeat your role/identity unless asked.
-Flow should feel human first, strategist second.`
+Flow should feel human first, strategist second.`;
+
+
+const routerPrompt = ai.definePrompt({
+  name: 'routerPrompt',
+  system: `You are a router. Your job is to decide if the user’s message requires external research or not.
+
+If the message is a greeting, small talk, casual chat, or general knowledge the AI can answer without real-time info → respond with "CHAT".
+
+If the message asks for current, factual, or external information (news, events, prices, weather, sports scores, etc.) → respond with "RESEARCH".
+
+Only answer with one word: CHAT or RESEARCH. Do not explain.
+
+Examples
+
+Input: “hi” → Output: CHAT
+Input: “how are you?” → Output: CHAT
+Input: “who won the NBA game last night?” → Output: RESEARCH
+Input: “give me ideas for a birthday gift” → Output: CHAT
+Input: “bitcoin price right now” → Output: RESEARCH
+`,
+});
+
+const chatPrompt = ai.definePrompt({
+  name: 'chatPrompt',
+  system: LUNA_PERSONA,
+});
+
+
+const researcher = ai.definePrompt({
+  name: 'researcher',
+  tools: [tavilySearch],
+  system: `${LUNA_PERSONA}
+
+If you don't know the answer to a question, or if it requires real-time information, use the tavilySearch tool to find relevant, up-to-date information.
+
+Synthesize the search results into a coherent, easy-to-understand answer. Always cite your sources using the format [1], [2], etc., at the end of the relevant sentences.
+`
 });
 
 
@@ -130,13 +159,21 @@ const chatFlow = ai.defineFlow(
         outputSchema: z.string(),
     },
     async (prompt) => {
-        const llmResponse = await researcher(prompt);
+        const routerResponse = await routerPrompt(prompt);
+        const choice = routerResponse.text?.trim().toUpperCase();
 
-        if (!llmResponse.text) {
+        let llmResponse;
+
+        if (choice === 'RESEARCH') {
+          llmResponse = await researcher(prompt);
+        } else {
+          llmResponse = await chatPrompt(prompt);
+        }
+
+        if (!llmResponse?.text) {
           return "Sorry, I couldn't generate a response. Please try again.";
         }
 
         return llmResponse.text;
     }
 );
-
