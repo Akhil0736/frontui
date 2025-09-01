@@ -1,45 +1,37 @@
 
 'use server';
 
-export type LiveSearchResult =
-  | { answer: string; sources: Array<{ title: string; url: string }> }
-  | string; // fallback message
+export async function webSearch(
+  query: string,
+  k = 8,
+  depth: "basic" | "advanced" = "basic"
+) {
+    try {
+        const response = await fetch("https://api.tavily.com/search", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                api_key: process.env.TAVILY_API_KEY,
+                query,
+                search_depth: depth,
+                include_answer: false,
+                max_results: k,
+            }),
+        });
 
-export async function liveSearch(query: string): Promise<LiveSearchResult> {
-  const apiKey = process.env.TAVILY_API_KEY;
-  const url = "https://api.tavily.com/search";
+        if (!response.ok) {
+            console.error(`Tavily API error: ${response.statusText}`);
+            return "Could not get a response from Tavily API.";
+        }
 
-  if (!apiKey) {
-    console.error('TAVILY_API_KEY is not set');
-    return "⚠️ Live search is not configured.";
-  }
-
-  try {
-    const res = await fetch(url, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${apiKey}`,
-      },
-      body: JSON.stringify({
-        query,
-        search_depth: "advanced",
-        include_answer: true,
-        max_results: 5,
-      }),
-    });
-
-    if (!res.ok) {
-      console.error(`Tavily HTTP ${res.status}: ${res.statusText}`);
-      return "⚠️ Live search failed (service unavailable).";
+        const data = await response.json();
+        return data.results
+            .map((r: { title: string; content: string; url: string; }) => `${r.title}\n${r.content}\n${r.url}`)
+            .join("\n\n");
+    } catch (err) {
+        console.error("Tavily fetch error:", err);
+        return "Error fetching live data from Tavily.";
     }
-
-    const data = await res.json();
-    return data?.answer
-      ? { answer: data.answer, sources: data.results ?? [] }
-      : "⚠️ No recent information found.";
-  } catch (err) {
-    console.error("Tavily fetch error:", err);
-    return "⚠️ Error fetching live data.";
-  }
 }
