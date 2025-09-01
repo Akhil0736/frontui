@@ -51,15 +51,15 @@ class EnhancedLunaRouter {
 
   constructor() {
     this.models = {
-      default: { primary: 'googleai/gemini-1.5-flash-latest', backup: 'googleai/gemini-1.5-flash-latest', maxContext: 64000 },
-      research: { primary: 'googleai/gemini-1.5-flash-latest', backup: 'googleai/gemini-1.5-flash-latest', maxContext: 33000 },
-      automation: { primary: 'googleai/gemini-1.5-flash-latest', backup: 'googleai/gemini-1.5-flash-latest', maxContext: 262000 },
-      vision: { primary: 'googleai/gemini-1.5-flash-latest', backup: 'googleai/gemini-1.5-flash-latest', maxContext: 33000 },
-      reasoning: { primary: 'googleai/gemini-1.5-pro-latest', backup: 'googleai/gemini-1.5-flash-latest', maxContext: 33000 },
-      creative: { primary: 'googleai/gemini-1.5-flash-latest', backup: 'googleai/gemini-1.5-flash-latest', maxContext: 64000 },
+      default: { primary: 'googleai/gemini-2.5-flash-preview', backup: 'googleai/gemini-1.5-flash-latest', maxContext: 64000 },
+      research: { primary: 'googleai/gemini-2.5-flash-preview', backup: 'googleai/gemini-1.5-flash-latest', maxContext: 33000 },
+      automation: { primary: 'googleai/gemini-2.5-flash-preview', backup: 'googleai/gemini-1.5-flash-latest', maxContext: 262000 },
+      vision: { primary: 'googleai/gemini-2.5-flash-preview', backup: 'googleai/gemini-1.5-flash-latest', maxContext: 33000 },
+      reasoning: { primary: 'googleai/gemini-1.5-pro-latest', backup: 'googleai/gemini-2.5-flash-preview', maxContext: 33000 },
+      creative: { primary: 'googleai/gemini-2.5-flash-preview', backup: 'googleai/gemini-1.5-flash-latest', maxContext: 64000 },
     };
     
-    this.routerModel = 'googleai/gemini-1.5-flash-latest'; // Fast model for routing decisions
+    this.routerModel = 'googleai/gemini-2.5-flash-preview'; // Fast model for routing decisions
     this.logger = new RouterLogger();
   }
 
@@ -325,7 +325,7 @@ You are Luna, Instagram Growth Mentor with Codie Sanchez personality. Your sole 
 </personality_enforcement>`;
 
       const result = await ai.generate({
-          model: modelId,
+          model: modelId as any,
           prompt: message,
           ...( !bypassSystemPrompt && { system: systemPrompt }),
           config: {
