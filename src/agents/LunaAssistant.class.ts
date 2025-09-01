@@ -78,7 +78,7 @@ export class LunaAssistant {
         intent,
         context
       );
-    } catch (error) {
+    } catch (error: any) {
       console.error('Luna processing error:', error);
       return this.getPersonalityFallback(input);
     }
@@ -204,11 +204,11 @@ export class LunaAssistant {
     const lowercaseInput = message.toLowerCase();
 
     // Then check existing patterns
-    if ((await this.extractEntities(message)).people?.length || (await this.extractEntities(message)).events?.length) {
+    if (((await this.extractEntities(message)).people?.length ?? 0) > 0 || ((await this.extractEntities(message)).events?.length ?? 0) > 0) {
       return 'event_query';
     }
 
-    if ((await this.extractEntities(message)).topics?.length) {
+    if (((await this.extractEntities(message)).topics?.length ?? 0) > 0) {
       return 'instagram_growth';
     }
 
@@ -238,7 +238,7 @@ export class LunaAssistant {
     // Event ambiguity - "clash" without location
     if (
       entities.events?.some((e) => e.includes('clash')) &&
-      !entities.places?.length
+      !(entities.places?.length ?? 0 > 0)
     ) {
       return {
         isAmbiguous: true,
@@ -353,8 +353,9 @@ Respond naturally but indicate you're searching for current information.
 User Query: ${message}`;
 
       case 'event_query':
+        const entities =  this.extractEntities(message);
         return `${baseContext}\n\nCURRENT QUERY: ${message}\nDETECTED ENTITIES: ${JSON.stringify(
-          this.extractEntities(message)
+            entities
         )}\nUSER INTENT: ${intent}\n\nCURRENT QUERY: ${message}`;
 
       default:
@@ -399,7 +400,7 @@ User Query: ${message}`;
 
     const hasClashEvent =
       lastContext.entities.events?.some((e) => e.includes('clash')) || false;
-    const hasPlace = lastContext.entities.places?.length > 0;
+    const hasPlace = (lastContext.entities.places?.length ?? 0) > 0;
 
     // Incomplete if it was a clash event query without a location
     return hasClashEvent && !hasPlace;
@@ -437,5 +438,3 @@ User Query: ${message}`;
     });
   }
 }
-
-    

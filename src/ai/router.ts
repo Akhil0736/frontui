@@ -65,5 +65,3 @@ export async function routeRequest(
   // If no web search signal, perform a standard Gemini call with the full prompt
   return standardGeminiCall(prompt);
 }
-
-    
