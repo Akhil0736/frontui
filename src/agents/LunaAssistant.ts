@@ -1,4 +1,3 @@
-'use server';
 
 import * as admin from 'firebase-admin';
 import { routeRequest } from '@/ai/router';
