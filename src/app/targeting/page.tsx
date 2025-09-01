@@ -20,10 +20,11 @@ import {
   Info,
   Lightbulb,
   Target,
-  Settings
+  Settings,
+  Star,
+  UserPlus
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Slider } from '@/components/ui/slider';
@@ -33,6 +34,9 @@ import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
+import { ProfileCard } from '@/components/ui/info-card';
+import { cn } from '@/lib/utils';
+
 
 interface TargetingSettings {
   hashtags: string[];
@@ -57,23 +61,6 @@ interface TargetingSettings {
     gender: string;
   };
 }
-
-const GlassCard: React.FC<{
-  title: string;
-  children: React.ReactNode;
-  className?: string;
-}> = ({ title, children, className = '' }) => {
-  return (
-    <Card className={`bg-card/80 backdrop-blur-xl border-border shadow-[0_2px_8px_rgba(0,0,0,0.08)] ${className}`}>
-      <CardHeader>
-        <CardTitle className="text-lg font-semibold text-foreground mb-4">{title}</CardTitle>
-      </CardHeader>
-      <CardContent>
-        {children}
-      </CardContent>
-    </Card>
-  );
-};
 
 const TagInput: React.FC<{
   id: string;
@@ -529,17 +516,15 @@ const HelperPanel: React.FC<{ className?: string }> = ({ className = '' }) => {
     <div className={`space-y-4 ${className}`}>
       <h3 className="text-lg font-semibold text-foreground">Quick Tips</h3>
       {tips.map((tip, index) => (
-        <Card key={index} className="p-4 bg-background/30 border-border">
-           <CardContent className="p-0">
-            <div className="flex items-start gap-3">
+        <ProfileCard key={index}>
+           <div className="flex items-start gap-3">
               <tip.icon className="w-5 h-5 text-accent mt-0.5" />
               <div>
                 <h4 className="font-medium text-foreground mb-1">{tip.title}</h4>
                 <p className="text-sm text-muted-foreground">{tip.content}</p>
               </div>
             </div>
-           </CardContent>
-        </Card>
+        </ProfileCard>
       ))}
     </div>
   );
@@ -649,13 +634,32 @@ export default function SmartTargetingScreen() {
   };
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <div className="min-h-screen bg-gray-100 dark:bg-gray-900 text-foreground relative overflow-hidden">
+      <div className="absolute inset-0 opacity-20">
+        <div
+          className="absolute inset-0 bg-gradient-to-r from-transparent via-gray-300 dark:via-gray-600 to-transparent"
+          style={{
+            backgroundImage: `
+              linear-gradient(rgba(156, 163, 175, 0.3) 1px, transparent 1px),
+              linear-gradient(90deg, rgba(156, 163, 175, 0.3) 1px, transparent 1px)
+            `,
+            backgroundSize: "40px 40px",
+            animation: "gridMove 20s linear infinite",
+          }}
+        />
+      </div>
+       <style jsx>{`
+        @keyframes gridMove {
+          0% { transform: translate(0, 0); }
+          100% { transform: translate(40px, 40px); }
+        }
+      `}</style>
       <HeaderBar />
       
-      <div className="mx-auto max-w-5xl px-6 py-8 grid gap-6 lg:grid-cols-[1fr_280px] pb-24">
+      <div className="mx-auto max-w-5xl px-6 py-8 grid gap-6 lg:grid-cols-[1fr_280px] pb-24 relative z-10">
         {/* Main Column */}
         <div className="space-y-6">
-          <GlassCard title="Target Audience">
+          <ProfileCard title="Target Audience">
             <div className="grid gap-6 md:grid-cols-2">
               <TagInput
                 id="hashtags"
@@ -679,9 +683,9 @@ export default function SmartTargetingScreen() {
                 />
               </div>
             </div>
-          </GlassCard>
+          </ProfileCard>
 
-          <GlassCard title="Engagement Limits">
+          <ProfileCard title="Engagement Limits">
             <div className="grid gap-6 md:grid-cols-2">
               <LimitSlider
                 id="follows"
@@ -719,9 +723,9 @@ export default function SmartTargetingScreen() {
             <div className="mt-6">
               <SafetyNotice hasRisk={hasRisk} />
             </div>
-          </GlassCard>
+          </ProfileCard>
 
-          <GlassCard title="AI Comments">
+          <ProfileCard title="AI Comments">
             <div className="space-y-6">
               <RadioMatrix
                 id="style"
@@ -743,18 +747,18 @@ export default function SmartTargetingScreen() {
               </div>
               <LivePreview settings={settings} />
             </div>
-          </GlassCard>
+          </ProfileCard>
 
-          <Card>
+          <ProfileCard title="Advanced Targeting">
             <Accordion type="single" collapsible className="w-full">
               <AccordionItem value="advanced" className="border-none">
-                <AccordionTrigger className="px-6 py-4 hover:no-underline">
+                <AccordionTrigger className="px-6 py-4 hover:no-underline -mx-6">
                   <div className="flex items-center gap-2">
                     <Settings className="w-5 h-5 text-accent" />
                     <span className="text-lg font-semibold text-foreground">Advanced Targeting</span>
                   </div>
                 </AccordionTrigger>
-                <AccordionContent className="px-6 pb-6">
+                <AccordionContent className="px-6 pb-6 -mx-6">
                   <div className="space-y-6">
                     <TimeWindowPicker
                       value={settings.activeHours}
@@ -774,7 +778,7 @@ export default function SmartTargetingScreen() {
                 </AccordionContent>
               </AccordionItem>
             </Accordion>
-          </Card>
+          </ProfileCard>
         </div>
 
         {/* Right Rail */}
