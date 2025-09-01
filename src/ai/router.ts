@@ -1,6 +1,6 @@
 
 'use server';
-import { answerLuna } from "@/services/lunaAnswer";
+import { answerWithLiveSearch } from "@/services/lunaLiveSearch";
 
 interface RouterResponse {
   response: string;
@@ -12,13 +12,16 @@ interface RouterResponse {
 }
 
 export async function routeRequest(prompt: string, attachments: any[] = [], context: any[] = []): Promise<RouterResponse> {
-    const result = await answerLuna(prompt);
+    
+    const needsWebSearch = /(today|latest|news|current|recent|this month|this year|2025|movies?|weather)/i.test(prompt);
+
+    const result = await answerWithLiveSearch(prompt);
     
     return {
-        response: result.answer,
-        model: 'gemini-1.5-flash', // Model is now hardcoded in gemini.ts
-        route: result.hasWebResults ? 'web_search' : 'gemini_direct',
-        sources: result.sources,
-        hasWebResults: result.hasWebResults,
+        response: result,
+        model: 'gemini-1.5-flash',
+        route: needsWebSearch ? 'web_search' : 'gemini_direct',
+        sources: [], // This could be enhanced to return sources from Tavily
+        hasWebResults: needsWebSearch,
     };
 }
