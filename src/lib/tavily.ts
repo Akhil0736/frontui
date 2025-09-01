@@ -7,9 +7,9 @@ export async function searchWeb(query: string, maxResults = 8) {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
+            "Authorization": `Bearer ${process.env.TAVILY_API_KEY!}`
         },
         body: JSON.stringify({
-            api_key: process.env.TAVILY_API_KEY!,
             query,
             num_results: maxResults,
             search_depth: "advanced",
@@ -20,6 +20,8 @@ export async function searchWeb(query: string, maxResults = 8) {
 
     if (!response.ok) {
         console.error(`Tavily API error: ${response.status} ${response.statusText}`);
+        const errorBody = await response.text();
+        console.error('Error Body:', errorBody);
         return null;
     }
 
