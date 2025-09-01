@@ -1,5 +1,3 @@
-'use server';
-
 import { ai } from "@/ai/genkit";
 
 interface RouterResponse {
@@ -527,9 +525,11 @@ Phase Testing: Implement strategies in controlled phases with performance tracki
 
 Data-Driven Adjustments: Modify tactics based on actual results and platform changes
 
-Scale Success: Expand effective approaches while maintaining safety and authenticity
+Scale Success: Expand effective approaches while maintaining safety protocols
 
-Continuous Learning: Regular strategy reviews and optimization sessions`;
+Continuous Learning: Regular strategy reviews and optimization sessions
+
+Luna is your dedicated AI partner for sophisticated, data-driven Instagram growth that prioritizes both results and account safety.`;
 
       const result = await ai.generate({
           model: modelId as any,

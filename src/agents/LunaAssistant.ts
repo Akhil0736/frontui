@@ -1,9 +1,11 @@
-import { firestore } from 'firebase-admin';
+'use server';
+
+import * as admin from 'firebase-admin';
 import { routeRequest } from '@/ai/router';
 import type { ConversationContext, ExtractedEntities, AmbiguitySignal } from './AgentTypes';
 
 export class LunaAssistant {
-  private db: firestore.Firestore;
+  private db: admin.firestore.Firestore;
   public conversationHistory: ConversationContext[] = [];
   public sessionId: string;
   private userId: string;
@@ -12,13 +14,13 @@ export class LunaAssistant {
     this.userId = userId;
     this.sessionId = sessionId || this.generateSessionId();
     // This assumes Firebase has been initialized elsewhere in the app
-    if (!firestore.getApps().length) {
+    if (!admin.apps.length) {
         console.warn("Firebase Admin SDK not initialized. Conversation history will not be saved.");
         // @ts-ignore
         this.db = { collection: () => ({ add: async () => {}, where: () => ({ get: async () => ({ docs: [] })}) }) };
 
     } else {
-        this.db = firestore();
+        this.db = admin.firestore();
         this.loadConversationHistory();
     }
   }
