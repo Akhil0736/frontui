@@ -8,7 +8,7 @@ import { AuroraBackground } from '@/components/ui/aurora-background';
 import { AIInputField } from '@/components/ui/ai-input';
 import LunaLogo from '@/components/ui/luna-logo';
 import { Sidebar, SidebarBody, SidebarLink } from '@/components/ui/sidebar';
-import { Home as HomeIcon, BarChart2, Settings, CreditCard, LogOut } from 'lucide-react';
+import { Home as HomeIcon, Settings, CreditCard, LogOut } from 'lucide-react';
 import Link from 'next/link';
 import { ShiningText } from '@/components/ui/shining-text';
 
@@ -57,7 +57,6 @@ export default function Home() {
 
   const links = [
     { label: 'Home', href: '/', icon: <HomeIcon className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" /> },
-    { label: 'Analytics', href: '/analytics', icon: <BarChart2 className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" /> },
     { label: 'Settings', href: '/settings', icon: <Settings className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" /> },
     { label: 'Billing', href: '/billing', icon: <CreditCard className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" /> },
     { label: 'Logout', href: '/logout', icon: <LogOut className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" /> },
