@@ -1,7 +1,8 @@
+
 'use client';
 
 import { useState } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
 import { Sidebar, SidebarBody, SidebarLink } from '@/components/ui/sidebar';
 import {
@@ -10,7 +11,11 @@ import {
   CreditCard,
   LogOut,
   BarChart,
+  Sun,
+  Moon,
 } from 'lucide-react';
+import { useTheme } from 'next-themes';
+import { Switch } from '@/components/ui/switch';
 
 const Logo = () => {
   return (
@@ -43,6 +48,8 @@ const LogoIcon = () => {
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   const [open, setOpen] = useState(false);
+  const { theme, setTheme } = useTheme();
+
   const links = [
     {
       label: 'Home',
@@ -91,6 +98,33 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
               {links.map((link, idx) => (
                 <SidebarLink key={idx} link={link} />
               ))}
+            </div>
+          </div>
+          <div>
+            <div
+              className={`flex items-center gap-2 ${
+                !open && 'justify-center'
+              }`}
+            >
+              <Sun className="h-5 w-5 text-neutral-700 dark:text-neutral-200" />
+              <AnimatePresence>
+                {open && (
+                  <motion.span
+                    initial={{ opacity: 0, width: 0 }}
+                    animate={{ opacity: 1, width: 'auto' }}
+                    exit={{ opacity: 0, width: 0 }}
+                    className="text-neutral-700 dark:text-neutral-200 text-sm whitespace-pre"
+                  >
+                    <Switch
+                      checked={theme === 'dark'}
+                      onCheckedChange={(checked) =>
+                        setTheme(checked ? 'dark' : 'light')
+                      }
+                    />
+                  </motion.span>
+                )}
+              </AnimatePresence>
+              <Moon className="h-5 w-5 text-neutral-700 dark:text-neutral-200" />
             </div>
           </div>
         </SidebarBody>
