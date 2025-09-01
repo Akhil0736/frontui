@@ -14,10 +14,10 @@ import {
   BarChart,
   Sun,
   Moon,
-  Target,
 } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import { Switch } from '@/components/ui/switch';
+import { BeamsBackground } from './ui/beams-background';
 
 const Logo = () => {
   return (
@@ -68,13 +68,6 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       ),
     },
     {
-      label: 'Targeting',
-      href: '/targeting',
-      icon: (
-        <Target className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" />
-      ),
-    },
-    {
       label: 'Settings',
       href: '/settings',
       icon: (
@@ -97,8 +90,8 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
     },
   ];
 
-  return (
-    <div className="relative z-20 h-screen w-full flex bg-background">
+  const MainContent = () => (
+    <div className="relative z-20 h-screen w-full flex bg-background dark:bg-transparent">
       <Sidebar open={open} setOpen={setOpen}>
         <SidebarBody className="justify-between gap-10">
           <div className="flex flex-col flex-1 overflow-y-auto overflow-x-hidden">
@@ -141,4 +134,15 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       <div className="flex-1 h-screen overflow-y-auto">{children}</div>
     </div>
   );
+
+
+  if (theme === 'dark') {
+    return (
+      <BeamsBackground>
+        <MainContent />
+      </BeamsBackground>
+    );
+  }
+
+  return <MainContent />;
 }
