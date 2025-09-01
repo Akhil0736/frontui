@@ -568,5 +568,3 @@ export async function routeRequest(prompt: string, attachments: any[] = [], cont
   const router = new EnhancedLunaRouter();
   return await router.route(prompt, attachments, context);
 }
-
-    
