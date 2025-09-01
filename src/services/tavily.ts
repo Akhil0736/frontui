@@ -1,6 +1,8 @@
 
 'use server';
 
+import 'dotenv/config';
+
 export async function search(query: string) {
   const TAVILY_API_KEY = process.env.TAVILY_API_KEY;
   if (!TAVILY_API_KEY) {
@@ -11,9 +13,9 @@ export async function search(query: string) {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
+      Authorization: `Bearer ${TAVILY_API_KEY}`,
     },
     body: JSON.stringify({
-      api_key: TAVILY_API_KEY,
       query: query,
       max_results: 5,
       include_domains: [], // optional: restrict to sites
@@ -34,29 +36,34 @@ export async function liveSearch(question: string) {
     return null;
   }
   try {
-    const res = await fetch("https://api.tavily.com/search", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ 
-            query: question,
-            search_depth: "basic",
-            api_key: TAVILY_API_KEY,
-            include_answer: true,
-        })
-      });
-    
-      if (!res.ok) {
-        console.error("Tavily API error:", await res.text());
-        return null;
-      };
+    const res = await fetch('https://api.tavily.com/search', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${TAVILY_API_KEY}`,
+      },
+      body: JSON.stringify({
+        query: question,
+        search_depth: 'basic',
+        include_answer: true,
+      }),
+    });
 
-      const data = await res.json();
-      return { answer: data.answer, sources: data.results.map((r: any) => ({ title: r.title, url: r.url }))};
+    if (!res.ok) {
+      console.error('Tavily API error:', await res.text());
+      return null;
+    }
 
+    const data = await res.json();
+    return {
+      answer: data.answer,
+      sources: data.results.map((r: any) => ({
+        title: r.title,
+        url: r.url,
+      })),
+    };
   } catch (err) {
-    console.error("Tavily error:", err);
+    console.error('Tavily error:', err);
     return null; // graceful fallback
   }
 }
