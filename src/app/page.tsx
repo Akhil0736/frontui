@@ -75,11 +75,13 @@ export default function Home() {
   return (
     <main className="w-full h-screen bg-transparent overflow-hidden">
       <AuroraBackground>
-        <div className="flex-1 flex flex-col h-full relative">
+        <div className="flex-1 flex flex-col h-full relative w-full">
           {messages.length === 0 ? (
-            <div className="flex-1 flex flex-col items-center justify-center">
-              <LunaLogo />
-              <div className="w-full mt-4">
+            <div className="flex-1 flex flex-col items-center justify-center h-full w-full">
+              <div className="flex-1 flex items-center justify-center">
+                 <LunaLogo />
+              </div>
+              <div className="w-full mt-4 pb-8">
                 <AIInputField onSend={handleSend} isLoading={isLoading} />
               </div>
             </div>
@@ -102,7 +104,7 @@ export default function Home() {
                           L
                         </div>
                       )}
-                      <div className={'max-w-xl py-4 text-black'}>
+                      <div className={'max-w-xl py-4 text-foreground'}>
                         {message.role === 'assistant' &&
                         message.content === '...' ? (
                           <ShiningText text="Luna is thinking..." />
@@ -117,7 +119,7 @@ export default function Home() {
                   <div ref={messagesEndRef} />
                 </AnimatePresence>
               </div>
-              <div className="chat-composer w-full px-4">
+              <div className="chat-composer w-full px-4 pb-8">
                 <AIInputField onSend={handleSend} isLoading={isLoading} />
               </div>
             </div>
@@ -127,3 +129,4 @@ export default function Home() {
     </main>
   );
 }
+
