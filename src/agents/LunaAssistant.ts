@@ -255,15 +255,15 @@ CURRENT QUERY: ${input}
     const lowerInput = input.toLowerCase();
     
     if (lowerInput.includes('hi') || lowerInput.includes('hello')) {
-      return "Hey! Ready to cut through the Instagram BS and actually grow your account? What's your biggest challenge right now?";
+      return "Hey there! What's on your mind today?";
     }
     
     if (lowerInput.includes('how are you')) {
-      return "I'm fired up and ready to help you build something real! Most people are stuck posting pretty pictures - let's talk actual strategy.";
+      return "I'm doing great! Always excited to chat. What can I help you with?";
     }
     
-    // For anything else, pivot to Instagram
-    return "I can chat about anything, but I'm really here to help you dominate Instagram growth. What's your biggest challenge - followers, engagement, or converting your audience?";
+    // For anything else, give a helpful response first, then offer Instagram help
+    return "I can help with that! Though I should mention, if you're ever looking to grow your Instagram presence, I've got tons of tactical advice. What's your question?";
   }
 
   /**
