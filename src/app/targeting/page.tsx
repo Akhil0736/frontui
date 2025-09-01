@@ -23,7 +23,7 @@ import {
   Settings as SettingsIcon
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Slider } from '@/components/ui/slider';
@@ -65,10 +65,12 @@ const GlassCard: React.FC<{
 }> = ({ title, children, className = '' }) => {
   return (
     <Card className={`bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl border border-white/20 dark:border-slate-700/50 shadow-lg ${className}`}>
-      <div className="p-6">
-        <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-4">{title}</h3>
+      <CardHeader>
+        <CardTitle>{title}</CardTitle>
+      </CardHeader>
+      <CardContent>
         {children}
-      </div>
+      </CardContent>
     </Card>
   );
 };
@@ -79,7 +81,8 @@ const TagInput: React.FC<{
   helper: string;
   value: string[];
   onChange: (value: string[]) => void;
-}> = ({ id, label, helper, value, onChange }) => {
+  placeholder: string;
+}> = ({ id, label, helper, value, onChange, placeholder }) => {
   const [inputValue, setInputValue] = useState('');
 
   const addTag = () => {
@@ -109,7 +112,7 @@ const TagInput: React.FC<{
               }
             }}
             className="flex-1"
-            placeholder={`Add ${label.toLowerCase()}...`}
+            placeholder={placeholder}
           />
           <Button 
             type="button" 
@@ -218,7 +221,6 @@ const LimitSlider: React.FC<{
         step={1}
         value={[value]}
         onValueChange={(values) => onChange(values[0])}
-        className="w-full"
       />
       <div className="flex justify-between text-xs text-muted-foreground">
         <span>0</span>
@@ -644,20 +646,18 @@ export default function SmartTargetingScreen() {
     <div className="min-h-screen bg-background text-foreground">
       <HeaderBar />
       
-      <div className="mx-auto max-w-5xl px-6 py-8 grid gap-6 lg:grid-cols-[1fr_280px]">
+      <div className="mx-auto max-w-5xl px-6 py-8 grid gap-6 lg:grid-cols-[1fr_280px] pb-24">
         {/* Main Column */}
         <div className="space-y-6">
-          <Card>
-            <CardHeader>
-                <CardTitle>Target Audience</CardTitle>
-            </CardHeader>
-            <CardContent className="grid gap-6 md:grid-cols-2">
+          <GlassCard title="Target Audience">
+            <div className="grid gap-6 md:grid-cols-2">
               <TagInput
                 id="hashtags"
                 label="Hashtags"
                 helper="5-10 tags • 100K–1M posts"
                 value={settings.hashtags}
                 onChange={(hashtags) => setSettings({ ...settings, hashtags })}
+                placeholder="Add hashtags..."
               />
               <TagInput
                 id="competitors"
@@ -665,6 +665,7 @@ export default function SmartTargetingScreen() {
                 helper="2-5 engaged accounts"
                 value={settings.competitors}
                 onChange={(competitors) => setSettings({ ...settings, competitors })}
+                placeholder="Add competitors..."
               />
               <div className="md:col-span-2">
                 <LocationSelect
@@ -673,14 +674,11 @@ export default function SmartTargetingScreen() {
                   onChange={(locations) => setSettings({ ...settings, locations })}
                 />
               </div>
-            </CardContent>
-          </Card>
+            </div>
+          </GlassCard>
 
-          <Card>
-             <CardHeader>
-                <CardTitle>Engagement Limits</CardTitle>
-            </CardHeader>
-            <CardContent className="grid gap-6 md:grid-cols-2">
+          <GlassCard title="Engagement Limits">
+            <div className="grid gap-6 md:grid-cols-2">
               <LimitSlider
                 id="follows"
                 label="Daily Follows"
@@ -713,17 +711,14 @@ export default function SmartTargetingScreen() {
                 value={settings.sessionHours}
                 onChange={(sessionHours) => setSettings({ ...settings, sessionHours })}
               />
-               <div className="md:col-span-2">
-                 <SafetyNotice hasRisk={hasRisk} />
-               </div>
-            </CardContent>
-          </Card>
+            </div>
+            <div className="mt-6">
+              <SafetyNotice hasRisk={hasRisk} />
+            </div>
+          </GlassCard>
 
-          <Card>
-            <CardHeader>
-                <CardTitle>AI Comments</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-6">
+          <GlassCard title="AI Comments">
+            <div className="space-y-6">
               <RadioMatrix
                 id="style"
                 options={['Professional', 'Friendly', 'Casual', 'Enthusiastic']}
@@ -743,30 +738,30 @@ export default function SmartTargetingScreen() {
                 />
               </div>
               <LivePreview settings={settings} />
-            </CardContent>
-          </Card>
+            </div>
+          </GlassCard>
 
           <Card>
             <Accordion type="single" collapsible className="w-full">
               <AccordionItem value="advanced" className="border-none">
-                <AccordionTrigger className="px-6 py-0 hover:no-underline">
+                <AccordionTrigger className="px-6">
                   <div className="flex items-center gap-2">
                     <SettingsIcon className="w-5 h-5 text-accent" />
                     <span className="text-lg font-semibold text-foreground">Advanced Targeting</span>
                   </div>
                 </AccordionTrigger>
-                <AccordionContent className="px-6 pb-6 pt-4">
+                <AccordionContent className="px-6 pt-4 pb-6">
                   <div className="space-y-6">
                     <TimeWindowPicker
                       value={settings.activeHours}
                       onChange={(activeHours) => setSettings({ ...settings, activeHours })}
                     />
-                    <Separator />
+                    <Separator/>
                     <PauseRules
                       value={settings.pauseRules}
                       onChange={(pauseRules) => setSettings({ ...settings, pauseRules })}
                     />
-                    <Separator />
+                    <Separator/>
                     <DemographicFilter
                       value={settings.demographics}
                       onChange={(demographics) => setSettings({ ...settings, demographics })}
@@ -791,42 +786,3 @@ export default function SmartTargetingScreen() {
     </div>
   );
 };
-```
-
-
-## Tailwind Configuration
-
-Add the following global styles:
-
-```css
-@layer base {
-  * {
-    @apply border-border outline-ring/50;
-  }
-```
-
-Custom colors detected: txt-primary, txt-second, accent-foreground, secondary-foreground, card-foreground, muted-foreground, destructive, popover-foreground, primary-foreground
-Make sure these are defined in your Tailwind configuration.
-
-
-## Integration Instructions
-
-1. Review the App.tsx component to understand the complete implementation
-2. Identify which components and utilities you need for your use case
-3. Analyze the Tailwind v4 styles in index.css - integrate custom styles that differ from integrating Codebase
-4. Install the required NPM dependencies listed above
-5. Integrate the components into your project, adapting them to fit your architecture
-
-Focus on:
-- Understanding projects structure, adding above components into it
-- Understanding the component composition
-- Identifying reusable utilities and helpers
-- Adapting the styling to match your design system
-
-Remember, the XML structure you generate is the only mechanism for applying changes to the user's code. Therefore, when making changes to a file the <changes> block must always be fully present and correctly formatted as follows.
-
-<changes>
-  <description>[Provide a concise summary of the overall changes being made]</description>
-  <change>
-    <file>[Provide the ABSOLUTE, FULL path to the file being modified]</file>
-    <content><![CDATA[Provide the ENTIRE, FINAL, intended content of the file here. Do NOT provide diffs or partial snippets. Ensure all code is properly escaped within the CDATA section.
