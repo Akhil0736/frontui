@@ -18,7 +18,7 @@ export async function answerLuna(userQuestion: string) {
       
       if (searchResults && searchResults.answer) {
         // Step 2: Use Gemini to synthesize answer with web context
-        console.log("🧠 Generating answer with Gemini 2.5 Flash");
+        console.log("🧠 Generating answer with Gemini 1.5 Flash");
         const answer = await generateWithGemini(
           userQuestion,
           `Tavily Summary: ${searchResults.answer}\n\nDetailed Sources:\n${searchResults.sources}`
