@@ -13,6 +13,7 @@ import {
   BarChart,
   Sun,
   Moon,
+  Target,
 } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import { Switch } from '@/components/ui/switch';
@@ -63,6 +64,13 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       href: '/analytics',
       icon: (
         <BarChart className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" />
+      ),
+    },
+    {
+      label: 'Targeting',
+      href: '/targeting',
+      icon: (
+        <Target className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" />
       ),
     },
     {
