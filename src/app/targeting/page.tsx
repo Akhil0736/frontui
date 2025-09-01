@@ -1,171 +1,91 @@
 
 'use client';
+import React, { useState, useEffect, useRef } from 'react';
+import { 
+  ArrowLeft, 
+  ChevronDown, 
+  Minus, 
+  Plus, 
+  Shield, 
+  ShieldAlert,
+  Clock,
+  Users,
+  MapPin,
+  Hash,
+  MessageCircle,
+  Smile,
+  ChevronRight,
+  Save,
+  Play,
+  Info,
+  Lightbulb,
+  Target,
+  Settings as SettingsIcon
+} from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Slider } from '@/components/ui/slider';
+import { Switch } from '@/components/ui/switch';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Textarea } from '@/components/ui/textarea';
+import { Badge } from '@/components/ui/badge';
+import { Separator } from '@/components/ui/separator';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 
-import React, { useState, useRef, useCallback } from 'react';
-import { ArrowLeft, Hash, Users, MapPin, Shield, Bot, TrendingUp, RefreshCw, X, ChevronDown, Plus, AlertTriangle, CheckCircle, Info, Target, Zap } from 'lucide-react';
-import HolographicCard from '@/components/ui/holographic-card';
-
-
-// TypeScript Interfaces
-interface TargetingConfig {
-  targeting: {
-    hashtags: string[];
-    competitors: string[];
-    locations: string[];
-    audienceFilters: {
-      ageRange: [number, number];
-      gender: 'all' | 'male' | 'female';
-      languages: string[];
-    };
+interface TargetingSettings {
+  hashtags: string[];
+  competitors: string[];
+  locations: string[];
+  dailyFollows: number;
+  dailyLikes: number;
+  dailyComments: number;
+  sessionHours: number;
+  commentStyle: string;
+  commentLength: string;
+  emojiLevel: string;
+  activeHours: { start: string; end: string };
+  pauseRules: {
+    weekends: boolean;
+    holidays: boolean;
+    lowEngagement: boolean;
   };
-  safetyLimits: {
-    dailyFollows: number;
-    dailyLikes: number;
-    dailyComments: number;
-    sessionDuration: number;
-  };
-  aiComments: {
-    style: 'friendly' | 'professional' | 'casual' | 'enthusiastic';
-    length: 'short' | 'medium' | 'long';
-    useEmojis: boolean;
-    personalizationLevel: number;
-  };
-  schedule: {
-    activeDays: number[];
-    preferredTimes: string[];
-    timezone: string;
+  demographics: {
+    minAge: number;
+    maxAge: number;
+    gender: string;
   };
 }
 
-interface SafetySliderProps {
-  label: string;
-  value: number;
-  max: number;
-  safeThreshold: number;
-  warningThreshold: number;
-  unit?: string;
-  onChange: (value: number) => void;
-}
-
-interface TagInputProps {
-  label: string;
-  placeholder: string;
-  suggestions?: string[];
-  maxTags?: number;
-  validation?: (tag: string) => boolean;
-  helperText?: string;
-  value: string[];
-  onChange: (tags: string[]) => void;
-}
-
-
-// Safety Slider Component
-const SafetySlider: React.FC<SafetySliderProps> = ({
-  label,
-  value,
-  max,
-  safeThreshold,
-  warningThreshold,
-  unit = '',
-  onChange
-}) => {
-  const getSafetyColor = (val: number) => {
-    if (val <= safeThreshold) return 'var(--apple-green)';
-    if (val <= warningThreshold) return 'var(--apple-orange)';
-    return 'var(--apple-red)';
-  };
-
-  const getSafetyLabel = (val: number) => {
-    if (val <= safeThreshold) return 'Safe';
-    if (val <= warningThreshold) return 'Caution';
-    return 'Danger';
-  };
-
-  const percentage = (value / max) * 100;
-
+const GlassCard: React.FC<{
+  title: string;
+  children: React.ReactNode;
+  className?: string;
+}> = ({ title, children, className = '' }) => {
   return (
-    <div className="space-y-3">
-      <div className="flex items-center justify-between">
-        <label className="text-sm font-medium text-card-foreground">{label}</label>
-        <div className="flex items-center gap-2">
-          <span className="text-lg font-semibold text-card-foreground">{value}</span>
-          <span className="text-sm text-muted-foreground">{unit}</span>
-          <span
-            className="text-xs font-medium px-2 py-1 rounded-full"
-            style={{
-              backgroundColor: `${getSafetyColor(value)}1A`, // 10% opacity
-              color: getSafetyColor(value)
-            }}
-          >
-            {getSafetyLabel(value)}
-          </span>
-        </div>
+    <Card className={`bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl border border-white/20 dark:border-slate-700/50 shadow-lg ${className}`}>
+      <div className="p-6">
+        <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-4">{title}</h3>
+        {children}
       </div>
-      
-      <div className="relative">
-        <div className="w-full h-2 bg-muted rounded-full overflow-hidden">
-          <div
-            className="h-full rounded-full transition-all duration-200"
-            style={{
-              width: `${percentage}%`,
-              backgroundColor: getSafetyColor(value)
-            }}
-          />
-        </div>
-        
-        <input
-          type="range"
-          min="0"
-          max={max}
-          value={value}
-          onChange={(e) => onChange(Number(e.target.value))}
-          className="absolute inset-0 w-full h-2 opacity-0 cursor-pointer"
-        />
-        
-        <div className="absolute top-0 h-2 flex items-center pointer-events-none w-full">
-          <div
-            className="h-1 bg-green-200/50 dark:bg-green-800/50 rounded-l-full"
-            style={{ width: `${(safeThreshold / max) * 100}%` }}
-          />
-          <div
-            className="h-1 bg-orange-200/50 dark:bg-orange-800/50"
-            style={{ width: `${((warningThreshold - safeThreshold) / max) * 100}%` }}
-          />
-        </div>
-      </div>
-    </div>
+    </Card>
   );
 };
 
-
-// Tag Input Component
-const TagInput: React.FC<TagInputProps> = ({
-  label,
-  placeholder,
-  suggestions = [],
-  maxTags = 10,
-  validation,
-  helperText,
-  value,
-  onChange
-}) => {
+const TagInput: React.FC<{
+  id: string;
+  label: string;
+  helper: string;
+  value: string[];
+  onChange: (value: string[]) => void;
+}> = ({ id, label, helper, value, onChange }) => {
   const [inputValue, setInputValue] = useState('');
-  const [showSuggestions, setShowSuggestions] = useState(false);
-  const inputRef = useRef<HTMLInputElement>(null);
 
-  const filteredSuggestions = suggestions.filter(
-    suggestion => 
-      suggestion.toLowerCase().includes(inputValue.toLowerCase()) &&
-      !value.includes(suggestion)
-  );
-
-  const addTag = (tag: string) => {
-    if (tag && value.length < maxTags && !value.includes(tag)) {
-      if (!validation || validation(tag)) {
-        onChange([...value, tag]);
-        setInputValue('');
-        setShowSuggestions(false);
-      }
+  const addTag = () => {
+    if (inputValue.trim() && !value.includes(inputValue.trim())) {
+      onChange([...value, inputValue.trim()]);
+      setInputValue('');
     }
   };
 
@@ -173,452 +93,740 @@ const TagInput: React.FC<TagInputProps> = ({
     onChange(value.filter(tag => tag !== tagToRemove));
   };
 
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter' || e.key === ',') {
-      e.preventDefault();
-      addTag(inputValue.trim());
-    } else if (e.key === 'Backspace' && !inputValue && value.length > 0) {
-      removeTag(value[value.length - 1]);
-    }
-  };
-  
-  const handleBlur = () => {
-    // Timeout to allow click on suggestion to register
-    setTimeout(() => setShowSuggestions(false), 150);
-  };
-
   return (
     <div className="space-y-2">
-      <label className="text-sm font-medium text-card-foreground">{label}</label>
-      
-      <div className="relative">
-        <div className="min-h-[42px] bg-background/50 border border-border rounded-xl p-3 flex flex-wrap gap-2 focus-within:ring-2 focus-within:ring-[var(--apple-blue)] focus-within:border-[var(--apple-blue)]">
-          {value.map((tag, index) => (
-            <span
-              key={index}
-              className="inline-flex items-center gap-1 bg-muted text-card-foreground px-3 py-1 rounded-lg text-sm font-medium"
+      <Label htmlFor={id} className="text-foreground font-medium">{label}</Label>
+      <div className="space-y-2">
+        <div className="flex gap-2">
+          <Input
+            id={id}
+            value={inputValue}
+            onChange={(e) => setInputValue(e.target.value)}
+            onKeyPress={(e) => {
+              if (e.key === 'Enter') {
+                e.preventDefault();
+                addTag();
+              }
+            }}
+            className="flex-1"
+            placeholder={`Add ${label.toLowerCase()}...`}
+          />
+          <Button 
+            type="button" 
+            onClick={addTag}
+            variant="outline"
+          >
+            <Plus className="w-4 h-4" />
+          </Button>
+        </div>
+        <div className="flex flex-wrap gap-2">
+          {value.map((tag) => (
+            <Badge 
+              key={tag} 
+              variant="secondary"
             >
               {tag}
               <button
                 onClick={() => removeTag(tag)}
-                className="text-muted-foreground hover:text-[var(--apple-red)] transition-colors"
+                className="ml-2 hover:text-destructive"
               >
-                <X className="w-3 h-3" />
+                ×
               </button>
-            </span>
+            </Badge>
           ))}
-          
-          <input
-            ref={inputRef}
-            type="text"
-            value={inputValue}
-            onChange={(e) => {
-              setInputValue(e.target.value);
-              if (!showSuggestions) setShowSuggestions(true);
-            }}
-            onKeyDown={handleKeyDown}
-            onFocus={() => setShowSuggestions(true)}
-            onBlur={handleBlur}
-            placeholder={value.length === 0 ? placeholder : ''}
-            className="flex-1 min-w-[120px] bg-transparent border-none outline-none text-sm placeholder:text-muted-foreground"
-          />
         </div>
-        
-        {showSuggestions && filteredSuggestions.length > 0 && (
-          <div className="absolute top-full left-0 right-0 mt-1 bg-card border border-border rounded-xl shadow-lg z-10 max-h-40 overflow-y-auto">
-            {filteredSuggestions.slice(0, 5).map((suggestion, index) => (
-              <button
-                key={index}
-                onClick={() => addTag(suggestion)}
-                className="w-full text-left px-4 py-2 text-sm hover:bg-accent transition-colors"
-              >
-                {suggestion}
-              </button>
-            ))}
-          </div>
-        )}
+        <p className="text-sm text-muted-foreground">{helper}</p>
       </div>
-      
-      {helperText && (
-        <p className="text-xs text-muted-foreground">{helperText}</p>
-      )}
     </div>
   );
 };
 
-
-export default function TargetingPage() {
-  const [config, setConfig] = useState<TargetingConfig>({
-    targeting: {
-      hashtags: ['#fitness', '#lifestyle', '#health'],
-      competitors: ['@competitor1', '@competitor2'],
-      locations: ['United States', 'Canada'],
-      audienceFilters: {
-        ageRange: [25, 45],
-        gender: 'all',
-        languages: ['English']
-      }
-    },
-    safetyLimits: {
-      dailyFollows: 25,
-      dailyLikes: 75,
-      dailyComments: 15,
-      sessionDuration: 3
-    },
-    aiComments: {
-      style: 'professional',
-      length: 'medium',
-      useEmojis: true,
-      personalizationLevel: 7
-    },
-    schedule: {
-      activeDays: [1, 2, 3, 4, 5],
-      preferredTimes: ['6-8 PM', '12-2 PM'],
-      timezone: 'America/New_York'
-    }
-  });
-
-  const [commentPreview, setCommentPreview] = useState("Excellent work! Your attention to detail really shows. Keep inspiring others! 👏");
-
-  const hashtagSuggestions = [
-    '#entrepreneur', '#business', '#motivation', '#success', '#marketing',
-    '#branding', '#startup', '#leadership', '#innovation', '#networking'
-  ];
-
-  const validateHashtag = (tag: string) => {
-    return tag.startsWith('#') && tag.length > 1 && !tag.includes(' ');
-  };
-
-  const validateCompetitor = (handle: string) => {
-    return handle.startsWith('@') && handle.length > 1 && !handle.includes(' ');
-  };
-
-  const generateNewComment = () => {
-    const comments = {
-      professional: [
-        "Excellent work! Your attention to detail really shows.",
-        "This is incredibly insightful. Thank you for sharing your expertise.",
-        "Outstanding content! Your perspective adds real value.",
-        "Impressive work! This demonstrates real expertise."
-      ],
-      friendly: [
-        "Love this! Thanks for sharing your journey 😊",
-        "This is so inspiring! Keep up the amazing work! 💪",
-        "Absolutely love your content! Thanks for the motivation! ✨",
-        "This made my day! Thank you for sharing! 🌟"
-      ],
-      casual: [
-        "This is so cool! Keep it up!",
-        "Nice one! Really enjoyed this.",
-        "Awesome stuff! Thanks for sharing.",
-        "Love it! More like this please! 🔥"
-      ],
-      enthusiastic: [
-        "WOW! Absolutely amazing content! 🔥✨",
-        "INCREDIBLE! This is exactly what I needed to see! 🚀",
-        "AMAZING work! You're crushing it! 💥⭐",
-        "LOVE THIS! Keep shining! ✨🌟🔥"
-      ]
-    };
-    
-    const styleComments = comments[config.aiComments.style];
-    const randomComment = styleComments[Math.floor(Math.random() * styleComments.length)];
-    setCommentPreview(randomComment);
-  };
+const LocationSelect: React.FC<{
+  id: string;
+  value: string[];
+  onChange: (value: string[]) => void;
+}> = ({ id, value, onChange }) => {
+  const locations = ['United States', 'United Kingdom', 'Canada', 'Australia', 'Germany', 'France'];
 
   return (
-    <div className="min-h-screen bg-muted/30 dark:bg-background text-foreground">
-      {/* Apple Navigation Header */}
-      <div className="bg-card/80 dark:bg-card/30 border-b border-border backdrop-blur-sm px-6 py-4">
-        <div className="max-w-4xl mx-auto">
-          <div className="flex items-center gap-4">
-            <button className="p-2 hover:bg-accent rounded-xl transition-colors">
-              <ArrowLeft className="w-5 h-5 text-[var(--apple-blue)]" />
+    <div className="space-y-2">
+      <Label htmlFor={id} className="text-foreground font-medium">Target Locations</Label>
+      <Select onValueChange={(newValue) => {
+        if (!value.includes(newValue)) {
+          onChange([...value, newValue]);
+        }
+      }}>
+        <SelectTrigger>
+          <SelectValue placeholder="Select locations..." />
+        </SelectTrigger>
+        <SelectContent>
+          {locations.map((location) => (
+            <SelectItem key={location} value={location}>
+              {location}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+      <div className="flex flex-wrap gap-2">
+        {value.map((location) => (
+          <Badge 
+            key={location} 
+            variant="secondary"
+          >
+            <MapPin className="w-3 h-3 mr-1" />
+            {location}
+            <button
+              onClick={() => onChange(value.filter(l => l !== location))}
+              className="ml-2 hover:text-destructive"
+            >
+              ×
             </button>
-            <div>
-              <h1 className="text-xl font-semibold text-foreground">Smart Targeting</h1>
-              <p className="text-sm text-muted-foreground">Configure your Instagram automation settings</p>
+          </Badge>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+const LimitSlider: React.FC<{
+  id: string;
+  label: string;
+  max: number;
+  safe: number;
+  value: number;
+  onChange: (value: number) => void;
+}> = ({ id, label, max, safe, value, onChange }) => {
+  const isRisk = value > safe;
+
+  return (
+    <div className="space-y-3">
+      <div className="flex items-center justify-between">
+        <Label htmlFor={id} className="text-foreground font-medium">{label}</Label>
+        <div className="flex items-center gap-2">
+          <span className="text-foreground font-semibold">{value}</span>
+          <Badge 
+            variant={isRisk ? "destructive" : "default"}
+          >
+            {isRisk ? "Risk" : "Safe"}
+          </Badge>
+        </div>
+      </div>
+      <Slider
+        id={id}
+        min={0}
+        max={max}
+        step={1}
+        value={[value]}
+        onValueChange={(values) => onChange(values[0])}
+        className="w-full"
+      />
+      <div className="flex justify-between text-xs text-muted-foreground">
+        <span>0</span>
+        <span className="text-green-500">Safe: {safe}</span>
+        <span>Max: {max}</span>
+      </div>
+    </div>
+  );
+};
+
+const SafetyNotice: React.FC<{ hasRisk: boolean }> = ({ hasRisk }) => {
+  return (
+    <div className={`flex items-center gap-2 p-3 rounded-lg ${
+      hasRisk 
+        ? 'bg-destructive/10 border border-destructive/20 text-destructive' 
+        : 'bg-green-500/10 border border-green-500/20 text-green-600 dark:text-green-400'
+    }`}>
+      {hasRisk ? (
+        <ShieldAlert className="w-5 h-5" />
+      ) : (
+        <Shield className="w-5 h-5" />
+      )}
+      <span className="font-medium">
+        {hasRisk ? 'Warning: Some limits exceed safe zone' : 'All limits within safe zone'}
+      </span>
+    </div>
+  );
+};
+
+const RadioMatrix: React.FC<{
+  id: string;
+  options: string[];
+  value: string;
+  onChange: (value: string) => void;
+}> = ({ id, options, value, onChange }) => {
+  return (
+    <div className="space-y-2">
+      <Label className="text-foreground font-medium">Comment Style</Label>
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+        {options.map((option) => (
+          <button
+            key={option}
+            onClick={() => onChange(option)}
+            className={`p-3 rounded-lg border transition-all ${
+              value === option
+                ? 'bg-accent text-accent-foreground border-accent'
+                : 'bg-background hover:border-accent/50 text-foreground'
+            }`}
+          >
+            {option}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+const LengthRadio: React.FC<{
+  id: string;
+  value: string;
+  onChange: (value: string) => void;
+}> = ({ id, value, onChange }) => {
+  const options = ['Short', 'Medium', 'Long'];
+
+  return (
+    <div className="space-y-2">
+      <Label className="text-foreground font-medium">Comment Length</Label>
+      <div className="flex gap-2">
+        {options.map((option) => (
+          <button
+            key={option}
+            onClick={() => onChange(option)}
+            className={`flex-1 p-2 rounded-lg border transition-all ${
+              value === option
+                ? 'bg-accent text-accent-foreground border-accent'
+                : 'bg-background hover:border-accent/50 text-foreground'
+            }`}
+          >
+            {option}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+const EmojiToggle: React.FC<{
+  id: string;
+  value: string;
+  onChange: (value: string) => void;
+}> = ({ id, value, onChange }) => {
+  const options = ['None', 'Minimal', 'Moderate', 'Liberal'];
+
+  return (
+    <div className="space-y-2">
+      <Label className="text-foreground font-medium">Emoji Usage</Label>
+      <div className="flex gap-2">
+        {options.map((option) => (
+          <button
+            key={option}
+            onClick={() => onChange(option)}
+            className={`flex-1 p-2 rounded-lg border transition-all ${
+              value === option
+                ? 'bg-accent text-accent-foreground border-accent'
+                : 'bg-background hover:border-accent/50 text-foreground'
+            }`}
+          >
+            {option}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+const LivePreview: React.FC<{ settings: TargetingSettings }> = ({ settings }) => {
+  const [preview, setPreview] = useState('');
+
+  useEffect(() => {
+    // Simulate AI comment generation
+    const generatePreview = () => {
+      const styles = {
+        Professional: "This is an excellent post! Your insights are valuable.",
+        Friendly: "Love this! Thanks for sharing your thoughts 😊",
+        Casual: "This is so cool! Really enjoyed reading this.",
+        Enthusiastic: "Amazing work! This totally made my day! 🔥"
+      };
+      
+      let baseComment = styles[settings.commentStyle as keyof typeof styles] || styles.Professional;
+      
+      if (settings.commentLength === 'Short') {
+        baseComment = baseComment.split('.')[0] + '.';
+      } else if (settings.commentLength === 'Long') {
+        baseComment += " Looking forward to seeing more content like this!";
+      }
+      
+      if (settings.emojiLevel === 'None') {
+        baseComment = baseComment.replace(/[😊🔥]/g, '');
+      }
+      
+      setPreview(baseComment);
+    };
+
+    generatePreview();
+  }, [settings]);
+
+  return (
+    <div className="space-y-2">
+      <Label className="text-foreground font-medium">Live Preview</Label>
+      <div className="p-4 bg-background/30 border border-border rounded-lg">
+        <div className="flex items-start gap-3">
+          <div className="w-8 h-8 bg-accent rounded-full flex items-center justify-center">
+            <span className="text-accent-foreground text-sm font-medium">AI</span>
+          </div>
+          <div className="flex-1">
+            <p className="text-foreground">{preview}</p>
+            <div className="flex items-center gap-4 mt-2 text-xs text-muted-foreground">
+              <span>2m ago</span>
+              <button className="hover:text-accent">Like</button>
+              <button className="hover:text-accent">Reply</button>
             </div>
           </div>
         </div>
       </div>
+    </div>
+  );
+};
 
-      <div className="max-w-4xl mx-auto p-6 space-y-6">
-        {/* Target Settings Card */}
-        <HolographicCard>
-            <div className="relative z-10">
-                <div className="flex items-start gap-3 mb-6">
-                    <div className={'w-8 h-8 rounded-lg flex items-center justify-center bg-blue-50 dark:bg-blue-900/20'}>
-                        <div className={'text-[var(--apple-blue)]'}>
-                            <Target className="w-5 h-5" />
-                        </div>
-                    </div>
-                    <div className="flex-1">
-                    <h3 className="text-lg font-semibold text-card-foreground mb-1">Target Settings</h3>
-                    <p className="text-sm text-muted-foreground">Configure your ideal audience</p>
-                    </div>
-                </div>
-                <div className="space-y-6">
-                    <TagInput
-                    label="Hashtags"
-                    placeholder="Enter hashtags like #fitness"
-                    suggestions={hashtagSuggestions}
-                    maxTags={10}
-                    validation={validateHashtag}
-                    helperText="Use 5-10 hashtags with 100K-1M posts for optimal reach"
-                    value={config.targeting.hashtags}
-                    onChange={(hashtags) => setConfig(prev => ({
-                        ...prev,
-                        targeting: { ...prev.targeting, hashtags }
-                    }))}
-                    />
-                    
-                    <TagInput
-                    label="Competitor Accounts"
-                    placeholder="Enter usernames like @competitor"
-                    maxTags={5}
-                    validation={validateCompetitor}
-                    helperText="Target competitor followers - they're 3x more likely to engage"
-                    value={config.targeting.competitors}
-                    onChange={(competitors) => setConfig(prev => ({
-                        ...prev,
-                        targeting: { ...prev.targeting, competitors }
-                    }))}
-                    />
-                    
-                    <TagInput
-                    label="Target Locations"
-                    placeholder="Enter cities or countries"
-                    suggestions={['United States', 'Canada', 'United Kingdom', 'Australia', 'Germany']}
-                    maxTags={3}
-                    helperText="Focus on 1-3 locations for better engagement rates"
-                    value={config.targeting.locations}
-                    onChange={(locations) => setConfig(prev => ({
-                        ...prev,
-                        targeting: { ...prev.targeting, locations }
-                    }))}
-                    />
-
-                    <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800/30 rounded-xl p-4">
-                    <div className="flex items-start gap-3">
-                        <Info className="w-5 h-5 text-[var(--apple-blue)] mt-0.5" />
-                        <div>
-                        <p className="text-sm font-medium text-[var(--apple-blue)] mb-1">Smart Tip</p>
-                        <p className="text-sm text-blue-700 dark:text-blue-300">Target hashtags with 100K-1M posts for optimal reach. Competitor followers are 3x more likely to engage with your content.</p>
-                        </div>
-                    </div>
-                    </div>
-                </div>
-            </div>
-        </HolographicCard>
-
-        {/* Safety-First Engagement Card */}
-        <HolographicCard>
-            <div className="relative z-10">
-                <div className="flex items-start gap-3 mb-6">
-                    <div className={'w-8 h-8 rounded-lg flex items-center justify-center bg-blue-50 dark:bg-blue-900/20'}>
-                        <div className={'text-[var(--apple-blue)]'}>
-                           <Shield className="w-5 h-5" />
-                        </div>
-                    </div>
-                    <div className="flex-1">
-                        <h3 className="text-lg font-semibold text-card-foreground mb-1">Safety-First Engagement</h3>
-                        <p className="text-sm text-muted-foreground">Stay within Instagram's safe limits</p>
-                    </div>
-                </div>
-                <div className="space-y-6">
-                    <SafetySlider
-                    label="Daily Follows"
-                    value={config.safetyLimits.dailyFollows}
-                    max={50}
-                    safeThreshold={25}
-                    warningThreshold={35}
-                    onChange={(dailyFollows) => setConfig(prev => ({
-                        ...prev,
-                        safetyLimits: { ...prev.safetyLimits, dailyFollows }
-                    }))}
-                    />
-                    
-                    <SafetySlider
-                    label="Daily Likes"
-                    value={config.safetyLimits.dailyLikes}
-                    max={200}
-                    safeThreshold={100}
-                    warningThreshold={150}
-                    onChange={(dailyLikes) => setConfig(prev => ({
-                        ...prev,
-                        safetyLimits: { ...prev.safetyLimits, dailyLikes }
-                    }))}
-                    />
-                    
-                    <SafetySlider
-                    label="Daily Comments"
-                    value={config.safetyLimits.dailyComments}
-                    max={50}
-                    safeThreshold={20}
-                    warningThreshold={35}
-                    onChange={(dailyComments) => setConfig(prev => ({
-                        ...prev,
-                        safetyLimits: { ...prev.safetyLimits, dailyComments }
-                    }))}
-                    />
-                    
-                    <SafetySlider
-                    label="Session Duration"
-                    value={config.safetyLimits.sessionDuration}
-                    max={8}
-                    safeThreshold={4}
-                    warningThreshold={6}
-                    unit="hours"
-                    onChange={(sessionDuration) => setConfig(prev => ({
-                        ...prev,
-                        safetyLimits: { ...prev.safetyLimits, sessionDuration }
-                    }))}
-                    />
-
-                    <div className="bg-orange-50 dark:bg-orange-900/20 border border-orange-100 dark:border-orange-800/30 rounded-xl p-4">
-                    <div className="flex items-start gap-3">
-                        <AlertTriangle className="w-5 h-5 text-[var(--apple-orange)] mt-0.5" />
-                        <div>
-                        <p className="text-sm font-medium text-[var(--apple-orange)] mb-1">Safety Reminder</p>
-                        <p className="text-sm text-orange-700 dark:text-orange-300">Staying in safe zones protects your account from Instagram penalties and maintains long-term growth.</p>
-                        </div>
-                    </div>
-                    </div>
-                </div>
-            </div>
-        </HolographicCard>
-
-        {/* AI Comment Intelligence Card */}
-        <HolographicCard>
-            <div className="relative z-10">
-                <div className="flex items-start gap-3 mb-6">
-                    <div className={'w-8 h-8 rounded-lg flex items-center justify-center bg-blue-50 dark:bg-blue-900/20'}>
-                        <div className={'text-[var(--apple-blue)]'}>
-                            <Bot className="w-5 h-5" />
-                        </div>
-                    </div>
-                    <div className="flex-1">
-                        <h3 className="text-lg font-semibold text-card-foreground mb-1">AI Comment Intelligence</h3>
-                        <p className="text-sm text-muted-foreground">Generate authentic, engaging comments</p>
-                    </div>
-                </div>
-
-              <div className="space-y-6">
-                <div>
-                  <label className="text-sm font-medium text-card-foreground mb-3 block">Comment Style</label>
-                  <div className="grid grid-cols-2 gap-3">
-                    {(['friendly', 'professional', 'casual', 'enthusiastic'] as const).map((style) => (
-                      <button
-                        key={style}
-                        onClick={() => setConfig(prev => ({
-                          ...prev,
-                          aiComments: { ...prev.aiComments, style }
-                        }))}
-                        className={`p-4 rounded-xl border-2 text-left transition-all ${
-                          config.aiComments.style === style
-                            ? 'border-[var(--apple-blue)] bg-blue-50 dark:bg-blue-900/20'
-                            : 'border-border hover:border-gray-300 dark:hover:border-gray-600'
-                        }`}
-                      >
-                        <div className="font-medium text-sm capitalize mb-1">{style}</div>
-                        <div className="text-xs text-muted-foreground">
-                          {style === 'friendly' && 'Warm and approachable'}
-                          {style === 'professional' && 'Business-focused tone'}
-                          {style === 'casual' && 'Relaxed and informal'}
-                          {style === 'enthusiastic' && 'High energy and excited'}
-                        </div>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="bg-muted/50 rounded-xl p-4">
-                  <div className="flex items-center justify-between mb-3">
-                    <span className="text-sm font-medium text-card-foreground">Preview</span>
-                    <button
-                      onClick={generateNewComment}
-                      className="flex items-center gap-2 px-3 py-1 bg-[var(--apple-blue)] text-white rounded-lg text-sm font-medium hover:bg-blue-600 transition-colors"
-                    >
-                      <RefreshCw className="w-4 h-4" />
-                      Generate New
-                    </button>
-                  </div>
-                  <div className="bg-background rounded-lg p-3 border border-border">
-                    <p className="text-sm text-card-foreground">"{commentPreview}"</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-        </HolographicCard>
-
-        {/* Luna's Tactical Insights Card */}
-        <HolographicCard>
-            <div className="relative z-10">
-                <div className="flex items-start gap-3 mb-6">
-                    <div className={'w-8 h-8 rounded-lg flex items-center justify-center bg-blue-50 dark:bg-blue-900/20'}>
-                        <div className={'text-[var(--apple-blue)]'}>
-                            <TrendingUp className="w-5 h-5" />
-                        </div>
-                    </div>
-                    <div className="flex-1">
-                        <h3 className="text-lg font-semibold text-card-foreground mb-1">Luna's Tactical Insights</h3>
-                        <p className="text-sm text-muted-foreground">AI-powered optimization recommendations</p>
-                    </div>
-                </div>
-
-              <div className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div className="bg-green-50 dark:bg-green-900/20 rounded-xl p-4 border border-green-100 dark:border-green-800/30">
-                    <div className="flex items-center gap-2 mb-2">
-                      <Users className="w-4 h-4 text-[var(--apple-green)]" />
-                      <span className="text-sm font-medium text-[var(--apple-green)]">Predicted Growth</span>
-                    </div>
-                    <div className="text-xl font-bold text-green-800 dark:text-green-200">+127</div>
-                    <div className="text-xs text-green-700 dark:text-green-400">followers/week</div>
-                  </div>
-                  
-                  <div className="bg-blue-50 dark:bg-blue-900/20 rounded-xl p-4 border border-blue-100 dark:border-blue-800/30">
-                    <div className="flex items-center gap-2 mb-2">
-                      <Zap className="w-4 h-4 text-[var(--apple-blue)]" />
-                      <span className="text-sm font-medium text-[var(--apple-blue)]">Engagement Boost</span>
-                    </div>
-                    <div className="text-xl font-bold text-blue-800 dark:text-blue-200">+15%</div>
-                    <div className="text-xs text-blue-700 dark:text-blue-400">average increase</div>
-                  </div>
-                  
-                  <div className="bg-purple-50 dark:bg-purple-900/20 rounded-xl p-4 border border-purple-100 dark:border-purple-800/30">
-                    <div className="flex items-center gap-2 mb-2">
-                      <MapPin className="w-4 h-4 text-[var(--apple-purple)]" />
-                      <span className="text-sm font-medium text-[var(--apple-purple)]">Optimal Times</span>
-                    </div>
-                    <div className="text-sm font-semibold text-purple-800 dark:text-purple-200">6-8 PM</div>
-                    <div className="text-xs text-purple-700 dark:text-purple-400">12-2 PM</div>
-                  </div>
-                </div>
-
-                <div className="bg-green-50 dark:bg-green-900/20 border border-green-100 dark:border-green-800/30 rounded-xl p-4">
-                  <div className="flex items-start gap-3">
-                    <CheckCircle className="w-5 h-5 text-[var(--apple-green)] mt-0.5" />
-                    <div>
-                      <p className="text-sm font-medium text-[var(--apple-green)] mb-1">Optimization Status</p>
-                      <p className="text-sm text-green-700 dark:text-green-300">Your settings are optimized for maximum safe growth. Expected ROI: 2.3x within 30 days.</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-        </HolographicCard>
-
-        {/* Save Configuration Button */}
-        <div className="sticky bottom-6 flex justify-center">
-          <button className="bg-[var(--apple-blue)] text-white px-8 py-4 rounded-2xl font-semibold text-lg shadow-lg hover:bg-blue-600 transition-all duration-200 transform hover:scale-[1.02]">
-            Save Configuration
-          </button>
+const TimeWindowPicker: React.FC<{
+  value: { start: string; end: string };
+  onChange: (value: { start: string; end: string }) => void;
+}> = ({ value, onChange }) => {
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center gap-2">
+        <Clock className="w-4 h-4 text-accent" />
+        <Label className="text-foreground font-medium">Active Hours</Label>
+      </div>
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <Label className="text-sm text-muted-foreground">Start Time</Label>
+          <Input
+            type="time"
+            value={value.start}
+            onChange={(e) => onChange({ ...value, start: e.target.value })}
+          />
+        </div>
+        <div>
+          <Label className="text-sm text-muted-foreground">End Time</Label>
+          <Input
+            type="time"
+            value={value.end}
+            onChange={(e) => onChange({ ...value, end: e.target.value })}
+          />
         </div>
       </div>
     </div>
   );
-}
+};
 
-    
+const PauseRules: React.FC<{
+  value: { weekends: boolean; holidays: boolean; lowEngagement: boolean };
+  onChange: (value: { weekends: boolean; holidays: boolean; lowEngagement: boolean }) => void;
+}> = ({ value, onChange }) => {
+  return (
+    <div className="space-y-4">
+      <Label className="text-foreground font-medium">Auto-Pause Rules</Label>
+      <div className="space-y-3">
+        <div className="flex items-center justify-between">
+          <span className="text-foreground">Pause on weekends</span>
+          <Switch
+            checked={value.weekends}
+            onCheckedChange={(checked) => onChange({ ...value, weekends: checked })}
+          />
+        </div>
+        <div className="flex items-center justify-between">
+          <span className="text-foreground">Pause on holidays</span>
+          <Switch
+            checked={value.holidays}
+            onCheckedChange={(checked) => onChange({ ...value, holidays: checked })}
+          />
+        </div>
+        <div className="flex items-center justify-between">
+          <span className="text-foreground">Pause on low engagement</span>
+          <Switch
+            checked={value.lowEngagement}
+            onCheckedChange={(checked) => onChange({ ...value, lowEngagement: checked })}
+          />
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const DemographicFilter: React.FC<{
+  value: { minAge: number; maxAge: number; gender: string };
+  onChange: (value: { minAge: number; maxAge: number; gender: string }) => void;
+}> = ({ value, onChange }) => {
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center gap-2">
+        <Users className="w-4 h-4 text-accent" />
+        <Label className="text-foreground font-medium">Demographics</Label>
+      </div>
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <Label className="text-sm text-muted-foreground">Min Age</Label>
+          <Input
+            type="number"
+            min="13"
+            max="100"
+            value={value.minAge}
+            onChange={(e) => onChange({ ...value, minAge: parseInt(e.target.value) || 18 })}
+          />
+        </div>
+        <div>
+          <Label className="text-sm text-muted-foreground">Max Age</Label>
+          <Input
+            type="number"
+            min="13"
+            max="100"
+            value={value.maxAge}
+            onChange={(e) => onChange({ ...value, maxAge: parseInt(e.target.value) || 65 })}
+          />
+        </div>
+      </div>
+      <div>
+        <Label className="text-sm text-muted-foreground">Gender</Label>
+        <Select value={value.gender} onValueChange={(gender) => onChange({ ...value, gender })}>
+          <SelectTrigger>
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All</SelectItem>
+            <SelectItem value="male">Male</SelectItem>
+            <SelectItem value="female">Female</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+    </div>
+  );
+};
+
+const HelperPanel: React.FC<{ className?: string }> = ({ className = '' }) => {
+  const tips = [
+    {
+      icon: Target,
+      title: "Targeting Tips",
+      content: "Use hashtags with 100K-1M posts for optimal reach. Mix popular and niche tags."
+    },
+    {
+      icon: Shield,
+      title: "Stay Safe",
+      content: "Keep daily actions within safe limits to avoid account restrictions."
+    },
+    {
+      icon: MessageCircle,
+      title: "Engagement Quality",
+      content: "Authentic comments perform better. Let AI adapt to your brand voice."
+    }
+  ];
+
+  return (
+    <div className={`space-y-4 ${className}`}>
+      <h3 className="text-lg font-semibold text-foreground">Quick Tips</h3>
+      {tips.map((tip, index) => (
+        <Card key={index} className="p-4 bg-background/30">
+          <div className="flex items-start gap-3">
+            <tip.icon className="w-5 h-5 text-accent mt-0.5" />
+            <div>
+              <h4 className="font-medium text-foreground mb-1">{tip.title}</h4>
+              <p className="text-sm text-muted-foreground">{tip.content}</p>
+            </div>
+          </div>
+        </Card>
+      ))}
+    </div>
+  );
+};
+
+const HeaderBar: React.FC = () => {
+  return (
+    <div className="flex items-center gap-4 p-6 bg-background/80 backdrop-blur-xl border-b border-border sticky top-0 z-10">
+      <Button variant="ghost" size="sm">
+        <ArrowLeft className="w-4 h-4 mr-2" />
+        Back
+      </Button>
+      <div>
+        <h1 className="text-xl font-semibold text-foreground">Smart Targeting</h1>
+        <p className="text-sm text-muted-foreground">Configure your AI-powered engagement strategy</p>
+      </div>
+    </div>
+  );
+};
+
+const FooterCTA: React.FC<{
+  onSave: () => void;
+  onStart: () => void;
+  isLoading: boolean;
+  hasSettings: boolean;
+}> = ({ onSave, onStart, isLoading, hasSettings }) => {
+  return (
+    <div className="sticky bottom-0 z-10 bg-background/80 backdrop-blur-xl border-t border-border p-6">
+      <div className="max-w-5xl mx-auto flex items-center justify-between">
+        <div className="text-sm text-muted-foreground">
+          {hasSettings ? 'Settings saved' : 'Configure your targeting settings'}
+        </div>
+        <div className="flex gap-3">
+          <Button 
+            variant="outline" 
+            onClick={onSave}
+            disabled={isLoading}
+          >
+            <Save className="w-4 h-4 mr-2" />
+            Save Settings
+          </Button>
+          <Button 
+            onClick={onStart}
+            disabled={isLoading || !hasSettings}
+          >
+            {isLoading ? (
+              <div className="w-4 h-4 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin mr-2" />
+            ) : (
+              <Play className="w-4 h-4 mr-2" />
+            )}
+            Start Session
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default function SmartTargetingScreen() {
+  const [settings, setSettings] = useState<TargetingSettings>({
+    hashtags: ['socialmedia', 'marketing'],
+    competitors: ['@competitor1'],
+    locations: ['United States'],
+    dailyFollows: 25,
+    dailyLikes: 100,
+    dailyComments: 20,
+    sessionHours: 4,
+    commentStyle: 'Professional',
+    commentLength: 'Medium',
+    emojiLevel: 'Minimal',
+    activeHours: { start: '09:00', end: '17:00' },
+    pauseRules: {
+      weekends: true,
+      holidays: true,
+      lowEngagement: false
+    },
+    demographics: {
+      minAge: 18,
+      maxAge: 65,
+      gender: 'all'
+    }
+  });
+
+  const [isLoading, setIsLoading] = useState(false);
+  const [hasSettings, setHasSettings] = useState(true);
+
+  const hasRisk = settings.dailyFollows > 25 || 
+                  settings.dailyLikes > 100 || 
+                  settings.dailyComments > 20 || 
+                  settings.sessionHours > 4;
+
+  const handleSave = async () => {
+    setIsLoading(true);
+    // Simulate API call
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    setHasSettings(true);
+    setIsLoading(false);
+  };
+
+  const handleStart = async () => {
+    setIsLoading(true);
+    // Simulate API call
+    await new Promise(resolve => setTimeout(resolve, 2000));
+    setIsLoading(false);
+  };
+
+  return (
+    <div className="min-h-screen bg-background text-foreground">
+      <HeaderBar />
+      
+      <div className="mx-auto max-w-5xl px-6 py-8 grid gap-6 lg:grid-cols-[1fr_280px]">
+        {/* Main Column */}
+        <div className="space-y-6">
+          <Card>
+            <CardHeader>
+                <CardTitle>Target Audience</CardTitle>
+            </CardHeader>
+            <CardContent className="grid gap-6 md:grid-cols-2">
+              <TagInput
+                id="hashtags"
+                label="Hashtags"
+                helper="5-10 tags • 100K–1M posts"
+                value={settings.hashtags}
+                onChange={(hashtags) => setSettings({ ...settings, hashtags })}
+              />
+              <TagInput
+                id="competitors"
+                label="Competitors"
+                helper="2-5 engaged accounts"
+                value={settings.competitors}
+                onChange={(competitors) => setSettings({ ...settings, competitors })}
+              />
+              <div className="md:col-span-2">
+                <LocationSelect
+                  id="locations"
+                  value={settings.locations}
+                  onChange={(locations) => setSettings({ ...settings, locations })}
+                />
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+             <CardHeader>
+                <CardTitle>Engagement Limits</CardTitle>
+            </CardHeader>
+            <CardContent className="grid gap-6 md:grid-cols-2">
+              <LimitSlider
+                id="follows"
+                label="Daily Follows"
+                max={50}
+                safe={25}
+                value={settings.dailyFollows}
+                onChange={(dailyFollows) => setSettings({ ...settings, dailyFollows })}
+              />
+              <LimitSlider
+                id="likes"
+                label="Daily Likes"
+                max={200}
+                safe={100}
+                value={settings.dailyLikes}
+                onChange={(dailyLikes) => setSettings({ ...settings, dailyLikes })}
+              />
+              <LimitSlider
+                id="comments"
+                label="Daily Comments"
+                max={50}
+                safe={20}
+                value={settings.dailyComments}
+                onChange={(dailyComments) => setSettings({ ...settings, dailyComments })}
+              />
+              <LimitSlider
+                id="hours"
+                label="Session Hours"
+                max={8}
+                safe={4}
+                value={settings.sessionHours}
+                onChange={(sessionHours) => setSettings({ ...settings, sessionHours })}
+              />
+               <div className="md:col-span-2">
+                 <SafetyNotice hasRisk={hasRisk} />
+               </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+                <CardTitle>AI Comments</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <RadioMatrix
+                id="style"
+                options={['Professional', 'Friendly', 'Casual', 'Enthusiastic']}
+                value={settings.commentStyle}
+                onChange={(commentStyle) => setSettings({ ...settings, commentStyle })}
+              />
+              <div className="grid gap-6 md:grid-cols-2">
+                <LengthRadio
+                  id="length"
+                  value={settings.commentLength}
+                  onChange={(commentLength) => setSettings({ ...settings, commentLength })}
+                />
+                <EmojiToggle
+                  id="emoji"
+                  value={settings.emojiLevel}
+                  onChange={(emojiLevel) => setSettings({ ...settings, emojiLevel })}
+                />
+              </div>
+              <LivePreview settings={settings} />
+            </CardContent>
+          </Card>
+
+          <Card>
+            <Accordion type="single" collapsible className="w-full">
+              <AccordionItem value="advanced" className="border-none">
+                <AccordionTrigger className="px-6 py-0 hover:no-underline">
+                  <div className="flex items-center gap-2">
+                    <SettingsIcon className="w-5 h-5 text-accent" />
+                    <span className="text-lg font-semibold text-foreground">Advanced Targeting</span>
+                  </div>
+                </AccordionTrigger>
+                <AccordionContent className="px-6 pb-6 pt-4">
+                  <div className="space-y-6">
+                    <TimeWindowPicker
+                      value={settings.activeHours}
+                      onChange={(activeHours) => setSettings({ ...settings, activeHours })}
+                    />
+                    <Separator />
+                    <PauseRules
+                      value={settings.pauseRules}
+                      onChange={(pauseRules) => setSettings({ ...settings, pauseRules })}
+                    />
+                    <Separator />
+                    <DemographicFilter
+                      value={settings.demographics}
+                      onChange={(demographics) => setSettings({ ...settings, demographics })}
+                    />
+                  </div>
+                </AccordionContent>
+              </AccordionItem>
+            </Accordion>
+          </Card>
+        </div>
+
+        {/* Right Rail */}
+        <HelperPanel className="hidden lg:block" />
+      </div>
+
+      <FooterCTA
+        onSave={handleSave}
+        onStart={handleStart}
+        isLoading={isLoading}
+        hasSettings={hasSettings}
+      />
+    </div>
+  );
+};
+```
+
+
+## Tailwind Configuration
+
+Add the following global styles:
+
+```css
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+```
+
+Custom colors detected: txt-primary, txt-second, accent-foreground, secondary-foreground, card-foreground, muted-foreground, destructive, popover-foreground, primary-foreground
+Make sure these are defined in your Tailwind configuration.
+
+
+## Integration Instructions
+
+1. Review the App.tsx component to understand the complete implementation
+2. Identify which components and utilities you need for your use case
+3. Analyze the Tailwind v4 styles in index.css - integrate custom styles that differ from integrating Codebase
+4. Install the required NPM dependencies listed above
+5. Integrate the components into your project, adapting them to fit your architecture
+
+Focus on:
+- Understanding projects structure, adding above components into it
+- Understanding the component composition
+- Identifying reusable utilities and helpers
+- Adapting the styling to match your design system
+
+Remember, the XML structure you generate is the only mechanism for applying changes to the user's code. Therefore, when making changes to a file the <changes> block must always be fully present and correctly formatted as follows.
+
+<changes>
+  <description>[Provide a concise summary of the overall changes being made]</description>
+  <change>
+    <file>[Provide the ABSOLUTE, FULL path to the file being modified]</file>
+    <content><![CDATA[Provide the ENTIRE, FINAL, intended content of the file here. Do NOT provide diffs or partial snippets. Ensure all code is properly escaped within the CDATA section.
