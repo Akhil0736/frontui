@@ -30,33 +30,61 @@
     --chart-3: 227 70% 39.8%;
     --chart-4: 84 75% 82.8%;
     --chart-5: 70 75% 76.9%;
+
+    /* Apple-inspired color system */
+    --apple-blue: #007AFF;
+    --apple-purple: #5856D6;
+    --apple-red: #FF3B30;
+    --apple-green: #34C759;
+    --apple-orange: #FF9500;
+    
+    --bg-primary: #FFFFFF;
+    --bg-surface: #F2F2F7;
+    --border-subtle: #E5E5EA;
+    --text-primary: #000000;
+    --text-secondary: #3C3C43;
+    --text-tertiary: #8E8E93;
   }
 
   .dark {
-    --background: 240 0% 9.6%;
-    --foreground: 240 0% 97.4%;
-    --card: 240 0% 13.3%;
-    --card-foreground: 240 0% 97.4%;
-    --popover: 240 0% 13.3%;
-    --popover-foreground: 240 0% 97.4%;
-    --primary: 240 0% 92.2%;
-    --primary-foreground: 240 0% 13.3%;
-    --secondary: 240 0% 26.7%;
-    --secondary-foreground: 240 0% 97.4%;
-    --muted: 240 0% 26.7%;
-    --muted-foreground: 240 0% 70.6%;
-    --accent: 240 0% 26.7%;
-    --accent-foreground: 240 0% 97.4%;
-    --destructive: 22 84% 60%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 0 0% 100% / 0.1;
-    --input: 0 0% 100% / 0.15;
-    --ring: 240 0% 55.7%;
+    --background: 224 71.4% 4.1%;
+    --foreground: 210 20% 98%;
+    --card: 224 71.4% 4.1%;
+    --card-foreground: 210 20% 98%;
+    --popover: 224 71.4% 4.1%;
+    --popover-foreground: 210 20% 98%;
+    --primary: 210 20% 98%;
+    --primary-foreground: 220.9 39.3% 11%;
+    --secondary: 215 27.9% 16.9%;
+    --secondary-foreground: 210 20% 98%;
+    --muted: 215 27.9% 16.9%;
+    --muted-foreground: 217.9 10.6% 64.9%;
+    --accent: 215 27.9% 16.9%;
+    --accent-foreground: 210 20% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 20% 98%;
+    --border: 215 27.9% 16.9%;
+    --input: 215 27.9% 16.9%;
+    --ring: 216 12.2% 83.9%;
     --chart-1: 264 80% 49%;
     --chart-2: 162 70% 70%;
     --chart-3: 70 75% 77%;
     --chart-4: 304 90% 63%;
     --chart-5: 16 85% 65%;
+
+    /* Apple-inspired color system */
+    --apple-blue: #0A84FF;
+    --apple-purple: #5E5CE6;
+    --apple-red: #FF453A;
+    --apple-green: #30D158;
+    --apple-orange: #FF9F0A;
+
+    --bg-primary: #000000;
+    --bg-surface: #1C1C1E;
+    --border-subtle: #2C2C2E;
+    --text-primary: #FFFFFF;
+    --text-secondary: #EBEBF599; /* 60% opacity */
+    --text-tertiary: #EBEBF54D; /* 30% opacity */
   }
 }
 
@@ -66,5 +94,9 @@
   }
   body {
     @apply bg-background text-foreground;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
   }
 }
+
+    
