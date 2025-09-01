@@ -20,9 +20,7 @@ import {
   Info,
   Lightbulb,
   Target,
-  Settings,
-  Star,
-  UserPlus
+  Settings
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -34,9 +32,8 @@ import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
-import { ProfileCard } from '@/components/ui/info-card';
-import { cn } from '@/lib/utils';
-
+import { BentoGrid } from '@/components/ui/bento-grid';
+import type { BentoItem } from '@/components/ui/bento-grid';
 
 interface TargetingSettings {
   hashtags: string[];
@@ -493,42 +490,6 @@ const DemographicFilter: React.FC<{
   );
 };
 
-const HelperPanel: React.FC<{ className?: string }> = ({ className = '' }) => {
-  const tips = [
-    {
-      icon: Target,
-      title: "Targeting Tips",
-      content: "Use hashtags with 100K-1M posts for optimal reach. Mix popular and niche tags."
-    },
-    {
-      icon: Shield,
-      title: "Stay Safe",
-      content: "Keep daily actions within safe limits to avoid account restrictions."
-    },
-    {
-      icon: MessageCircle,
-      title: "Engagement Quality",
-      content: "Authentic comments perform better. Let AI adapt to your brand voice."
-    }
-  ];
-
-  return (
-    <div className={`space-y-4 ${className}`}>
-      <h3 className="text-lg font-semibold text-foreground">Quick Tips</h3>
-      {tips.map((tip, index) => (
-        <ProfileCard key={index}>
-           <div className="flex items-start gap-3">
-              <tip.icon className="w-5 h-5 text-accent mt-0.5" />
-              <div>
-                <h4 className="font-medium text-foreground mb-1">{tip.title}</h4>
-                <p className="text-sm text-muted-foreground">{tip.content}</p>
-              </div>
-            </div>
-        </ProfileCard>
-      ))}
-    </div>
-  );
-};
 
 const HeaderBar: React.FC = () => {
   return (
@@ -552,8 +513,8 @@ const FooterCTA: React.FC<{
   hasSettings: boolean;
 }> = ({ onSave, onStart, isLoading, hasSettings }) => {
   return (
-    <div className="fixed bottom-0 left-0 right-0 bg-card/80 backdrop-blur-xl border-t border-border p-6">
-      <div className="max-w-5xl mx-auto flex items-center justify-between">
+    <div className="fixed bottom-0 left-0 right-0 bg-card/80 backdrop-blur-xl border-t border-border p-6 z-20">
+      <div className="max-w-7xl mx-auto flex items-center justify-between">
         <div className="text-sm text-muted-foreground">
           {hasSettings ? 'Settings saved' : 'Configure your targeting settings'}
         </div>
@@ -632,6 +593,128 @@ export default function SmartTargetingScreen() {
     await new Promise(resolve => setTimeout(resolve, 2000));
     setIsLoading(false);
   };
+  
+  const bentoItems: BentoItem[] = [
+    {
+        title: "Target Audience",
+        description: (
+            <div className="grid gap-6 md:grid-cols-2">
+              <TagInput
+                id="hashtags"
+                label="Hashtags"
+                helper="5-10 tags • 100K–1M posts"
+                value={settings.hashtags}
+                onChange={(hashtags) => setSettings({ ...settings, hashtags })}
+              />
+              <TagInput
+                id="competitors"
+                label="Competitors"
+                helper="2-5 engaged accounts"
+                value={settings.competitors}
+                onChange={(competitors) => setSettings({ ...settings, competitors })}
+              />
+              <div className="md:col-span-2">
+                <LocationSelect
+                  id="locations"
+                  value={settings.locations}
+                  onChange={(locations) => setSettings({ ...settings, locations })}
+                />
+              </div>
+            </div>
+        ),
+        icon: <Users className="w-4 h-4 text-blue-500" />,
+        colSpan: 2,
+        hasPersistentHover: true,
+    },
+    {
+        title: "Engagement Limits",
+        description: (
+            <div className="space-y-4">
+              <LimitSlider
+                id="follows"
+                label="Daily Follows"
+                max={50}
+                safe={25}
+                value={settings.dailyFollows}
+                onChange={(dailyFollows) => setSettings({ ...settings, dailyFollows })}
+              />
+              <LimitSlider
+                id="likes"
+                label="Daily Likes"
+                max={200}
+                safe={100}
+                value={settings.dailyLikes}
+                onChange={(dailyLikes) => setSettings({ ...settings, dailyLikes })}
+              />
+              <div className="pt-2">
+                <SafetyNotice hasRisk={hasRisk} />
+              </div>
+            </div>
+        ),
+        icon: <Shield className="w-4 h-4 text-emerald-500" />,
+    },
+    {
+        title: "AI Comments",
+        description: (
+            <div className="space-y-4">
+              <RadioMatrix
+                id="style"
+                options={['Professional', 'Friendly', 'Casual', 'Enthusiastic']}
+                value={settings.commentStyle}
+                onChange={(commentStyle) => setSettings({ ...settings, commentStyle })}
+              />
+              <LengthRadio
+                id="length"
+                value={settings.commentLength}
+                onChange={(commentLength) => setSettings({ ...settings, commentLength })}
+              />
+               <EmojiToggle
+                  id="emoji"
+                  value={settings.emojiLevel}
+                  onChange={(emojiLevel) => setSettings({ ...settings, emojiLevel })}
+                />
+            </div>
+        ),
+        icon: <MessageCircle className="w-4 h-4 text-purple-500" />,
+    },
+    {
+        title: "Advanced Targeting",
+        description: (
+            <div className="space-y-4">
+                 <Accordion type="single" collapsible className="w-full">
+                    <AccordionItem value="advanced" className="border-none">
+                        <AccordionTrigger className="p-0 hover:no-underline">
+                         <div className="flex items-center gap-2">
+                            <span className="text-sm font-semibold text-foreground">Fine-tune your strategy</span>
+                         </div>
+                        </AccordionTrigger>
+                        <AccordionContent className="px-1 pt-4">
+                          <div className="space-y-6">
+                            <TimeWindowPicker
+                              value={settings.activeHours}
+                              onChange={(activeHours) => setSettings({ ...settings, activeHours })}
+                            />
+                            <Separator/>
+                            <PauseRules
+                              value={settings.pauseRules}
+                              onChange={(pauseRules) => setSettings({ ...settings, pauseRules })}
+                            />
+                            <Separator/>
+                            <DemographicFilter
+                              value={settings.demographics}
+                              onChange={(demographics) => setSettings({ ...settings, demographics })}
+                            />
+                          </div>
+                        </AccordionContent>
+                    </AccordionItem>
+                </Accordion>
+            </div>
+        ),
+        icon: <Settings className="w-4 h-4 text-sky-500" />,
+        colSpan: 2,
+    },
+];
+
 
   return (
     <div className="min-h-screen bg-gray-100 dark:bg-gray-900 text-foreground relative overflow-hidden">
@@ -656,133 +739,8 @@ export default function SmartTargetingScreen() {
       `}</style>
       <HeaderBar />
       
-      <div className="mx-auto max-w-5xl px-6 py-8 grid gap-6 lg:grid-cols-[1fr_280px] pb-24 relative z-10">
-        {/* Main Column */}
-        <div className="space-y-6">
-          <ProfileCard title="Target Audience">
-            <div className="grid gap-6 md:grid-cols-2">
-              <TagInput
-                id="hashtags"
-                label="Hashtags"
-                helper="5-10 tags • 100K–1M posts"
-                value={settings.hashtags}
-                onChange={(hashtags) => setSettings({ ...settings, hashtags })}
-              />
-              <TagInput
-                id="competitors"
-                label="Competitors"
-                helper="2-5 engaged accounts"
-                value={settings.competitors}
-                onChange={(competitors) => setSettings({ ...settings, competitors })}
-              />
-              <div className="md:col-span-2">
-                <LocationSelect
-                  id="locations"
-                  value={settings.locations}
-                  onChange={(locations) => setSettings({ ...settings, locations })}
-                />
-              </div>
-            </div>
-          </ProfileCard>
-
-          <ProfileCard title="Engagement Limits">
-            <div className="grid gap-6 md:grid-cols-2">
-              <LimitSlider
-                id="follows"
-                label="Daily Follows"
-                max={50}
-                safe={25}
-                value={settings.dailyFollows}
-                onChange={(dailyFollows) => setSettings({ ...settings, dailyFollows })}
-              />
-              <LimitSlider
-                id="likes"
-                label="Daily Likes"
-                max={200}
-                safe={100}
-                value={settings.dailyLikes}
-                onChange={(dailyLikes) => setSettings({ ...settings, dailyLikes })}
-              />
-              <LimitSlider
-                id="comments"
-                label="Daily Comments"
-                max={50}
-                safe={20}
-                value={settings.dailyComments}
-                onChange={(dailyComments) => setSettings({ ...settings, dailyComments })}
-              />
-              <LimitSlider
-                id="hours"
-                label="Session Hours"
-                max={8}
-                safe={4}
-                value={settings.sessionHours}
-                onChange={(sessionHours) => setSettings({ ...settings, sessionHours })}
-              />
-            </div>
-            <div className="mt-6">
-              <SafetyNotice hasRisk={hasRisk} />
-            </div>
-          </ProfileCard>
-
-          <ProfileCard title="AI Comments">
-            <div className="space-y-6">
-              <RadioMatrix
-                id="style"
-                options={['Professional', 'Friendly', 'Casual', 'Enthusiastic']}
-                value={settings.commentStyle}
-                onChange={(commentStyle) => setSettings({ ...settings, commentStyle })}
-              />
-              <div className="grid gap-6 md:grid-cols-2">
-                <LengthRadio
-                  id="length"
-                  value={settings.commentLength}
-                  onChange={(commentLength) => setSettings({ ...settings, commentLength })}
-                />
-                <EmojiToggle
-                  id="emoji"
-                  value={settings.emojiLevel}
-                  onChange={(emojiLevel) => setSettings({ ...settings, emojiLevel })}
-                />
-              </div>
-              <LivePreview settings={settings} />
-            </div>
-          </ProfileCard>
-
-          <ProfileCard title="Advanced Targeting">
-            <Accordion type="single" collapsible className="w-full">
-              <AccordionItem value="advanced" className="border-none">
-                <AccordionTrigger className="px-6 py-4 hover:no-underline -mx-6">
-                  <div className="flex items-center gap-2">
-                    <Settings className="w-5 h-5 text-accent" />
-                    <span className="text-lg font-semibold text-foreground">Advanced Targeting</span>
-                  </div>
-                </AccordionTrigger>
-                <AccordionContent className="px-6 pb-6 -mx-6">
-                  <div className="space-y-6">
-                    <TimeWindowPicker
-                      value={settings.activeHours}
-                      onChange={(activeHours) => setSettings({ ...settings, activeHours })}
-                    />
-                    <Separator/>
-                    <PauseRules
-                      value={settings.pauseRules}
-                      onChange={(pauseRules) => setSettings({ ...settings, pauseRules })}
-                    />
-                    <Separator/>
-                    <DemographicFilter
-                      value={settings.demographics}
-                      onChange={(demographics) => setSettings({ ...settings, demographics })}
-                    />
-                  </div>
-                </AccordionContent>
-              </AccordionItem>
-            </Accordion>
-          </ProfileCard>
-        </div>
-
-        {/* Right Rail */}
-        <HelperPanel className="hidden lg:block" />
+      <div className="relative z-10 pb-24">
+        <BentoGrid items={bentoItems} />
       </div>
 
       <FooterCTA
@@ -794,3 +752,5 @@ export default function SmartTargetingScreen() {
     </div>
   );
 }
+
+    
