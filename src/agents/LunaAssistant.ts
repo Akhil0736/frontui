@@ -1,4 +1,3 @@
-'use server';
 import { firestore } from 'firebase-admin';
 import { routeRequest } from '@/ai/router';
 import type { ConversationContext, ExtractedEntities, AmbiguitySignal } from './AgentTypes';
