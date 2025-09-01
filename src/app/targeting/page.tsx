@@ -23,7 +23,6 @@ import {
   Settings
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Slider } from '@/components/ui/slider';
@@ -33,6 +32,8 @@ import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
+import { NeonGradientCard } from '@/components/ui/neon-gradient-card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 interface TargetingSettings {
   hashtags: string[];
@@ -57,23 +58,6 @@ interface TargetingSettings {
     gender: string;
   };
 }
-
-const GlassCard: React.FC<{
-  title: string;
-  children: React.ReactNode;
-  className?: string;
-}> = ({ title, children, className = '' }) => {
-  return (
-    <Card className={`bg-card/80 backdrop-blur-xl border-border shadow-[0_2px_8px_rgba(0,0,0,0.08)] ${className}`}>
-      <CardHeader>
-        <CardTitle>{title}</CardTitle>
-      </CardHeader>
-      <CardContent>
-        {children}
-      </CardContent>
-    </Card>
-  );
-};
 
 const TagInput: React.FC<{
   id: string;
@@ -655,97 +639,112 @@ export default function SmartTargetingScreen() {
       <div className="mx-auto max-w-5xl px-6 py-8 grid gap-6 lg:grid-cols-[1fr_280px] pb-24">
         {/* Main Column */}
         <div className="space-y-6">
-          <GlassCard title="Target Audience">
-            <div className="grid gap-6 md:grid-cols-2">
-              <TagInput
-                id="hashtags"
-                label="Hashtags"
-                helper="5-10 tags • 100K–1M posts"
-                value={settings.hashtags}
-                onChange={(hashtags) => setSettings({ ...settings, hashtags })}
-              />
-              <TagInput
-                id="competitors"
-                label="Competitors"
-                helper="2-5 engaged accounts"
-                value={settings.competitors}
-                onChange={(competitors) => setSettings({ ...settings, competitors })}
-              />
-              <div className="md:col-span-2">
-                <LocationSelect
-                  id="locations"
-                  value={settings.locations}
-                  onChange={(locations) => setSettings({ ...settings, locations })}
+          <NeonGradientCard>
+             <CardHeader>
+                <CardTitle>Target Audience</CardTitle>
+            </CardHeader>
+            <CardContent>
+                <div className="grid gap-6 md:grid-cols-2">
+                <TagInput
+                    id="hashtags"
+                    label="Hashtags"
+                    helper="5-10 tags • 100K–1M posts"
+                    value={settings.hashtags}
+                    onChange={(hashtags) => setSettings({ ...settings, hashtags })}
                 />
-              </div>
-            </div>
-          </GlassCard>
-
-          <GlassCard title="Engagement Limits">
-            <div className="grid gap-6 md:grid-cols-2">
-              <LimitSlider
-                id="follows"
-                label="Daily Follows"
-                max={50}
-                safe={25}
-                value={settings.dailyFollows}
-                onChange={(dailyFollows) => setSettings({ ...settings, dailyFollows })}
-              />
-              <LimitSlider
-                id="likes"
-                label="Daily Likes"
-                max={200}
-                safe={100}
-                value={settings.dailyLikes}
-                onChange={(dailyLikes) => setSettings({ ...settings, dailyLikes })}
-              />
-              <LimitSlider
-                id="comments"
-                label="Daily Comments"
-                max={50}
-                safe={20}
-                value={settings.dailyComments}
-                onChange={(dailyComments) => setSettings({ ...settings, dailyComments })}
-              />
-              <LimitSlider
-                id="hours"
-                label="Session Hours"
-                max={8}
-                safe={4}
-                value={settings.sessionHours}
-                onChange={(sessionHours) => setSettings({ ...settings, sessionHours })}
-              />
-            </div>
-            <div className="mt-6">
-              <SafetyNotice hasRisk={hasRisk} />
-            </div>
-          </GlassCard>
-
-          <GlassCard title="AI Comments">
-            <div className="space-y-6">
-              <RadioMatrix
-                id="style"
-                options={['Professional', 'Friendly', 'Casual', 'Enthusiastic']}
-                value={settings.commentStyle}
-                onChange={(commentStyle) => setSettings({ ...settings, commentStyle })}
-              />
-              <div className="grid gap-6 md:grid-cols-2">
-                <LengthRadio
-                  id="length"
-                  value={settings.commentLength}
-                  onChange={(commentLength) => setSettings({ ...settings, commentLength })}
+                <TagInput
+                    id="competitors"
+                    label="Competitors"
+                    helper="2-5 engaged accounts"
+                    value={settings.competitors}
+                    onChange={(competitors) => setSettings({ ...settings, competitors })}
                 />
-                <EmojiToggle
-                  id="emoji"
-                  value={settings.emojiLevel}
-                  onChange={(emojiLevel) => setSettings({ ...settings, emojiLevel })}
-                />
-              </div>
-              <LivePreview settings={settings} />
-            </div>
-          </GlassCard>
+                <div className="md:col-span-2">
+                    <LocationSelect
+                    id="locations"
+                    value={settings.locations}
+                    onChange={(locations) => setSettings({ ...settings, locations })}
+                    />
+                </div>
+                </div>
+            </CardContent>
+          </NeonGradientCard>
 
-          <Card className="bg-card/80 backdrop-blur-xl border-border">
+          <NeonGradientCard>
+            <CardHeader>
+                <CardTitle>Engagement Limits</CardTitle>
+            </CardHeader>
+            <CardContent>
+                <div className="grid gap-6 md:grid-cols-2">
+                <LimitSlider
+                    id="follows"
+                    label="Daily Follows"
+                    max={50}
+                    safe={25}
+                    value={settings.dailyFollows}
+                    onChange={(dailyFollows) => setSettings({ ...settings, dailyFollows })}
+                />
+                <LimitSlider
+                    id="likes"
+                    label="Daily Likes"
+                    max={200}
+                    safe={100}
+                    value={settings.dailyLikes}
+                    onChange={(dailyLikes) => setSettings({ ...settings, dailyLikes })}
+                />
+                <LimitSlider
+                    id="comments"
+                    label="Daily Comments"
+                    max={50}
+                    safe={20}
+                    value={settings.dailyComments}
+                    onChange={(dailyComments) => setSettings({ ...settings, dailyComments })}
+                />
+                <LimitSlider
+                    id="hours"
+                    label="Session Hours"
+                    max={8}
+                    safe={4}
+                    value={settings.sessionHours}
+                    onChange={(sessionHours) => setSettings({ ...settings, sessionHours })}
+                />
+                </div>
+                <div className="mt-6">
+                <SafetyNotice hasRisk={hasRisk} />
+                </div>
+            </CardContent>
+          </NeonGradientCard>
+
+          <NeonGradientCard>
+            <CardHeader>
+                <CardTitle>AI Comments</CardTitle>
+            </CardHeader>
+            <CardContent>
+                <div className="space-y-6">
+                <RadioMatrix
+                    id="style"
+                    options={['Professional', 'Friendly', 'Casual', 'Enthusiastic']}
+                    value={settings.commentStyle}
+                    onChange={(commentStyle) => setSettings({ ...settings, commentStyle })}
+                />
+                <div className="grid gap-6 md:grid-cols-2">
+                    <LengthRadio
+                    id="length"
+                    value={settings.commentLength}
+                    onChange={(commentLength) => setSettings({ ...settings, commentLength })}
+                    />
+                    <EmojiToggle
+                    id="emoji"
+                    value={settings.emojiLevel}
+                    onChange={(emojiLevel) => setSettings({ ...settings, emojiLevel })}
+                    />
+                </div>
+                <LivePreview settings={settings} />
+                </div>
+            </CardContent>
+          </NeonGradientCard>
+
+          <NeonGradientCard>
             <Accordion type="single" collapsible className="w-full">
               <AccordionItem value="advanced" className="border-none">
                 <AccordionTrigger className="px-6 py-4 hover:no-underline">
@@ -774,7 +773,7 @@ export default function SmartTargetingScreen() {
                 </AccordionContent>
               </AccordionItem>
             </Accordion>
-          </Card>
+          </NeonGradientCard>
         </div>
 
         {/* Right Rail */}
