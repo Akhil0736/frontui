@@ -1,37 +1,25 @@
 
 'use server';
 
-import { ActionResult } from "@/automation/InstagramActions";
-import { StrategyAction } from "@/planning/StrategyPlanner";
-
-export interface AgentState {
-  status: 'standby' | 'active' | 'paused' | 'error';
-  userId: string;
+export interface ConversationContext {
+  query: string;
+  entities: ExtractedEntities;
+  intent: string;
+  timestamp: Date;
   sessionId: string;
-  currentStep: number;
-  totalSteps: number;
 }
 
-export interface InstagramCredentials {
-    username: string;
-    password?: string; // Password might be stored securely
-    sessionCookies?: any; // For resuming sessions
+export interface ExtractedEntities {
+  people?: string[];
+  places?: string[];
+  events?: string[];
+  dates?: string[];
+  topics?: string[];
 }
 
-export interface SafetyResult {
-    safe: boolean;
-    score: number;
-    reason?: string;
-    suggestedWait?: number; // in seconds
-    remainingActions?: number;
-}
-
-export interface ActionRecord {
-    sessionId: string;
-    step: number;
-    action: StrategyAction;
-    results: ActionResult[];
-    safetyScore: number;
-
-    timestamp: Date;
+export interface AmbiguitySignal {
+  isAmbiguous: boolean;
+  missingInfo?: string[];
+  multipleMatches?: string[];
+  clarificationNeeded: string;
 }
