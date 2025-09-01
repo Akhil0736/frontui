@@ -86,9 +86,9 @@ const SafetySlider: React.FC<SafetySliderProps> = ({
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between">
-        <label className="text-sm font-medium text-foreground">{label}</label>
+        <label className="text-sm font-medium text-card-foreground">{label}</label>
         <div className="flex items-center gap-2">
-          <span className="text-lg font-semibold text-foreground">{value}</span>
+          <span className="text-lg font-semibold text-card-foreground">{value}</span>
           <span className="text-sm text-muted-foreground">{unit}</span>
           <span
             className="text-xs font-medium px-2 py-1 rounded-full"
@@ -189,14 +189,14 @@ const TagInput: React.FC<TagInputProps> = ({
 
   return (
     <div className="space-y-2">
-      <label className="text-sm font-medium text-foreground">{label}</label>
+      <label className="text-sm font-medium text-card-foreground">{label}</label>
       
       <div className="relative">
-        <div className="min-h-[42px] bg-background border border-border rounded-xl p-3 flex flex-wrap gap-2 focus-within:ring-2 focus-within:ring-[var(--apple-blue)] focus-within:border-[var(--apple-blue)]">
+        <div className="min-h-[42px] bg-background/50 border border-border rounded-xl p-3 flex flex-wrap gap-2 focus-within:ring-2 focus-within:ring-[var(--apple-blue)] focus-within:border-[var(--apple-blue)]">
           {value.map((tag, index) => (
             <span
               key={index}
-              className="inline-flex items-center gap-1 bg-muted text-foreground px-3 py-1 rounded-lg text-sm font-medium"
+              className="inline-flex items-center gap-1 bg-muted text-card-foreground px-3 py-1 rounded-lg text-sm font-medium"
             >
               {tag}
               <button
@@ -327,9 +327,9 @@ export default function TargetingPage() {
   };
 
   return (
-    <div className="min-h-screen bg-muted/30 dark:bg-background">
+    <div className="min-h-screen bg-muted/30 dark:bg-background text-foreground">
       {/* Apple Navigation Header */}
-      <div className="bg-card/80 border-b border-border backdrop-blur-sm px-6 py-4">
+      <div className="bg-card/80 dark:bg-card/30 border-b border-border backdrop-blur-sm px-6 py-4">
         <div className="max-w-4xl mx-auto">
           <div className="flex items-center gap-4">
             <button className="p-2 hover:bg-accent rounded-xl transition-colors">
@@ -506,7 +506,7 @@ export default function TargetingPage() {
 
               <div className="space-y-6">
                 <div>
-                  <label className="text-sm font-medium text-foreground mb-3 block">Comment Style</label>
+                  <label className="text-sm font-medium text-card-foreground mb-3 block">Comment Style</label>
                   <div className="grid grid-cols-2 gap-3">
                     {(['friendly', 'professional', 'casual', 'enthusiastic'] as const).map((style) => (
                       <button
@@ -535,7 +535,7 @@ export default function TargetingPage() {
 
                 <div className="bg-muted/50 rounded-xl p-4">
                   <div className="flex items-center justify-between mb-3">
-                    <span className="text-sm font-medium text-foreground">Preview</span>
+                    <span className="text-sm font-medium text-card-foreground">Preview</span>
                     <button
                       onClick={generateNewComment}
                       className="flex items-center gap-2 px-3 py-1 bg-[var(--apple-blue)] text-white rounded-lg text-sm font-medium hover:bg-blue-600 transition-colors"
@@ -545,7 +545,7 @@ export default function TargetingPage() {
                     </button>
                   </div>
                   <div className="bg-background rounded-lg p-3 border border-border">
-                    <p className="text-sm text-foreground">"{commentPreview}"</p>
+                    <p className="text-sm text-card-foreground">"{commentPreview}"</p>
                   </div>
                 </div>
               </div>
