@@ -2,7 +2,7 @@
 
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, type ReactNode } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
 import { Sidebar, SidebarBody, SidebarLink } from '@/components/ui/sidebar';
@@ -52,6 +52,12 @@ const LogoIcon = () => {
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   const [open, setOpen] = useState(false);
   const { theme, setTheme } = useTheme();
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
 
   const links = [
     {
@@ -143,6 +149,10 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
     </div>
   );
 
+
+  if (!isMounted) {
+    return <MainContent />;
+  }
 
   if (theme === 'dark') {
     return (
