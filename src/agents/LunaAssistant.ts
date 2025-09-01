@@ -29,9 +29,12 @@ export class LunaAssistant {
    */
   async handleUserInput(input: string): Promise<string> {
     try {
+      console.log('Input received:', input);
       // Extract entities and intent from user input
       const entities = await this.extractEntities(input);
+      console.log('Extracted entities:', entities);
       const intent = await this.classifyIntent(input, entities);
+      console.log('Classified intent:', intent);
 
       // Store in conversation context
       const context: ConversationContext = {
@@ -75,7 +78,13 @@ export class LunaAssistant {
     entities.people = wrestlingPeople.filter(person => lowercaseInput.includes(person));
     
     // Event entities
-    const wrestlingEvents = ['clash at the castle', 'clash in paris', 'wrestlemania', 'summerslam'];
+    const wrestlingEvents = [
+      'clash at the castle', 
+      'clash in paris', 
+      'clash in paris 2025',
+      'wrestlemania', 
+      'summerslam'
+    ];
     entities.events = wrestlingEvents.filter(event => lowercaseInput.includes(event));
     
     // Location entities
@@ -94,6 +103,9 @@ export class LunaAssistant {
    */
   private async classifyIntent(input: string, entities: ExtractedEntities): Promise<string> {
     const lowercaseInput = input.toLowerCase();
+    
+    // Debug logging to see what's being detected
+    console.log('Detected entities:', entities);
     
     if (entities.people?.length || entities.events?.length) {
       return 'event_query';
@@ -220,14 +232,13 @@ export class LunaAssistant {
     intent: string,
     context: ConversationContext
   ): string {
-    
     const recentHistory = this.conversationHistory.slice(-3);
     const historyContext = recentHistory
       .map(h => `User: ${h.query}`)
       .join('\n');
     
     return `
-You are Luna, Instagram Growth Mentor with Codie Sanchez personality.
+You are Luna, a helpful AI assistant with expertise in Instagram growth.
 
 CONVERSATION CONTEXT:
 ${historyContext}
@@ -237,11 +248,12 @@ DETECTED ENTITIES: ${JSON.stringify(entities)}
 USER INTENT: ${intent}
 
 RESPONSE RULES:
-- Never use generic phrases like "I'm here to help with Instagram growth"
-- Be specific and actionable
-- Use Codie Sanchez voice: confident, direct, tactical
-- For off-topic questions: answer briefly, pivot to Instagram naturally
-- Always end with a specific question or next step
+- Answer the user's question directly and helpfully first
+- Be conversational and natural
+- If it's completely off-topic from Instagram, answer briefly then offer to help with Instagram growth
+- For wrestling/WWE questions: Answer factually, then optionally mention Instagram growth for content creators
+- For greetings: Be friendly and welcoming
+- Always be helpful, never dismissive
 
 CURRENT QUERY: ${input}
 `;
