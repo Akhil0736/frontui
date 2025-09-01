@@ -88,27 +88,33 @@ class EnhancedLunaRouter {
   }
 
   private async analyzeRequest(userMessage: string, attachments: any[] = [], context: any[] = []) {
-    const needsWeb = /movies?.*this month|weather|today|latest/i.test(userMessage);
+    const needsWeb = /movies?.*this month|weather|today|latest|news/i.test(userMessage);
 
+    let contextBlock = "";
     if (needsWeb) {
-      const searchResult = await liveSearch(userMessage);
-      if (searchResult) {
-        const liveContext = `Live answer: ${searchResult.answer}\nSources:\n` +
-          searchResult.sources.map(s => `• ${s.title} (${s.url})`).join("\n");
-        // Inject live context into the context array to be used in the prompt
-        // @ts-ignore
-        context.push({ role: 'system', content: liveContext });
+      const live = await liveSearch(userMessage);
+      if (live?.answer) {
+        contextBlock = [
+          "Real-time info (via Tavily):",
+          live.answer,
+          "Sources:",
+          ...live.sources.map(s => `• ${s.title} (${s.url})`)
+        ].join("\n");
       }
     }
+    
+    const messageWithContext = contextBlock ? `${contextBlock}\n\nUser: ${userMessage}` : userMessage;
 
 
-    let routingDecision = await this.heuristicAnalysis(userMessage, attachments, context);
+    let routingDecision = await this.heuristicAnalysis(messageWithContext, attachments, context);
     if (routingDecision.confidence < 0.8) {
-        routingDecision = await this.llmClassification(userMessage, attachments, context);
+        routingDecision = await this.llmClassification(messageWithContext, attachments, context);
     }
-    routingDecision = this.contextAwareRouting(routingDecision, userMessage, context);
+    routingDecision = this.contextAwareRouting(routingDecision, messageWithContext, context);
     // @ts-ignore
-    routingDecision.reasoning_mode = this.shouldUseReasoningMode(userMessage, routingDecision.route);
+    routingDecision.reasoning_mode = this.shouldUseReasoningMode(messageWithContext, routingDecision.route);
+    // @ts-ignore
+    routingDecision.messageWithContext = messageWithContext;
     return routingDecision;
   }
 
@@ -129,12 +135,12 @@ class EnhancedLunaRouter {
     let fallback: 'backup' | 'emergency' | undefined = undefined;
 
     try {
-        response = await this.callModel(modelConfig.primary, userMessage, routingDecision);
+        response = await this.callModel(modelConfig.primary, routingDecision.messageWithContext, routingDecision);
         modelUsed = modelConfig.primary;
     } catch (error: any) {
         console.log(`Primary model ${modelConfig.primary} failed: ${error.message}, trying backup...`);
         try {
-            response = await this.callModel(modelConfig.backup, userMessage, routingDecision);
+            response = await this.callModel(modelConfig.backup, routingDecision.messageWithContext, routingDecision);
             modelUsed = modelConfig.backup;
             fallback = 'backup';
         } catch (backupError: any) {
@@ -303,7 +309,9 @@ Return ONLY this JSON:
 
   async callModel(modelId: string, message: string, options: any = {}, bypassSystemPrompt = false): Promise<string> {
     try {
-      const systemPrompt = `Luna is your dedicated AI partner for sophisticated, data-driven Instagram growth that prioritizes both results and account safety.
+      const systemPrompt = `You are Luna, an AI assistant. If a “Real-time info” block appears, use it.
+
+Luna is your dedicated AI partner for sophisticated, data-driven Instagram growth that prioritizes both results and account safety.
 
 Luna is a next-generation AI assistant engineered specifically for Instagram growth acceleration. She combines tactical expertise inspired by Codie Sanchez with advanced automation capabilities, delivering actionable strategies that drive measurable results while maintaining account safety.
 
@@ -546,10 +554,15 @@ Scale Success: Expand effective approaches while maintaining safety protocols
 Continuous Learning: Regular strategy reviews and optimization sessions
 
 Luna is your dedicated AI partner for sophisticated, data-driven Instagram growth that prioritizes both results and account safety.`;
+      
+      const fullPrompt = `
+${message}
+Assistant:`;
+
 
       const result = await ai.generate({
           model: modelId as any,
-          prompt: message,
+          prompt: fullPrompt,
           ...( !bypassSystemPrompt && { system: systemPrompt }),
           config: {
               temperature: options.temperature || 0.7,

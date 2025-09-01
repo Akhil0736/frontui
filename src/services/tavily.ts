@@ -28,31 +28,35 @@ export async function search(query: string) {
 }
 
 export async function liveSearch(question: string) {
+  const TAVILY_API_KEY = process.env.TAVILY_API_KEY;
+  if (!TAVILY_API_KEY) {
+    console.error('TAVILY_API_KEY is not set');
+    return null;
+  }
   try {
-    const TAVILY_API_KEY = process.env.TAVILY_API_KEY;
-    if (!TAVILY_API_KEY) {
-      throw new Error('TAVILY_API_KEY is not set');
-    }
-    
-    const res = await fetch("https://api.tavily.com/qna_search", {
+    const res = await fetch("https://api.tavily.com/search", {
         method: "POST",
         headers: {
-            "Content-Type": "application/json",
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({ 
+            query: question,
+            search_depth: "basic",
             api_key: TAVILY_API_KEY,
-            query: question 
+            include_answer: true,
         })
-    });
-
-    if (!res.ok) {
-        console.error(`Tavily request failed with status: ${res.status}`);
-        return null;
-    }
+      });
     
-    return res.json();   // { answer, sources[] }
+      if (!res.ok) {
+        console.error("Tavily API error:", await res.text());
+        return null;
+      };
+
+      const data = await res.json();
+      return { answer: data.answer, sources: data.results.map((r: any) => ({ title: r.title, url: r.url }))};
+
   } catch (err) {
     console.error("Tavily error:", err);
-    return null;              // graceful fallback
+    return null; // graceful fallback
   }
 }
