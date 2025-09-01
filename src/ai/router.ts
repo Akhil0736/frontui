@@ -7,6 +7,8 @@ interface RouterResponse {
   model: string;
   route: string;
   fallback?: 'backup' | 'emergency';
+  sources?: any[];
+  hasWebResults?: boolean;
 }
 
 export async function routeRequest(prompt: string, attachments: any[] = [], context: any[] = []): Promise<RouterResponse> {
@@ -14,7 +16,9 @@ export async function routeRequest(prompt: string, attachments: any[] = [], cont
     
     return {
         response: result.answer,
-        model: 'gemini-2.5-flash', // Model is now hardcoded in gemini.ts
-        route: result.hasWebResults ? 'web_search' : 'gemini_direct'
+        model: 'gemini-1.5-flash', // Model is now hardcoded in gemini.ts
+        route: result.hasWebResults ? 'web_search' : 'gemini_direct',
+        sources: result.sources,
+        hasWebResults: result.hasWebResults,
     };
 }
