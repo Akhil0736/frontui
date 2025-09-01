@@ -23,7 +23,7 @@ import {
   Settings as SettingsIcon
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import HolographicCard from '@/components/ui/holographic-card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Slider } from '@/components/ui/slider';
@@ -57,23 +57,6 @@ interface TargetingSettings {
     gender: string;
   };
 }
-
-const GlassCard: React.FC<{
-  title: string;
-  children: React.ReactNode;
-  className?: string;
-}> = ({ title, children, className = '' }) => {
-  return (
-    <Card className={`bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl border border-white/20 dark:border-slate-700/50 shadow-lg ${className}`}>
-      <CardHeader>
-        <CardTitle>{title}</CardTitle>
-      </CardHeader>
-      <CardContent>
-        {children}
-      </CardContent>
-    </Card>
-  );
-};
 
 const TagInput: React.FC<{
   id: string;
@@ -527,15 +510,15 @@ const HelperPanel: React.FC<{ className?: string }> = ({ className = '' }) => {
     <div className={`space-y-4 ${className}`}>
       <h3 className="text-lg font-semibold text-foreground">Quick Tips</h3>
       {tips.map((tip, index) => (
-        <Card key={index} className="p-4 bg-background/30">
-          <div className="flex items-start gap-3">
+        <HolographicCard key={index}>
+           <div className="flex items-start gap-3">
             <tip.icon className="w-5 h-5 text-accent mt-0.5" />
             <div>
               <h4 className="font-medium text-foreground mb-1">{tip.title}</h4>
               <p className="text-sm text-muted-foreground">{tip.content}</p>
             </div>
           </div>
-        </Card>
+        </HolographicCard>
       ))}
     </div>
   );
@@ -649,7 +632,8 @@ export default function SmartTargetingScreen() {
       <div className="mx-auto max-w-5xl px-6 py-8 grid gap-6 lg:grid-cols-[1fr_280px] pb-24">
         {/* Main Column */}
         <div className="space-y-6">
-          <GlassCard title="Target Audience">
+          <HolographicCard>
+            <h3 className="text-lg font-semibold text-foreground mb-4">Target Audience</h3>
             <div className="grid gap-6 md:grid-cols-2">
               <TagInput
                 id="hashtags"
@@ -675,9 +659,10 @@ export default function SmartTargetingScreen() {
                 />
               </div>
             </div>
-          </GlassCard>
+          </HolographicCard>
 
-          <GlassCard title="Engagement Limits">
+          <HolographicCard>
+            <h3 className="text-lg font-semibold text-foreground mb-4">Engagement Limits</h3>
             <div className="grid gap-6 md:grid-cols-2">
               <LimitSlider
                 id="follows"
@@ -715,9 +700,10 @@ export default function SmartTargetingScreen() {
             <div className="mt-6">
               <SafetyNotice hasRisk={hasRisk} />
             </div>
-          </GlassCard>
+          </HolographicCard>
 
-          <GlassCard title="AI Comments">
+          <HolographicCard>
+            <h3 className="text-lg font-semibold text-foreground mb-4">AI Comments</h3>
             <div className="space-y-6">
               <RadioMatrix
                 id="style"
@@ -739,9 +725,9 @@ export default function SmartTargetingScreen() {
               </div>
               <LivePreview settings={settings} />
             </div>
-          </GlassCard>
+          </HolographicCard>
 
-          <Card>
+          <HolographicCard>
             <Accordion type="single" collapsible className="w-full">
               <AccordionItem value="advanced" className="border-none">
                 <AccordionTrigger className="px-6">
@@ -770,7 +756,7 @@ export default function SmartTargetingScreen() {
                 </AccordionContent>
               </AccordionItem>
             </Accordion>
-          </Card>
+          </HolographicCard>
         </div>
 
         {/* Right Rail */}
