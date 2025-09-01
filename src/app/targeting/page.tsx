@@ -3,7 +3,7 @@
 
 import React, { useState, useRef, useCallback } from 'react';
 import { ArrowLeft, Hash, Users, MapPin, Shield, Bot, TrendingUp, RefreshCw, X, ChevronDown, Plus, AlertTriangle, CheckCircle, Info, Target, Zap } from 'lucide-react';
-import { GradientBlobCard } from '@/components/ui/gradient-bold-card';
+import { GlowCard } from '@/components/ui/spotlight-card';
 
 
 // TypeScript Interfaces
@@ -345,8 +345,8 @@ export default function TargetingPage() {
 
       <div className="max-w-4xl mx-auto p-6 space-y-6">
         {/* Target Settings Card */}
-        <GradientBlobCard>
-            <div className="p-6">
+        <GlowCard customSize={true} glowColor="blue" className="p-6">
+            <div className="relative z-10">
                 <div className="flex items-start gap-3 mb-6">
                     <div className={'w-8 h-8 rounded-lg flex items-center justify-center bg-blue-50 dark:bg-blue-900/20'}>
                         <div className={'text-[var(--apple-blue)]'}>
@@ -410,11 +410,11 @@ export default function TargetingPage() {
                     </div>
                 </div>
             </div>
-        </GradientBlobCard>
+        </GlowCard>
 
         {/* Safety-First Engagement Card */}
-        <GradientBlobCard>
-            <div className="p-6">
+        <GlowCard customSize={true} glowColor="red" className="p-6">
+            <div className="relative z-10">
                 <div className="flex items-start gap-3 mb-6">
                     <div className={'w-8 h-8 rounded-lg flex items-center justify-center bg-blue-50 dark:bg-blue-900/20'}>
                         <div className={'text-[var(--apple-blue)]'}>
@@ -487,11 +487,11 @@ export default function TargetingPage() {
                     </div>
                 </div>
             </div>
-        </GradientBlobCard>
+        </GlowCard>
 
         {/* AI Comment Intelligence Card */}
-        <GradientBlobCard>
-            <div className="p-6">
+        <GlowCard customSize={true} glowColor="purple" className="p-6">
+            <div className="relative z-10">
                 <div className="flex items-start gap-3 mb-6">
                     <div className={'w-8 h-8 rounded-lg flex items-center justify-center bg-blue-50 dark:bg-blue-900/20'}>
                         <div className={'text-[var(--apple-blue)]'}>
@@ -550,11 +550,11 @@ export default function TargetingPage() {
                 </div>
               </div>
             </div>
-        </GradientBlobCard>
+        </GlowCard>
 
         {/* Luna's Tactical Insights Card */}
-        <GradientBlobCard>
-            <div className="p-6">
+        <GlowCard customSize={true} glowColor="green" className="p-6">
+            <div className="relative z-10">
                 <div className="flex items-start gap-3 mb-6">
                     <div className={'w-8 h-8 rounded-lg flex items-center justify-center bg-blue-50 dark:bg-blue-900/20'}>
                         <div className={'text-[var(--apple-blue)]'}>
@@ -608,7 +608,7 @@ export default function TargetingPage() {
                 </div>
               </div>
             </div>
-        </GradientBlobCard>
+        </GlowCard>
 
         {/* Save Configuration Button */}
         <div className="sticky bottom-6 flex justify-center">
@@ -620,4 +620,3 @@ export default function TargetingPage() {
     </div>
   );
 }
-
