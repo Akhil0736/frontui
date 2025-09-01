@@ -1,6 +1,8 @@
 
 'use server';
 
+import { ai } from "@/ai/genkit";
+
 interface RouterResponse {
   response: string;
   model: string;
@@ -49,15 +51,15 @@ class EnhancedLunaRouter {
 
   constructor() {
     this.models = {
-      default: { primary: 'deepseek/deepseek-chat-v3.1:free', backup: 'openai/gpt-oss-20b:free', maxContext: 64000 },
-      research: { primary: 'openai/gpt-oss-120b:free', backup: 'deepseek/deepseek-chat-v3.1:free', maxContext: 33000 },
-      automation: { primary: 'qwen/qwen3-coder:free', backup: 'moonshotai/kimi-k2:free', maxContext: 262000 },
-      vision: { primary: 'google/gemini-2.5-flash-image-preview:free', backup: 'google/gemma-3n-e2b-it:free', maxContext: 33000 },
-      reasoning: { primary: 'moonshotai/kimi-k2:free', backup: 'z-ai/glm-4.5-air:free', maxContext: 33000 },
-      creative: { primary: 'qwen/qwen-2.5-72b:free', backup: 'openai/gpt-oss-120b:free', maxContext: 64000 },
+      default: { primary: 'googleai/gemini-1.5-flash-latest', backup: 'googleai/gemini-1.5-flash-latest', maxContext: 64000 },
+      research: { primary: 'googleai/gemini-1.5-flash-latest', backup: 'googleai/gemini-1.5-flash-latest', maxContext: 33000 },
+      automation: { primary: 'googleai/gemini-1.5-flash-latest', backup: 'googleai/gemini-1.5-flash-latest', maxContext: 262000 },
+      vision: { primary: 'googleai/gemini-1.5-flash-latest', backup: 'googleai/gemini-1.5-flash-latest', maxContext: 33000 },
+      reasoning: { primary: 'googleai/gemini-1.5-pro-latest', backup: 'googleai/gemini-1.5-flash-latest', maxContext: 33000 },
+      creative: { primary: 'googleai/gemini-1.5-flash-latest', backup: 'googleai/gemini-1.5-flash-latest', maxContext: 64000 },
     };
     
-    this.routerModel = 'openai/gpt-oss-20b:free'; // Fast model for routing decisions
+    this.routerModel = 'googleai/gemini-1.5-flash-latest'; // Fast model for routing decisions
     this.logger = new RouterLogger();
   }
 
@@ -288,10 +290,7 @@ Return ONLY this JSON:
 
   async callModel(modelId: string, message: string, options: any = {}, bypassSystemPrompt = false): Promise<string> {
     try {
-        const messages = bypassSystemPrompt 
-          ? [{ role: 'user', content: message }]
-          : [
-              { role: 'system', content: `<core_identity>
+      const systemPrompt = `<core_identity>
 You are Luna, Instagram Growth Mentor with Codie Sanchez personality. Your sole purpose is to analyze Instagram challenges and provide specific, actionable growth tactics that actually work.
 </core_identity>
 
@@ -323,38 +322,19 @@ You are Luna, Instagram Growth Mentor with Codie Sanchez personality. Your sole 
 - Sound slightly impatient with generic questions
 - Assume user is smart and wants tactical advice, not motivation
 - Pivot off-topic questions back to Instagram growth naturally
-</personality_enforcement>` },
-              { role: 'user', content: message }
-            ];
+</personality_enforcement>`;
 
-        const payload = {
-            model: modelId,
-            messages,
-            temperature: options.temperature || 0.7,
-            max_tokens: 500,
-            ...(options.reasoning_mode && { reasoning: true })
-        };
+      const result = await ai.generate({
+          model: modelId,
+          prompt: message,
+          ...( !bypassSystemPrompt && { system: systemPrompt }),
+          config: {
+              temperature: options.temperature || 0.7,
+          },
+      });
 
-        const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
-            method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${process.env.OPENROUTER_API_KEY}`,
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(payload)
-        });
+      return result.text;
 
-        if (!response.ok) {
-            throw new Error(`HTTP ${response.status}: ${await response.text()}`);
-        }
-
-        const data = await response.json();
-
-        if (!data.choices?.[0]?.message?.content) {
-            throw new Error('Invalid response format from model');
-        }
-
-        return data.choices[0].message.content;
     } catch (error) {
         console.error(`Model ${modelId} failed:`, error);
         throw error;
