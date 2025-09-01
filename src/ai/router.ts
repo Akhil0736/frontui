@@ -1,7 +1,10 @@
 
 'use server';
-import { answerWithLiveSearch } from "@/services/lunaLiveSearch";
 import { GoogleGenerativeAI } from "@google/generative-ai";
+import { exec } from 'child_process';
+import { promisify } from 'util';
+
+const execAsync = promisify(exec);
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
 
@@ -20,44 +23,58 @@ async function generateWithGemini(prompt: string) {
     return result.response.text();
 }
 
+async function getLiveAnswer(question: string): Promise<any> {
+  try {
+    const command = `python3 -c "
+from src.services.luna_live_search import enhanced_luna_answer
+import json
+import os
+# It's better to load env vars within the script if possible
+# or ensure the calling process has them.
+from dotenv import load_dotenv
+load_dotenv()
+
+result = enhanced_luna_answer('${question.replace(/'/g, "\\'")}')
+print(json.dumps(result))
+"`;
+    console.log("Executing python command for question: ", question);
+    const { stdout, stderr } = await execAsync(command);
+
+    if (stderr) {
+      console.error("Python service error:", stderr);
+      return { error: "Live search unavailable due to script error." };
+    }
+
+    return JSON.parse(stdout);
+  } catch (error) {
+    console.error("Python execution failed:", error);
+    return { error: "Live search unavailable" };
+  }
+}
+
+
 export async function routeRequest(prompt: string, originalMessage?: string): Promise<RouterResponse> {
     
-    // Check if this is a web search request signaled by the assistant
-    if (prompt.includes('IMPORTANT: This query requires real-time web information')) {
-        // Extract the original question
-        const questionMatch = prompt.match(/The user asked: "([^"]+)"/);
-        const originalQuestion = questionMatch?.[1] || originalMessage || '';
-        
-        if (originalQuestion) {
-            const result = await answerWithLiveSearch(originalQuestion);
-            return {
-                response: result,
-                model: 'gemini-1.5-flash-tavily',
-                route: 'web_search',
-                hasWebResults: true,
-            };
-        }
-    }
+    // The main logic is now in Python. We just need to call it.
+    const question = originalMessage || prompt;
 
-    // Fallback for direct calls or if signal is missing
-    const needsWebSearch = /(today|latest|news|current|recent|this month|movies?|weather)/i.test(originalMessage || prompt);
+    // The python script will decide if a web search is needed.
+    const result = await getLiveAnswer(question);
 
-    if (needsWebSearch) {
-        const result = await answerWithLiveSearch(originalMessage || prompt);
+    if (result.error) {
         return {
-            response: result,
-            model: 'gemini-1.5-flash-tavily',
-            route: 'web_search_fallback',
-            hasWebResults: true,
+            response: result.error,
+            model: 'gemini_direct',
+            route: 'python_error',
+            hasWebResults: false,
         };
     }
-    
-    // Default to Gemini if no web search is needed
-    const result = await generateWithGemini(prompt);
+
     return {
-        response: result,
-        model: 'gemini-1.5-flash',
-        route: 'gemini_direct',
-        hasWebResults: false,
+        response: result.answer,
+        model: 'python_service',
+        route: result.has_live_data ? 'web_search' : 'gemini_direct',
+        hasWebResults: result.has_live_data,
+        sources: result.sources || []
     };
 }
