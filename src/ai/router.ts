@@ -93,7 +93,9 @@ class EnhancedLunaRouter {
     let contextBlock = "";
     if (needsWeb) {
       const live = await liveSearch(userMessage);
-      if (live?.answer) {
+      if (typeof live === "string") {
+        contextBlock = live;
+      } else if (live?.answer) {
         contextBlock = [
           "Real-time info (via Tavily):",
           live.answer,

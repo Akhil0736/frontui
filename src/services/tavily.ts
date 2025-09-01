@@ -1,69 +1,45 @@
 
 'use server';
 
-import 'dotenv/config';
+export type LiveSearchResult =
+  | { answer: string; sources: Array<{ title: string; url: string }> }
+  | string; // fallback message
 
-export async function search(query: string) {
-  const TAVILY_API_KEY = process.env.TAVILY_API_KEY;
-  if (!TAVILY_API_KEY) {
-    throw new Error('TAVILY_API_KEY is not set');
-  }
+export async function liveSearch(query: string): Promise<LiveSearchResult> {
+  const apiKey = process.env.TAVILY_API_KEY;
+  const url = "https://api.tavily.com/search";
 
-  const res = await fetch('https://api.tavily.com/search', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${TAVILY_API_KEY}`,
-    },
-    body: JSON.stringify({
-      query: query,
-      max_results: 5,
-      include_domains: [], // optional: restrict to sites
-      search_depth: 'advanced', // broader crawling
-    }),
-  });
-
-  if (!res.ok) {
-    throw new Error(`Tavily search request failed with status ${res.status}`);
-  }
-  return res.json();
-}
-
-export async function liveSearch(question: string) {
-  const TAVILY_API_KEY = process.env.TAVILY_API_KEY;
-  if (!TAVILY_API_KEY) {
+  if (!apiKey) {
     console.error('TAVILY_API_KEY is not set');
-    return null;
+    return "⚠️ Live search is not configured.";
   }
+
   try {
-    const res = await fetch('https://api.tavily.com/search', {
-      method: 'POST',
+    const res = await fetch(url, {
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${TAVILY_API_KEY}`,
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${apiKey}`,          // ← key in HEADER
       },
       body: JSON.stringify({
-        query: question,
-        search_depth: 'basic',
+        query,
+        search_depth: "advanced",
         include_answer: true,
+        max_results: 5,
       }),
     });
 
     if (!res.ok) {
-      console.error('Tavily API error:', await res.text());
-      return null;
+      console.error(`Tavily HTTP ${res.status}: ${res.statusText}`);
+      return "⚠️ Live search failed (service unavailable).";
     }
 
     const data = await res.json();
-    return {
-      answer: data.answer,
-      sources: data.results.map((r: any) => ({
-        title: r.title,
-        url: r.url,
-      })),
-    };
+    return data?.answer
+      ? { answer: data.answer, sources: data.results ?? [] }
+      : "⚠️ No recent information found.";
   } catch (err) {
-    console.error('Tavily error:', err);
-    return null; // graceful fallback
+    console.error("Tavily fetch error:", err);
+    return "⚠️ Error fetching live data.";
   }
 }
