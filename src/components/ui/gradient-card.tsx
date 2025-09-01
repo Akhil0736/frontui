@@ -16,7 +16,7 @@ export const GradientCard: React.FC<GradientCardProps> = ({ children, className 
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, ease: "easeOut" }}
       >
-        <div className="absolute inset-0 -z-10 bg-gradient-to-br from-purple-500/10 via-transparent to-blue-500/10" />
+        <div className="absolute inset-0 -z-10 bg-gradient-to-br from-pink-500/10 via-transparent to-white/10" />
         {children}
       </motion.div>
   );
