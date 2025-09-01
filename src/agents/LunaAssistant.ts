@@ -1,4 +1,3 @@
-
 'use server';
 import { firestore } from 'firebase-admin';
 import { routeRequest } from '@/ai/router';
@@ -6,8 +5,8 @@ import type { ConversationContext, ExtractedEntities, AmbiguitySignal } from './
 
 export class LunaAssistant {
   private db: firestore.Firestore;
-  private conversationHistory: ConversationContext[] = [];
-  private sessionId: string;
+  public conversationHistory: ConversationContext[] = [];
+  public sessionId: string;
   private userId: string;
 
   constructor(userId: string, sessionId?: string) {

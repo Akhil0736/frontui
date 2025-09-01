@@ -54,6 +54,7 @@ export default function Home() {
   const { toast } = useToast();
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [open, setOpen] = useState(false);
+  const [sessionId, setSessionId] = useState<string>(() => `session_${Date.now()}`);
 
   const links = [
     { label: 'Home', href: '/', icon: <HomeIcon className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" /> },
@@ -85,7 +86,8 @@ export default function Home() {
     setMessages(newMessages);
 
     try {
-      const response = await chat(prompt);
+      const { response, sessionId: newSessionId } = await chat(prompt, sessionId);
+      setSessionId(newSessionId);
       setMessages(prevMessages => prevMessages.map(msg => 
         msg.id === assistantMessageId ? { ...msg, content: response } : msg
       ));

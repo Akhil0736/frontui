@@ -12,14 +12,24 @@ import { LunaAssistant } from '@/agents/LunaAssistant';
 
 const ChatInputSchema = z.string();
 
-// Maintain one assistant instance per user/session if possible
-// This is a simplified example; in a real app, you'd manage this more robustly
-const assistant = new LunaAssistant('user-123');
+// This is a simplified example of session management. In a real app, you'd manage this more robustly.
+const assistants: Record<string, LunaAssistant> = {};
 
-export async function chat(prompt: string): Promise<string> {
-    // Use the new assistant to handle the input
+function getAssistant(sessionId: string): LunaAssistant {
+    if (!assistants[sessionId]) {
+        console.log("Creating new assistant for session:", sessionId);
+        assistants[sessionId] = new LunaAssistant('user-123', sessionId);
+    } else {
+        console.log("Using existing assistant for session:", sessionId);
+    }
+    return assistants[sessionId];
+}
+
+
+export async function chat(prompt: string, sessionId: string): Promise<{response: string, sessionId: string}> {
+    const assistant = getAssistant(sessionId);
     const result = await assistant.handleUserInput(prompt);
-    return result;
+    return { response: result, sessionId: assistant.sessionId };
 }
 
 // The underlying chatFlow can still be used for direct model access if needed,
