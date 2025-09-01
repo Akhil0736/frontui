@@ -19,7 +19,7 @@ export async function liveSearch(query: string): Promise<LiveSearchResult> {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${apiKey}`,          // ← key in HEADER
+        Authorization: `Bearer ${apiKey}`,
       },
       body: JSON.stringify({
         query,
