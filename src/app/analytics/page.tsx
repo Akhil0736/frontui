@@ -33,6 +33,8 @@ import {
   LineChart,
   Line
 } from "recharts";
+import { GlowCard } from '@/components/ui/spotlight-card';
+
 
 interface MetricCardProps {
   title: string;
@@ -40,7 +42,7 @@ interface MetricCardProps {
   change: number;
   icon: React.ReactNode;
   trend: 'up' | 'down';
-  color: string;
+  glowColor: 'blue' | 'purple' | 'green' | 'red' | 'orange';
 }
 
 interface TrafficSource {
@@ -67,12 +69,11 @@ interface GrowthProjection {
   engagement: number;
 }
 
-const MetricCard: React.FC<MetricCardProps> = ({ title, value, change, icon, trend, color }) => (
-  <div className="relative overflow-hidden rounded-2xl bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl border border-white/20 dark:border-slate-700/50 p-6 shadow-lg hover:shadow-xl transition-all duration-300 group">
-    <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent pointer-events-none" />
+const MetricCard: React.FC<MetricCardProps> = ({ title, value, change, icon, trend, glowColor }) => (
+  <GlowCard glowColor={glowColor} customSize={true} className="p-6">
     <div className="relative z-10">
       <div className="flex items-center justify-between mb-4">
-        <div className={`p-3 rounded-xl bg-gradient-to-br ${color} shadow-lg`}>
+        <div className={`p-3 rounded-xl bg-gradient-to-br from-background/80 to-background/50 shadow-lg`}>
           {icon}
         </div>
         <div className={`flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${
@@ -85,11 +86,11 @@ const MetricCard: React.FC<MetricCardProps> = ({ title, value, change, icon, tre
         </div>
       </div>
       <div className="space-y-1">
-        <p className="text-2xl font-bold text-slate-900 dark:text-white">{value}</p>
-        <p className="text-sm text-slate-600 dark:text-slate-400">{title}</p>
+        <p className="text-2xl font-bold text-foreground">{value}</p>
+        <p className="text-sm text-muted-foreground">{title}</p>
       </div>
     </div>
-  </div>
+  </GlowCard>
 );
 
 const LunaAnalyticsDashboard: React.FC = () => {
@@ -126,41 +127,41 @@ const LunaAnalyticsDashboard: React.FC = () => {
       title: 'Profile Visits',
       value: '12,847',
       change: 23.5,
-      icon: <Eye className="w-5 h-5 text-white" />,
+      icon: <Eye className="w-5 h-5 text-pink-400" />,
       trend: 'up' as const,
-      color: 'from-[#f62369] to-pink-500'
+      glowColor: 'red' as const,
     },
     {
       title: 'New Followers',
       value: '2,394',
       change: 78.2,
-      icon: <Users className="w-5 h-5 text-white" />,
+      icon: <Users className="w-5 h-5 text-blue-400" />,
       trend: 'up' as const,
-      color: 'from-blue-500 to-cyan-500'
+      glowColor: 'blue' as const,
     },
     {
       title: 'Engagement Rate',
       value: '8.7%',
       change: 12.3,
-      icon: <Heart className="w-5 h-5 text-white" />,
+      icon: <Heart className="w-5 h-5 text-purple-400" />,
       trend: 'up' as const,
-      color: 'from-purple-500 to-indigo-500'
+      glowColor: 'purple' as const,
     },
     {
       title: 'Revenue Projection',
       value: '$2,700',
       change: 45.8,
-      icon: <DollarSign className="w-5 h-5 text-white" />,
+      icon: <DollarSign className="w-5 h-5 text-green-400" />,
       trend: 'up' as const,
-      color: 'from-emerald-500 to-green-500'
+      glowColor: 'green' as const,
     },
     {
       title: 'Conversion Rate',
       value: '5.2%',
       change: 8.9,
-      icon: <Target className="w-5 h-5 text-white" />,
+      icon: <Target className="w-5 h-5 text-orange-400" />,
       trend: 'up' as const,
-      color: 'from-orange-500 to-red-500'
+      glowColor: 'orange' as const,
     }
   ], []);
 
@@ -558,3 +559,4 @@ const LunaAnalyticsDashboard: React.FC = () => {
 };
 
 export default LunaAnalyticsDashboard;
+
