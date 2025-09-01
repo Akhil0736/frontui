@@ -23,7 +23,7 @@ import {
   Settings
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Slider } from '@/components/ui/slider';
@@ -64,11 +64,13 @@ const GlassCard: React.FC<{
   className?: string;
 }> = ({ title, children, className = '' }) => {
   return (
-    <Card className={`bg-glass backdrop-blur-xl border-stroke shadow-[0_2px_8px_rgba(0,0,0,0.08)] ${className}`}>
-      <div className="p-6">
-        <h3 className="text-lg font-semibold text-txt-primary mb-4">{title}</h3>
+    <Card className={`bg-card/80 backdrop-blur-xl border-border shadow-[0_2px_8px_rgba(0,0,0,0.08)] ${className}`}>
+      <CardHeader>
+        <CardTitle>{title}</CardTitle>
+      </CardHeader>
+      <CardContent>
         {children}
-      </div>
+      </CardContent>
     </Card>
   );
 };
@@ -95,7 +97,7 @@ const TagInput: React.FC<{
 
   return (
     <div className="space-y-2">
-      <Label htmlFor={id} className="text-txt-primary font-medium">{label}</Label>
+      <Label htmlFor={id} className="text-foreground font-medium">{label}</Label>
       <div className="space-y-2">
         <div className="flex gap-2">
           <Input
@@ -103,14 +105,14 @@ const TagInput: React.FC<{
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}
             onKeyPress={(e) => e.key === 'Enter' && addTag()}
-            className="flex-1 bg-white/50 border-stroke focus:border-accent focus:ring-accent/20"
+            className="flex-1 bg-background/50 border-border focus:border-accent focus:ring-accent/20"
             placeholder={`Add ${label.toLowerCase()}...`}
           />
           <Button 
             type="button" 
             onClick={addTag}
             variant="outline"
-            className="bg-white/50 border-stroke hover:bg-accent hover:text-white"
+            className="bg-background/50 border-border hover:bg-accent hover:text-white"
           >
             <Plus className="w-4 h-4" />
           </Button>
@@ -125,14 +127,14 @@ const TagInput: React.FC<{
               {tag}
               <button
                 onClick={() => removeTag(tag)}
-                className="ml-2 hover:text-danger"
+                className="ml-2 hover:text-destructive"
               >
                 ×
               </button>
             </Badge>
           ))}
         </div>
-        <p className="text-sm text-txt-second">{helper}</p>
+        <p className="text-sm text-muted-foreground">{helper}</p>
       </div>
     </div>
   );
@@ -147,13 +149,13 @@ const LocationSelect: React.FC<{
 
   return (
     <div className="space-y-2">
-      <Label htmlFor={id} className="text-txt-primary font-medium">Target Locations</Label>
+      <Label htmlFor={id} className="text-foreground font-medium">Target Locations</Label>
       <Select onValueChange={(newValue) => {
         if (!value.includes(newValue)) {
           onChange([...value, newValue]);
         }
       }}>
-        <SelectTrigger className="bg-white/50 border-stroke focus:border-accent">
+        <SelectTrigger className="bg-background/50 border-border focus:border-accent">
           <SelectValue placeholder="Select locations..." />
         </SelectTrigger>
         <SelectContent>
@@ -175,7 +177,7 @@ const LocationSelect: React.FC<{
             {location}
             <button
               onClick={() => onChange(value.filter(l => l !== location))}
-              className="ml-2 hover:text-danger"
+              className="ml-2 hover:text-destructive"
             >
               ×
             </button>
@@ -199,12 +201,11 @@ const LimitSlider: React.FC<{
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between">
-        <Label htmlFor={id} className="text-txt-primary font-medium">{label}</Label>
+        <Label htmlFor={id} className="text-foreground font-medium">{label}</Label>
         <div className="flex items-center gap-2">
-          <span className="text-txt-primary font-semibold">{value}</span>
+          <span className="text-foreground font-semibold">{value}</span>
           <Badge 
             variant={isRisk ? "destructive" : "default"}
-            className={isRisk ? "bg-danger text-white" : "bg-success text-white"}
           >
             {isRisk ? "Risk" : "Safe"}
           </Badge>
@@ -219,9 +220,9 @@ const LimitSlider: React.FC<{
         onValueChange={(values) => onChange(values[0])}
         className="w-full"
       />
-      <div className="flex justify-between text-xs text-txt-second">
+      <div className="flex justify-between text-xs text-muted-foreground">
         <span>0</span>
-        <span className="text-success">Safe: {safe}</span>
+        <span>Safe: {safe}</span>
         <span>Max: {max}</span>
       </div>
     </div>
@@ -232,8 +233,8 @@ const SafetyNotice: React.FC<{ hasRisk: boolean }> = ({ hasRisk }) => {
   return (
     <div className={`flex items-center gap-2 p-3 rounded-lg ${
       hasRisk 
-        ? 'bg-danger/10 border border-danger/20 text-danger' 
-        : 'bg-success/10 border border-success/20 text-success'
+        ? 'bg-destructive/10 border border-destructive/20 text-destructive' 
+        : 'bg-green-500/10 border border-green-500/20 text-green-500'
     }`}>
       {hasRisk ? (
         <ShieldAlert className="w-5 h-5" />
@@ -255,7 +256,7 @@ const RadioMatrix: React.FC<{
 }> = ({ id, options, value, onChange }) => {
   return (
     <div className="space-y-2">
-      <Label className="text-txt-primary font-medium">Comment Style</Label>
+      <Label className="text-foreground font-medium">Comment Style</Label>
       <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
         {options.map((option) => (
           <button
@@ -263,8 +264,8 @@ const RadioMatrix: React.FC<{
             onClick={() => onChange(option)}
             className={`p-3 rounded-lg border transition-all ${
               value === option
-                ? 'bg-accent text-white border-accent'
-                : 'bg-white/50 border-stroke hover:border-accent/50 text-txt-primary'
+                ? 'bg-accent text-accent-foreground border-accent'
+                : 'bg-background/50 border-border hover:border-accent/50 text-foreground'
             }`}
           >
             {option}
@@ -284,7 +285,7 @@ const LengthRadio: React.FC<{
 
   return (
     <div className="space-y-2">
-      <Label className="text-txt-primary font-medium">Comment Length</Label>
+      <Label className="text-foreground font-medium">Comment Length</Label>
       <div className="flex gap-2">
         {options.map((option) => (
           <button
@@ -292,8 +293,8 @@ const LengthRadio: React.FC<{
             onClick={() => onChange(option)}
             className={`flex-1 p-2 rounded-lg border transition-all ${
               value === option
-                ? 'bg-accent text-white border-accent'
-                : 'bg-white/50 border-stroke hover:border-accent/50 text-txt-primary'
+                ? 'bg-accent text-accent-foreground border-accent'
+                : 'bg-background/50 border-border hover:border-accent/50 text-foreground'
             }`}
           >
             {option}
@@ -313,7 +314,7 @@ const EmojiToggle: React.FC<{
 
   return (
     <div className="space-y-2">
-      <Label className="text-txt-primary font-medium">Emoji Usage</Label>
+      <Label className="text-foreground font-medium">Emoji Usage</Label>
       <div className="flex gap-2">
         {options.map((option) => (
           <button
@@ -321,8 +322,8 @@ const EmojiToggle: React.FC<{
             onClick={() => onChange(option)}
             className={`flex-1 p-2 rounded-lg border transition-all ${
               value === option
-                ? 'bg-accent text-white border-accent'
-                : 'bg-white/50 border-stroke hover:border-accent/50 text-txt-primary'
+                ? 'bg-accent text-accent-foreground border-accent'
+                : 'bg-background/50 border-border hover:border-accent/50 text-foreground'
             }`}
           >
             {option}
@@ -366,15 +367,15 @@ const LivePreview: React.FC<{ settings: TargetingSettings }> = ({ settings }) =>
 
   return (
     <div className="space-y-2">
-      <Label className="text-txt-primary font-medium">Live Preview</Label>
-      <div className="p-4 bg-white/30 border border-stroke rounded-lg">
+      <Label className="text-foreground font-medium">Live Preview</Label>
+      <div className="p-4 bg-background/30 border border-border rounded-lg">
         <div className="flex items-start gap-3">
           <div className="w-8 h-8 bg-accent rounded-full flex items-center justify-center">
-            <span className="text-white text-sm font-medium">AI</span>
+            <span className="text-accent-foreground text-sm font-medium">AI</span>
           </div>
           <div className="flex-1">
-            <p className="text-txt-primary">{preview}</p>
-            <div className="flex items-center gap-4 mt-2 text-xs text-txt-second">
+            <p className="text-foreground">{preview}</p>
+            <div className="flex items-center gap-4 mt-2 text-xs text-muted-foreground">
               <span>2m ago</span>
               <button className="hover:text-accent">Like</button>
               <button className="hover:text-accent">Reply</button>
@@ -394,25 +395,25 @@ const TimeWindowPicker: React.FC<{
     <div className="space-y-4">
       <div className="flex items-center gap-2">
         <Clock className="w-4 h-4 text-accent" />
-        <Label className="text-txt-primary font-medium">Active Hours</Label>
+        <Label className="text-foreground font-medium">Active Hours</Label>
       </div>
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <Label className="text-sm text-txt-second">Start Time</Label>
+          <Label className="text-sm text-muted-foreground">Start Time</Label>
           <Input
             type="time"
             value={value.start}
             onChange={(e) => onChange({ ...value, start: e.target.value })}
-            className="bg-white/50 border-stroke"
+            className="bg-background/50 border-border"
           />
         </div>
         <div>
-          <Label className="text-sm text-txt-second">End Time</Label>
+          <Label className="text-sm text-muted-foreground">End Time</Label>
           <Input
             type="time"
             value={value.end}
             onChange={(e) => onChange({ ...value, end: e.target.value })}
-            className="bg-white/50 border-stroke"
+            className="bg-background/50 border-border"
           />
         </div>
       </div>
@@ -426,24 +427,24 @@ const PauseRules: React.FC<{
 }> = ({ value, onChange }) => {
   return (
     <div className="space-y-4">
-      <Label className="text-txt-primary font-medium">Auto-Pause Rules</Label>
+      <Label className="text-foreground font-medium">Auto-Pause Rules</Label>
       <div className="space-y-3">
         <div className="flex items-center justify-between">
-          <span className="text-txt-primary">Pause on weekends</span>
+          <span className="text-foreground">Pause on weekends</span>
           <Switch
             checked={value.weekends}
             onCheckedChange={(checked) => onChange({ ...value, weekends: checked })}
           />
         </div>
         <div className="flex items-center justify-between">
-          <span className="text-txt-primary">Pause on holidays</span>
+          <span className="text-foreground">Pause on holidays</span>
           <Switch
             checked={value.holidays}
             onCheckedChange={(checked) => onChange({ ...value, holidays: checked })}
           />
         </div>
         <div className="flex items-center justify-between">
-          <span className="text-txt-primary">Pause on low engagement</span>
+          <span className="text-foreground">Pause on low engagement</span>
           <Switch
             checked={value.lowEngagement}
             onCheckedChange={(checked) => onChange({ ...value, lowEngagement: checked })}
@@ -462,36 +463,36 @@ const DemographicFilter: React.FC<{
     <div className="space-y-4">
       <div className="flex items-center gap-2">
         <Users className="w-4 h-4 text-accent" />
-        <Label className="text-txt-primary font-medium">Demographics</Label>
+        <Label className="text-foreground font-medium">Demographics</Label>
       </div>
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <Label className="text-sm text-txt-second">Min Age</Label>
+          <Label className="text-sm text-muted-foreground">Min Age</Label>
           <Input
             type="number"
             min="13"
             max="100"
             value={value.minAge}
             onChange={(e) => onChange({ ...value, minAge: parseInt(e.target.value) || 18 })}
-            className="bg-white/50 border-stroke"
+            className="bg-background/50 border-border"
           />
         </div>
         <div>
-          <Label className="text-sm text-txt-second">Max Age</Label>
+          <Label className="text-sm text-muted-foreground">Max Age</Label>
           <Input
             type="number"
             min="13"
             max="100"
             value={value.maxAge}
             onChange={(e) => onChange({ ...value, maxAge: parseInt(e.target.value) || 65 })}
-            className="bg-white/50 border-stroke"
+            className="bg-background/50 border-border"
           />
         </div>
       </div>
       <div>
-        <Label className="text-sm text-txt-second">Gender</Label>
+        <Label className="text-sm text-muted-foreground">Gender</Label>
         <Select value={value.gender} onValueChange={(gender) => onChange({ ...value, gender })}>
-          <SelectTrigger className="bg-white/50 border-stroke">
+          <SelectTrigger className="bg-background/50 border-border">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
@@ -526,16 +527,18 @@ const HelperPanel: React.FC<{ className?: string }> = ({ className = '' }) => {
 
   return (
     <div className={`space-y-4 ${className}`}>
-      <h3 className="text-lg font-semibold text-txt-primary">Quick Tips</h3>
+      <h3 className="text-lg font-semibold text-foreground">Quick Tips</h3>
       {tips.map((tip, index) => (
-        <Card key={index} className="p-4 bg-white/30 border-stroke">
-          <div className="flex items-start gap-3">
-            <tip.icon className="w-5 h-5 text-accent mt-0.5" />
-            <div>
-              <h4 className="font-medium text-txt-primary mb-1">{tip.title}</h4>
-              <p className="text-sm text-txt-second">{tip.content}</p>
+        <Card key={index} className="p-4 bg-background/30 border-border">
+           <CardContent className="p-0">
+            <div className="flex items-start gap-3">
+              <tip.icon className="w-5 h-5 text-accent mt-0.5" />
+              <div>
+                <h4 className="font-medium text-foreground mb-1">{tip.title}</h4>
+                <p className="text-sm text-muted-foreground">{tip.content}</p>
+              </div>
             </div>
-          </div>
+           </CardContent>
         </Card>
       ))}
     </div>
@@ -544,14 +547,14 @@ const HelperPanel: React.FC<{ className?: string }> = ({ className = '' }) => {
 
 const HeaderBar: React.FC = () => {
   return (
-    <div className="flex items-center gap-4 p-6 bg-glass backdrop-blur-xl border-b border-stroke">
-      <Button variant="ghost" size="sm" className="text-txt-primary hover:bg-white/20">
+    <div className="flex items-center gap-4 p-6 bg-card/80 backdrop-blur-xl border-b border-border">
+      <Button variant="ghost" size="sm" className="text-foreground hover:bg-white/20">
         <ArrowLeft className="w-4 h-4 mr-2" />
         Back
       </Button>
       <div>
-        <h1 className="text-xl font-semibold text-txt-primary">Smart Targeting</h1>
-        <p className="text-sm text-txt-second">Configure your AI-powered engagement strategy</p>
+        <h1 className="text-xl font-semibold text-foreground">Smart Targeting</h1>
+        <p className="text-sm text-muted-foreground">Configure your AI-powered engagement strategy</p>
       </div>
     </div>
   );
@@ -564,9 +567,9 @@ const FooterCTA: React.FC<{
   hasSettings: boolean;
 }> = ({ onSave, onStart, isLoading, hasSettings }) => {
   return (
-    <div className="fixed bottom-0 left-0 right-0 bg-glass backdrop-blur-xl border-t border-stroke p-6">
+    <div className="fixed bottom-0 left-0 right-0 bg-card/80 backdrop-blur-xl border-t border-border p-6">
       <div className="max-w-5xl mx-auto flex items-center justify-between">
-        <div className="text-sm text-txt-second">
+        <div className="text-sm text-muted-foreground">
           {hasSettings ? 'Settings saved' : 'Configure your targeting settings'}
         </div>
         <div className="flex gap-3">
@@ -574,7 +577,7 @@ const FooterCTA: React.FC<{
             variant="outline" 
             onClick={onSave}
             disabled={isLoading}
-            className="bg-white/50 border-stroke hover:bg-white/70"
+            className="bg-background/50 border-border hover:bg-white/70"
           >
             <Save className="w-4 h-4 mr-2" />
             Save Settings
@@ -646,7 +649,7 @@ export default function SmartTargetingScreen() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-white via-accent/5 to-white">
+    <div className="min-h-screen bg-background text-foreground">
       <HeaderBar />
       
       <div className="mx-auto max-w-5xl px-6 py-8 grid gap-6 lg:grid-cols-[1fr_280px] pb-24">
@@ -742,13 +745,13 @@ export default function SmartTargetingScreen() {
             </div>
           </GlassCard>
 
-          <Card className="bg-glass backdrop-blur-xl border-stroke">
+          <Card className="bg-card/80 backdrop-blur-xl border-border">
             <Accordion type="single" collapsible className="w-full">
               <AccordionItem value="advanced" className="border-none">
                 <AccordionTrigger className="px-6 py-4 hover:no-underline">
                   <div className="flex items-center gap-2">
                     <Settings className="w-5 h-5 text-accent" />
-                    <span className="text-lg font-semibold text-txt-primary">Advanced Targeting</span>
+                    <span className="text-lg font-semibold text-foreground">Advanced Targeting</span>
                   </div>
                 </AccordionTrigger>
                 <AccordionContent className="px-6 pb-6">
@@ -757,12 +760,12 @@ export default function SmartTargetingScreen() {
                       value={settings.activeHours}
                       onChange={(activeHours) => setSettings({ ...settings, activeHours })}
                     />
-                    <Separator className="bg-stroke" />
+                    <Separator className="bg-border" />
                     <PauseRules
                       value={settings.pauseRules}
                       onChange={(pauseRules) => setSettings({ ...settings, pauseRules })}
                     />
-                    <Separator className="bg-stroke" />
+                    <Separator className="bg-border" />
                     <DemographicFilter
                       value={settings.demographics}
                       onChange={(demographics) => setSettings({ ...settings, demographics })}
@@ -784,85 +787,6 @@ export default function SmartTargetingScreen() {
         isLoading={isLoading}
         hasSettings={hasSettings}
       />
-
-      <style jsx global>{`
-        :root {
-          --white: #FFFFFF;
-          --glass: rgba(255,255,255,0.72);
-          --stroke: #E5E5EA;
-          --txt-primary: #1D1D1F;
-          --txt-second: #6E6E73;
-          --accent: #007AFF;
-          --danger: #FF3B30;
-          --success: #30D158;
-        }
-
-        .bg-glass {
-          background-color: var(--glass);
-        }
-
-        .border-stroke {
-          border-color: var(--stroke);
-        }
-
-        .text-txt-primary {
-          color: var(--txt-primary);
-        }
-
-        .text-txt-second {
-          color: var(--txt-second);
-        }
-
-        .text-accent {
-          color: var(--accent);
-        }
-
-        .bg-accent {
-          background-color: var(--accent);
-        }
-
-        .text-danger {
-          color: var(--danger);
-        }
-
-        .bg-danger {
-          background-color: var(--danger);
-        }
-
-        .text-success {
-          color: var(--success);
-        }
-
-        .bg-success {
-          background-color: var(--success);
-        }
-
-        .hover\\:bg-accent\\/90:hover {
-          background-color: rgba(0, 122, 255, 0.9);
-        }
-
-        .focus\\:border-accent:focus {
-          border-color: var(--accent);
-        }
-
-        .focus\\:ring-accent\\/20:focus {
-          box-shadow: 0 0 0 4px rgba(0, 122, 255, 0.18);
-        }
-
-        * {
-          transition: all 150ms ease;
-        }
-
-        *:hover {
-          transform: translateY(-1px);
-        }
-
-        button:hover, .hover\\:bg-white\\/70:hover {
-          transform: translateY(-1px);
-        }
-      `}</style>
     </div>
   );
-};
-
-```
+}
