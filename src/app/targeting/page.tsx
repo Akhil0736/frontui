@@ -12,45 +12,8 @@ import { Switch } from '@/components/ui/switch'
 import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible'
-
-interface GlassCardProps {
-  title: string
-  children: React.ReactNode
-  className?: string
-}
-
-const GlassCard: React.FC<GlassCardProps> = ({ title, children, className = "" }) => {
-  return (
-    <div className={`bg-white/72 dark:bg-black/50 backdrop-blur-md border border-[#E5E5EA] dark:border-white/10 rounded-2xl p-6 shadow-[0_2px_8px_rgba(0,0,0,0.08)] ${className}`}>
-      <h3 className="text-lg font-semibold text-[#1D1D1F] dark:text-gray-100 mb-4">{title}</h3>
-      {children}
-    </div>
-  )
-}
-
-interface HeaderBarProps {
-  title: string
-  onBack?: () => void
-}
-
-const HeaderBar: React.FC<HeaderBarProps> = ({ title, onBack }) => {
-  return (
-    <div className="bg-white/72 dark:bg-black/50 backdrop-blur-md border-b border-[#E5E5EA] dark:border-white/10 px-6 py-4">
-      <div className="max-w-5xl mx-auto flex items-center gap-4">
-        <Button 
-          variant="ghost" 
-          size="sm" 
-          onClick={onBack}
-          className="text-[#007AFF] hover:bg-[#007AFF]/10 transition-all duration-150"
-        >
-          <ChevronLeft className="w-4 h-4 mr-1" />
-          Back
-        </Button>
-        <h1 className="text-xl font-semibold text-[#1D1D1F] dark:text-gray-100">{title}</h1>
-      </div>
-    </div>
-  )
-}
+import { CursorCard, CursorCardsContainer } from '@/components/ui/cursor-cards'
+import { useTheme } from "next-themes"
 
 interface TagInputProps {
   id: string
@@ -398,7 +361,7 @@ const AdvancedOptions: React.FC<AdvancedOptionsProps> = ({ title, children }) =>
   const [isOpen, setIsOpen] = useState(false)
 
   return (
-    <GlassCard title="" className="overflow-hidden">
+    <div className="p-6">
       <Collapsible open={isOpen} onOpenChange={setIsOpen}>
         <CollapsibleTrigger asChild>
           <Button 
@@ -413,7 +376,7 @@ const AdvancedOptions: React.FC<AdvancedOptionsProps> = ({ title, children }) =>
           {children}
         </CollapsibleContent>
       </Collapsible>
-    </GlassCard>
+    </div>
   )
 }
 
@@ -524,9 +487,14 @@ interface HelperPanelProps {
 }
 
 const HelperPanel: React.FC<HelperPanelProps> = ({ className = "" }) => {
+    const { theme } = useTheme();
   return (
     <div className={className}>
-      <GlassCard title="💡 Tips & Best Practices">
+      <CursorCard
+        borderColor={theme === "dark" ? "#262626" : "#e5e5e5"}
+        className="h-auto w-full rounded-xl p-6 shadow-md"
+      >
+        <h3 className="text-lg font-semibold text-[#1D1D1F] dark:text-gray-100 mb-4">💡 Tips & Best Practices</h3>
         <div className="space-y-4 text-sm">
           <div className="space-y-2">
             <h4 className="font-medium text-[#1D1D1F] dark:text-gray-200">Hashtag Strategy</h4>
@@ -543,7 +511,7 @@ const HelperPanel: React.FC<HelperPanelProps> = ({ className = "" }) => {
             <p className="text-[#6E6E73] dark:text-gray-400">Authentic, personalized comments perform 3x better than generic ones.</p>
           </div>
         </div>
-      </GlassCard>
+      </CursorCard>
     </div>
   )
 }
@@ -577,6 +545,7 @@ const FooterCTA: React.FC<FooterCTAProps> = ({
 }
 
 const SmartTargetingScreen: React.FC = () => {
+  const { theme } = useTheme();
   const [hashtags, setHashtags] = useState<string[]>(["socialmedia", "marketing"])
   const [competitors, setCompetitors] = useState<string[]>(["@competitor1"])
   const [location, setLocation] = useState("us")
@@ -594,7 +563,6 @@ const SmartTargetingScreen: React.FC = () => {
 
   const handleSave = async () => {
     setIsLoading(true)
-    // Simulate API call
     await new Promise(resolve => setTimeout(resolve, 1500))
     setHasSettings(true)
     setIsLoading(false)
@@ -602,18 +570,19 @@ const SmartTargetingScreen: React.FC = () => {
 
   const handleStart = async () => {
     setIsLoading(true)
-    // Simulate session start
     await new Promise(resolve => setTimeout(resolve, 1000))
     setIsLoading(false)
   }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-white to-[#F2F2F7] dark:bg-gradient-to-br dark:from-black dark:to-[#1a1a1a]">
-      <HeaderBar title="Smart Targeting" />
-      
       <div className="mx-auto max-w-5xl px-6 py-8 grid gap-6 lg:grid-cols-[1fr_280px]">
-        <div className="space-y-6">
-          <GlassCard title="Target Audience">
+        <CursorCardsContainer className="space-y-6">
+          <CursorCard
+            borderColor={theme === "dark" ? "#262626" : "#e5e5e5"}
+            className="h-auto w-full rounded-xl p-6 shadow-md"
+          >
+            <h3 className="text-lg font-semibold text-[#1D1D1F] dark:text-gray-100 mb-4">Target Audience</h3>
             <div className="grid gap-6 md:grid-cols-2">
               <TagInput 
                 id="hashtags" 
@@ -635,9 +604,13 @@ const SmartTargetingScreen: React.FC = () => {
                 onChange={setLocation}
               />
             </div>
-          </GlassCard>
+          </CursorCard>
 
-          <GlassCard title="Engagement Limits">
+          <CursorCard
+            borderColor={theme === "dark" ? "#262626" : "#e5e5e5"}
+            className="h-auto w-full rounded-xl p-6 shadow-md"
+          >
+            <h3 className="text-lg font-semibold text-[#1D1D1F] dark:text-gray-100 mb-4">Engagement Limits</h3>
             <div className="grid gap-6 md:grid-cols-2">
               <LimitSlider 
                 id="follows" 
@@ -673,9 +646,13 @@ const SmartTargetingScreen: React.FC = () => {
               />
             </div>
             <SafetyNotice hasRisk={hasRisk} />
-          </GlassCard>
+          </CursorCard>
 
-          <GlassCard title="AI Comments">
+          <CursorCard
+            borderColor={theme === "dark" ? "#262626" : "#e5e5e5"}
+            className="h-auto w-full rounded-xl p-6 shadow-md"
+          >
+            <h3 className="text-lg font-semibold text-[#1D1D1F] dark:text-gray-100 mb-4">AI Comments</h3>
             <RadioMatrix 
               id="style" 
               options={["Professional", "Friendly", "Casual", "Enthusiastic"]}
@@ -695,14 +672,19 @@ const SmartTargetingScreen: React.FC = () => {
               />
             </div>
             <LivePreview className="mt-6" />
-          </GlassCard>
+          </CursorCard>
 
-          <AdvancedOptions title="Advanced Targeting">
-            <TimeWindowPicker />
-            <PauseRules />
-            <DemographicFilter />
-          </AdvancedOptions>
-        </div>
+          <CursorCard
+            borderColor={theme === "dark" ? "#262626" : "#e5e5e5"}
+            className="h-auto w-full rounded-xl shadow-md"
+          >
+            <AdvancedOptions title="Advanced Targeting">
+              <TimeWindowPicker />
+              <PauseRules />
+              <DemographicFilter />
+            </AdvancedOptions>
+          </CursorCard>
+        </CursorCardsContainer>
 
         <HelperPanel className="hidden lg:block" />
       </div>
@@ -718,4 +700,3 @@ const SmartTargetingScreen: React.FC = () => {
 }
 
 export default SmartTargetingScreen;
-
