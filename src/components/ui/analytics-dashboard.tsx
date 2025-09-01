@@ -8,13 +8,13 @@ import {
   TrendingUp,
   ShieldCheck,
   MapPin,
-  BarChart,
+  BarChart as BarChartIcon,
   DollarSign,
   Clock,
   Zap,
 } from 'lucide-react';
-import { ChartContainer, ChartTooltip, ChartTooltipContent, BarChart as RechartsBarChart } from '@/components/ui/chart';
-import { Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, Legend, ResponsiveContainer } from 'recharts';
+import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, Legend, ResponsiveContainer } from 'recharts';
 
 
 const chartData = [
@@ -121,7 +121,7 @@ export function AnalyticsDashboard() {
             <h3 className="font-bold text-lg text-white mb-4">Weekly Performance</h3>
              <div className="h-80">
                 <ResponsiveContainer width="100%" height="100%">
-                    <RechartsBarChart data={chartData} margin={{ top: 20, right: 30, left: 0, bottom: 5 }} >
+                    <BarChart data={chartData} margin={{ top: 20, right: 30, left: 0, bottom: 5 }} >
                         <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.2)" />
                         <XAxis dataKey="date" stroke="rgba(255,255,255,0.7)" fontSize={12} />
                         <YAxis stroke="rgba(255,255,255,0.7)" fontSize={12} />
@@ -139,7 +139,7 @@ export function AnalyticsDashboard() {
                         <Bar dataKey="actions" fill="hsl(var(--primary))" name="Luna Actions" radius={[4, 4, 0, 0]} />
                         <Bar dataKey="visits" fill="#82ca9d" name="Profile Visits" radius={[4, 4, 0, 0]} />
                         <Bar dataKey="followers" fill="#8884d8" name="New Followers" radius={[4, 4, 0, 0]} />
-                    </RechartsBarChart>
+                    </BarChart>
                 </ResponsiveContainer>
             </div>
             </GlassCard>
@@ -288,3 +288,5 @@ export function AnalyticsDashboard() {
     </div>
   );
 }
+
+    
