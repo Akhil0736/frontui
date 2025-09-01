@@ -3,6 +3,8 @@
 
 import React, { useState, useRef, useCallback } from 'react';
 import { ArrowLeft, Hash, Users, MapPin, Shield, Bot, TrendingUp, RefreshCw, X, ChevronDown, Plus, AlertTriangle, CheckCircle, Info, Target, Zap } from 'lucide-react';
+import { GradientCard } from '@/components/ui/gradient-card';
+
 
 // TypeScript Interfaces
 interface TargetingConfig {
@@ -35,14 +37,6 @@ interface TargetingConfig {
   };
 }
 
-interface AppleCardProps {
-  title: string;
-  description?: string;
-  icon?: React.ReactNode;
-  children: React.ReactNode;
-  warning?: boolean;
-}
-
 interface SafetySliderProps {
   label: string;
   value: number;
@@ -64,29 +58,6 @@ interface TagInputProps {
   onChange: (tags: string[]) => void;
 }
 
-// Apple Card Component
-const AppleCard: React.FC<AppleCardProps> = ({ title, description, icon, children, warning = false }) => {
-  return (
-    <div className={`bg-card rounded-2xl border border-[var(--border-subtle)] shadow-sm p-6 ${warning ? 'border-[var(--apple-orange)]' : ''}`}>
-      <div className="flex items-start gap-3 mb-6">
-        {icon && (
-          <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${warning ? 'bg-orange-50 dark:bg-orange-900/20' : 'bg-blue-50 dark:bg-blue-900/20'}`}>
-            <div className={warning ? 'text-[var(--apple-orange)]' : 'text-[var(--apple-blue)]'}>
-              {icon}
-            </div>
-          </div>
-        )}
-        <div className="flex-1">
-          <h3 className="text-lg font-semibold text-card-foreground mb-1">{title}</h3>
-          {description && (
-            <p className="text-sm text-muted-foreground">{description}</p>
-          )}
-        </div>
-      </div>
-      {children}
-    </div>
-  );
-};
 
 // Safety Slider Component
 const SafetySlider: React.FC<SafetySliderProps> = ({
@@ -358,7 +329,7 @@ export default function TargetingPage() {
   return (
     <div className="min-h-screen bg-muted/30 dark:bg-background">
       {/* Apple Navigation Header */}
-      <div className="bg-card border-b border-border px-6 py-4">
+      <div className="bg-card/80 border-b border-border backdrop-blur-sm px-6 py-4">
         <div className="max-w-4xl mx-auto">
           <div className="flex items-center gap-4">
             <button className="p-2 hover:bg-accent rounded-xl transition-colors">
@@ -374,139 +345,160 @@ export default function TargetingPage() {
 
       <div className="max-w-4xl mx-auto p-6 space-y-6">
         {/* Target Settings Card */}
-        <AppleCard
-          title="Target Settings"
-          description="Configure your ideal audience"
-          icon={<Target className="w-5 h-5" />}
-        >
-          <div className="space-y-6">
-            <TagInput
-              label="Hashtags"
-              placeholder="Enter hashtags like #fitness"
-              suggestions={hashtagSuggestions}
-              maxTags={10}
-              validation={validateHashtag}
-              helperText="Use 5-10 hashtags with 100K-1M posts for optimal reach"
-              value={config.targeting.hashtags}
-              onChange={(hashtags) => setConfig(prev => ({
-                ...prev,
-                targeting: { ...prev.targeting, hashtags }
-              }))}
-            />
-            
-            <TagInput
-              label="Competitor Accounts"
-              placeholder="Enter usernames like @competitor"
-              maxTags={5}
-              validation={validateCompetitor}
-              helperText="Target competitor followers - they're 3x more likely to engage"
-              value={config.targeting.competitors}
-              onChange={(competitors) => setConfig(prev => ({
-                ...prev,
-                targeting: { ...prev.targeting, competitors }
-              }))}
-            />
-            
-            <TagInput
-              label="Target Locations"
-              placeholder="Enter cities or countries"
-              suggestions={['United States', 'Canada', 'United Kingdom', 'Australia', 'Germany']}
-              maxTags={3}
-              helperText="Focus on 1-3 locations for better engagement rates"
-              value={config.targeting.locations}
-              onChange={(locations) => setConfig(prev => ({
-                ...prev,
-                targeting: { ...prev.targeting, locations }
-              }))}
-            />
-
-            <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800/30 rounded-xl p-4">
-              <div className="flex items-start gap-3">
-                <Info className="w-5 h-5 text-[var(--apple-blue)] mt-0.5" />
-                <div>
-                  <p className="text-sm font-medium text-[var(--apple-blue)] mb-1">Smart Tip</p>
-                  <p className="text-sm text-blue-700 dark:text-blue-300">Target hashtags with 100K-1M posts for optimal reach. Competitor followers are 3x more likely to engage with your content.</p>
+        <GradientCard>
+            <div className="flex items-start gap-3 mb-6">
+                <div className={'w-8 h-8 rounded-lg flex items-center justify-center bg-blue-50 dark:bg-blue-900/20'}>
+                    <div className={'text-[var(--apple-blue)]'}>
+                        <Target className="w-5 h-5" />
+                    </div>
                 </div>
-              </div>
+                <div className="flex-1">
+                <h3 className="text-lg font-semibold text-card-foreground mb-1">Target Settings</h3>
+                <p className="text-sm text-muted-foreground">Configure your ideal audience</p>
+                </div>
             </div>
-          </div>
-        </AppleCard>
+            <div className="space-y-6">
+                <TagInput
+                label="Hashtags"
+                placeholder="Enter hashtags like #fitness"
+                suggestions={hashtagSuggestions}
+                maxTags={10}
+                validation={validateHashtag}
+                helperText="Use 5-10 hashtags with 100K-1M posts for optimal reach"
+                value={config.targeting.hashtags}
+                onChange={(hashtags) => setConfig(prev => ({
+                    ...prev,
+                    targeting: { ...prev.targeting, hashtags }
+                }))}
+                />
+                
+                <TagInput
+                label="Competitor Accounts"
+                placeholder="Enter usernames like @competitor"
+                maxTags={5}
+                validation={validateCompetitor}
+                helperText="Target competitor followers - they're 3x more likely to engage"
+                value={config.targeting.competitors}
+                onChange={(competitors) => setConfig(prev => ({
+                    ...prev,
+                    targeting: { ...prev.targeting, competitors }
+                }))}
+                />
+                
+                <TagInput
+                label="Target Locations"
+                placeholder="Enter cities or countries"
+                suggestions={['United States', 'Canada', 'United Kingdom', 'Australia', 'Germany']}
+                maxTags={3}
+                helperText="Focus on 1-3 locations for better engagement rates"
+                value={config.targeting.locations}
+                onChange={(locations) => setConfig(prev => ({
+                    ...prev,
+                    targeting: { ...prev.targeting, locations }
+                }))}
+                />
+
+                <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800/30 rounded-xl p-4">
+                <div className="flex items-start gap-3">
+                    <Info className="w-5 h-5 text-[var(--apple-blue)] mt-0.5" />
+                    <div>
+                    <p className="text-sm font-medium text-[var(--apple-blue)] mb-1">Smart Tip</p>
+                    <p className="text-sm text-blue-700 dark:text-blue-300">Target hashtags with 100K-1M posts for optimal reach. Competitor followers are 3x more likely to engage with your content.</p>
+                    </div>
+                </div>
+                </div>
+            </div>
+        </GradientCard>
 
         {/* Safety-First Engagement Card */}
-        <AppleCard
-          title="Safety-First Engagement"
-          description="Stay within Instagram's safe limits"
-          icon={<Shield className="w-5 h-5" />}
-          warning={config.safetyLimits.dailyFollows > 25 || config.safetyLimits.dailyLikes > 100}
-        >
-          <div className="space-y-6">
-            <SafetySlider
-              label="Daily Follows"
-              value={config.safetyLimits.dailyFollows}
-              max={50}
-              safeThreshold={25}
-              warningThreshold={35}
-              onChange={(dailyFollows) => setConfig(prev => ({
-                ...prev,
-                safetyLimits: { ...prev.safetyLimits, dailyFollows }
-              }))}
-            />
-            
-            <SafetySlider
-              label="Daily Likes"
-              value={config.safetyLimits.dailyLikes}
-              max={200}
-              safeThreshold={100}
-              warningThreshold={150}
-              onChange={(dailyLikes) => setConfig(prev => ({
-                ...prev,
-                safetyLimits: { ...prev.safetyLimits, dailyLikes }
-              }))}
-            />
-            
-            <SafetySlider
-              label="Daily Comments"
-              value={config.safetyLimits.dailyComments}
-              max={50}
-              safeThreshold={20}
-              warningThreshold={35}
-              onChange={(dailyComments) => setConfig(prev => ({
-                ...prev,
-                safetyLimits: { ...prev.safetyLimits, dailyComments }
-              }))}
-            />
-            
-            <SafetySlider
-              label="Session Duration"
-              value={config.safetyLimits.sessionDuration}
-              max={8}
-              safeThreshold={4}
-              warningThreshold={6}
-              unit="hours"
-              onChange={(sessionDuration) => setConfig(prev => ({
-                ...prev,
-                safetyLimits: { ...prev.safetyLimits, sessionDuration }
-              }))}
-            />
-
-            <div className="bg-orange-50 dark:bg-orange-900/20 border border-orange-100 dark:border-orange-800/30 rounded-xl p-4">
-              <div className="flex items-start gap-3">
-                <AlertTriangle className="w-5 h-5 text-[var(--apple-orange)] mt-0.5" />
-                <div>
-                  <p className="text-sm font-medium text-[var(--apple-orange)] mb-1">Safety Reminder</p>
-                  <p className="text-sm text-orange-700 dark:text-orange-300">Staying in safe zones protects your account from Instagram penalties and maintains long-term growth.</p>
+        <GradientCard>
+            <div className="flex items-start gap-3 mb-6">
+                <div className={'w-8 h-8 rounded-lg flex items-center justify-center bg-blue-50 dark:bg-blue-900/20'}>
+                    <div className={'text-[var(--apple-blue)]'}>
+                       <Shield className="w-5 h-5" />
+                    </div>
                 </div>
-              </div>
+                <div className="flex-1">
+                    <h3 className="text-lg font-semibold text-card-foreground mb-1">Safety-First Engagement</h3>
+                    <p className="text-sm text-muted-foreground">Stay within Instagram's safe limits</p>
+                </div>
             </div>
-          </div>
-        </AppleCard>
+            <div className="space-y-6">
+                <SafetySlider
+                label="Daily Follows"
+                value={config.safetyLimits.dailyFollows}
+                max={50}
+                safeThreshold={25}
+                warningThreshold={35}
+                onChange={(dailyFollows) => setConfig(prev => ({
+                    ...prev,
+                    safetyLimits: { ...prev.safetyLimits, dailyFollows }
+                }))}
+                />
+                
+                <SafetySlider
+                label="Daily Likes"
+                value={config.safetyLimits.dailyLikes}
+                max={200}
+                safeThreshold={100}
+                warningThreshold={150}
+                onChange={(dailyLikes) => setConfig(prev => ({
+                    ...prev,
+                    safetyLimits: { ...prev.safetyLimits, dailyLikes }
+                }))}
+                />
+                
+                <SafetySlider
+                label="Daily Comments"
+                value={config.safetyLimits.dailyComments}
+                max={50}
+                safeThreshold={20}
+                warningThreshold={35}
+                onChange={(dailyComments) => setConfig(prev => ({
+                    ...prev,
+                    safetyLimits: { ...prev.safetyLimits, dailyComments }
+                }))}
+                />
+                
+                <SafetySlider
+                label="Session Duration"
+                value={config.safetyLimits.sessionDuration}
+                max={8}
+                safeThreshold={4}
+                warningThreshold={6}
+                unit="hours"
+                onChange={(sessionDuration) => setConfig(prev => ({
+                    ...prev,
+                    safetyLimits: { ...prev.safetyLimits, sessionDuration }
+                }))}
+                />
+
+                <div className="bg-orange-50 dark:bg-orange-900/20 border border-orange-100 dark:border-orange-800/30 rounded-xl p-4">
+                <div className="flex items-start gap-3">
+                    <AlertTriangle className="w-5 h-5 text-[var(--apple-orange)] mt-0.5" />
+                    <div>
+                    <p className="text-sm font-medium text-[var(--apple-orange)] mb-1">Safety Reminder</p>
+                    <p className="text-sm text-orange-700 dark:text-orange-300">Staying in safe zones protects your account from Instagram penalties and maintains long-term growth.</p>
+                    </div>
+                </div>
+                </div>
+            </div>
+        </GradientCard>
 
         {/* AI Comment Intelligence Card */}
-        <AppleCard
-          title="AI Comment Intelligence"
-          description="Generate authentic, engaging comments"
-          icon={<Bot className="w-5 h-5" />}
-        >
+        <GradientCard>
+            <div className="flex items-start gap-3 mb-6">
+                <div className={'w-8 h-8 rounded-lg flex items-center justify-center bg-blue-50 dark:bg-blue-900/20'}>
+                    <div className={'text-[var(--apple-blue)]'}>
+                        <Bot className="w-5 h-5" />
+                    </div>
+                </div>
+                <div className="flex-1">
+                    <h3 className="text-lg font-semibold text-card-foreground mb-1">AI Comment Intelligence</h3>
+                    <p className="text-sm text-muted-foreground">Generate authentic, engaging comments</p>
+                </div>
+            </div>
+
           <div className="space-y-6">
             <div>
               <label className="text-sm font-medium text-foreground mb-3 block">Comment Style</label>
@@ -552,14 +544,22 @@ export default function TargetingPage() {
               </div>
             </div>
           </div>
-        </AppleCard>
+        </GradientCard>
 
         {/* Luna's Tactical Insights Card */}
-        <AppleCard
-          title="Luna's Tactical Insights"
-          description="AI-powered optimization recommendations"
-          icon={<TrendingUp className="w-5 h-5" />}
-        >
+        <GradientCard>
+            <div className="flex items-start gap-3 mb-6">
+                <div className={'w-8 h-8 rounded-lg flex items-center justify-center bg-blue-50 dark:bg-blue-900/20'}>
+                    <div className={'text-[var(--apple-blue)]'}>
+                        <TrendingUp className="w-5 h-5" />
+                    </div>
+                </div>
+                <div className="flex-1">
+                    <h3 className="text-lg font-semibold text-card-foreground mb-1">Luna's Tactical Insights</h3>
+                    <p className="text-sm text-muted-foreground">AI-powered optimization recommendations</p>
+                </div>
+            </div>
+
           <div className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="bg-green-50 dark:bg-green-900/20 rounded-xl p-4 border border-green-100 dark:border-green-800/30">
@@ -600,7 +600,7 @@ export default function TargetingPage() {
               </div>
             </div>
           </div>
-        </AppleCard>
+        </GradientCard>
 
         {/* Save Configuration Button */}
         <div className="sticky bottom-6 flex justify-center">
@@ -613,4 +613,3 @@ export default function TargetingPage() {
   );
 }
 
-    
