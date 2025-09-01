@@ -59,10 +59,25 @@ export async function answerWithLiveSearch(question: string) {
   }
 
   const context = searchResults.results
-    ?.map((r: any) => `${r.title}: ${r.content} (${r.url})`)
-    .join("\n\n") || "";
+    ?.map((r: any) => `Title: ${r.title}\nURL: ${r.url}\nContent: ${r.content}\n`)
+    .join("\n---\n") || "";
 
-  const prompt = `Based on this current information:\n\n${context}\n\nQuestion: ${question}\n\nProvide a comprehensive answer with source URLs in parentheses.`;
+  const prompt = `Based on this current web information:
+
+${context}
+
+Question: ${question}
+
+IMPORTANT: Extract and clearly list all specific movie titles mentioned in the search results. Format your response as:
+
+**Movies releasing this month:**
+- [Movie Title 1] - [Release Date] ([Source URL])
+- [Movie Title 2] - [Release Date] ([Source URL])
+- [Movie Title 3] - [Release Date] ([Source URL])
+
+If specific titles aren't clearly mentioned, state that and provide the source links for manual checking.
+
+Provide a comprehensive answer with specific movie names, not just source descriptions.`;
 
   const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
   const result = await model.generateContent(prompt);
