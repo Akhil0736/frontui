@@ -1,4 +1,6 @@
+
 import { ai } from "@/ai/genkit";
+import { liveSearch } from "@/services/tavily";
 
 interface RouterResponse {
   response: string;
@@ -86,6 +88,20 @@ class EnhancedLunaRouter {
   }
 
   private async analyzeRequest(userMessage: string, attachments: any[] = [], context: any[] = []) {
+    const needsWeb = /movies?.*this month|weather|today|latest/i.test(userMessage);
+
+    if (needsWeb) {
+      const searchResult = await liveSearch(userMessage);
+      if (searchResult) {
+        const liveContext = `Live answer: ${searchResult.answer}\nSources:\n` +
+          searchResult.sources.map(s => `• ${s.title} (${s.url})`).join("\n");
+        // Inject live context into the context array to be used in the prompt
+        // @ts-ignore
+        context.push({ role: 'system', content: liveContext });
+      }
+    }
+
+
     let routingDecision = await this.heuristicAnalysis(userMessage, attachments, context);
     if (routingDecision.confidence < 0.8) {
         routingDecision = await this.llmClassification(userMessage, attachments, context);
