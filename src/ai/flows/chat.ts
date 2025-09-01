@@ -36,17 +36,17 @@ export async function chat(prompt: string, sessionId: string): Promise<{response
 const chatFlow = ai.defineFlow(
     {
         name: 'chatFlow',
-        inputSchema: ChatInputSchema,
-        outputSchema: z.string(),
+        inputSchema: z.object({ prompt: ChatInputSchema, sessionId: z.string() }),
+        outputSchema: z.object({ response: z.string(), sessionId: z.string() }),
     },
-    async (prompt) => {
+    async ({ prompt, sessionId }) => {
         try {
-            // This is now the direct call to the LLM router, used by the assistant
-            const result = await routeRequest(prompt); 
-            return result?.response || "I'm sorry, I encountered an issue while processing your request.";
+            const assistant = getAssistant(sessionId);
+            const result = await assistant.handleUserInput(prompt);
+            return { response: result, sessionId: assistant.sessionId };
         } catch (error: any) {
             console.error("Error in chatFlow:", error.message || error);
-            return "I'm sorry, I'm having trouble responding right now. Please try again in a moment.";
+            return { response: "I'm sorry, I'm having trouble responding right now. Please try again in a moment.", sessionId };
         }
     }
 );

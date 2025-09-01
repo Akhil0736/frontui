@@ -33,7 +33,7 @@ export class LunaAssistant {
       // Extract entities and intent from user input
       const entities = await this.extractEntities(input);
       console.log('Extracted entities:', entities);
-      const intent = await this.classifyIntent(input, entities);
+      const intent = await this.classifyIntent(input);
       console.log('Classified intent:', intent);
 
       // Store in conversation context
@@ -101,17 +101,28 @@ export class LunaAssistant {
   /**
    * Classify user intent based on input and entities
    */
-  private async classifyIntent(input: string, entities: ExtractedEntities): Promise<string> {
-    const lowercaseInput = input.toLowerCase();
+  private async classifyIntent(message: string): Promise<string> {
+    // First check for web-search patterns
+    const webSearchPatterns = [
+      /(?:what|which|tell me about).*(today|this month|this week|current|latest|recent|now)/i,
+      /(?:movies?|films?).*(releasing|coming|this month|new)/i,
+      /(?:news|updates|latest).*(instagram|social media|tech)/i,
+      /(?:price|cost|stock|market).*(today|current|now)/i,
+      /(?:weather|forecast)/i
+    ];
     
-    // Debug logging to see what's being detected
-    console.log('Detected entities:', entities);
+    if (webSearchPatterns.some(pattern => pattern.test(message))) {
+      return 'web_search_required';
+    }
     
-    if (entities.people?.length || entities.events?.length) {
+    const lowercaseInput = message.toLowerCase();
+
+    // Then check existing patterns
+    if (this.extractEntities(message).then(e => e.people?.length || e.events?.length)) {
       return 'event_query';
     }
     
-    if (entities.topics?.length) {
+    if (this.extractEntities(message).then(e => e.topics?.length)) {
       return 'instagram_growth';
     }
     
@@ -125,6 +136,7 @@ export class LunaAssistant {
     
     return 'general_query';
   }
+
 
   /**
    * Detect ambiguity in user queries using context
@@ -212,11 +224,11 @@ export class LunaAssistant {
   ): Promise<string> {
     
     // Use your existing LLM router with enhanced context
-    const contextPrompt = this.buildContextPrompt(input, entities, intent, context);
+    const contextPrompt = this.buildContextPrompt(intent, input);
     
     try {
       // Call your enhanced router with context
-      const response = await routeRequest(contextPrompt);
+      const response = await routeRequest(contextPrompt, input);
       return response.response;
     } catch (error) {
       return this.getPersonalityFallback(input);
@@ -227,25 +239,19 @@ export class LunaAssistant {
    * Build context-rich prompt for LLM
    */
   private buildContextPrompt(
-    input: string,
-    entities: ExtractedEntities,
     intent: string,
-    context: ConversationContext
+    message: string,
   ): string {
     const recentHistory = this.conversationHistory.slice(-3);
     const historyContext = recentHistory
       .map(h => `User: ${h.query}`)
       .join('\n');
-    
-    return `
+      
+    const baseContext = `
 You are Luna, a helpful AI assistant with expertise in Instagram growth.
 
 CONVERSATION CONTEXT:
 ${historyContext}
-
-CURRENT QUERY: ${input}
-DETECTED ENTITIES: ${JSON.stringify(entities)}
-USER INTENT: ${intent}
 
 RESPONSE RULES:
 - Answer the user's question directly and helpfully first
@@ -254,9 +260,23 @@ RESPONSE RULES:
 - For wrestling/WWE questions: Answer factually, then optionally mention Instagram growth for content creators
 - For greetings: Be friendly and welcoming
 - Always be helpful, never dismissive
-
-CURRENT QUERY: ${input}
 `;
+
+    switch (intent) {
+      case 'web_search_required':
+        return `${baseContext}
+        
+IMPORTANT: This query requires real-time web information. The user asked: "${message}"
+Respond naturally but indicate you're searching for current information.
+
+User Query: ${message}`;
+        
+      case 'event_query':
+        return `${baseContext}\n\nCURRENT QUERY: ${message}\nDETECTED ENTITIES: ${JSON.stringify(this.extractEntities(message))}\nUSER INTENT: ${intent}\n\nCURRENT QUERY: ${message}`;
+
+      default:
+        return `${baseContext}\n\nCURRENT QUERY: ${message}\nUSER INTENT: ${intent}\n\nCURRENT QUERY: ${message}`;
+    }
   }
 
 
