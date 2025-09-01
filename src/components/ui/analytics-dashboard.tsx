@@ -288,5 +288,3 @@ export function AnalyticsDashboard() {
     </div>
   );
 }
-
-    
