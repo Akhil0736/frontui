@@ -25,18 +25,9 @@ async function generateWithGemini(prompt: string) {
 
 async function getLiveAnswer(question: string): Promise<any> {
   try {
-    const command = `python3 -c "
-from src.services.luna_live_search import enhanced_luna_answer
-import json
-import os
-# It's better to load env vars within the script if possible
-# or ensure the calling process has them.
-from dotenv import load_dotenv
-load_dotenv()
-
-result = enhanced_luna_answer('${question.replace(/'/g, "\\'")}')
-print(json.dumps(result))
-"`;
+    // Execute the python script as a module to handle relative imports correctly.
+    const command = `python3 -m src.services.luna_live_search "${question.replace(/"/g, '\\"')}"`;
+    
     console.log("Executing python command for question: ", question);
     const { stdout, stderr } = await execAsync(command);
 

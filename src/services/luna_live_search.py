@@ -2,6 +2,11 @@ import google.generativeai as genai
 from .tavily_service import TavilyService
 import os
 import json
+import sys
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
 
 # Configure Gemini
 genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
@@ -21,7 +26,7 @@ def standard_luna_response(question: str):
             "has_live_data": False
         }
     except Exception as e:
-        print(f"Standard Gemini generation failed: {e}")
+        print(f"Standard Gemini generation failed: {e}", file=sys.stderr)
         return {
             "answer": "I'm having a little trouble thinking right now. Please try again later.",
             "sources": [],
@@ -35,7 +40,11 @@ def answer_with_live_search(question: str):
     search_results = tavily_service.search(question)
     
     if not search_results:
-        return "I encountered an issue searching for current information. Please try again."
+        return {
+            "answer": "I encountered an issue searching for current information. Please try again.",
+            "sources": [],
+            "has_live_data": False
+        }
     
     # Step 2: Format results for Gemini
     context_parts = []
@@ -67,8 +76,12 @@ Please provide a comprehensive answer using the information above. Include relev
             "has_live_data": True
         }
     except Exception as e:
-        print(f"Gemini generation failed: {e}")
-        return "I found current information but had trouble generating a response. Please try again."
+        print(f"Gemini generation failed: {e}", file=sys.stderr)
+        return {
+            "answer": "I found current information but had trouble generating a response. Please try again.",
+            "sources": sources,
+            "has_live_data": True
+        }
 
 # For your existing Luna routing
 def enhanced_luna_answer(user_question: str):
@@ -85,3 +98,11 @@ def enhanced_luna_answer(user_question: str):
     else:
         # Your existing Luna chat logic here
         return standard_luna_response(user_question)
+
+if __name__ == '__main__':
+    if len(sys.argv) > 1:
+        question = sys.argv[1]
+        result = enhanced_luna_answer(question)
+        print(json.dumps(result))
+    else:
+        print(json.dumps({"error": "No question provided"}), file=sys.stderr)
