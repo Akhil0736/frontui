@@ -5,7 +5,8 @@ import { useParams, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { BeamsBackground } from '@/components/ui/beams-background';
-import { Send, Sparkles, Paperclip, Mic } from 'lucide-react';
+import { Send, Paperclip, Mic } from 'lucide-react';
+import { LunaLogo } from "./ui/luna-logo";
 import AIInputField from "./ui/ai-input";
 
 export default function ChatInterface() {
@@ -50,24 +51,7 @@ export default function ChatInterface() {
             <div className="flex flex-col h-full relative z-10">
                 {/* Welcome Content */}
                 <div className="flex-1 flex items-center justify-center p-4">
-                    <motion.div
-                        initial={{ opacity: 0.0, y: 40 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{
-                            delay: 0.3,
-                            duration: 0.8,
-                            ease: "easeInOut",
-                        }}
-                        className="relative flex flex-col gap-6 items-center justify-center px-4 text-center max-w-3xl"
-                    >
-                        <div className="text-4xl md:text-6xl font-bold text-neutral-800 dark:text-white mb-4">
-                            LUNA
-                        </div>
-                        
-                        <div className="font-light text-lg md:text-xl text-neutral-600 dark:text-neutral-300 max-w-2xl">
-                            What can I help you with?
-                        </div>
-                    </motion.div>
+                    <LunaLogo />
                 </div>
 
                 {/* Input Area */}
