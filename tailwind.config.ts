@@ -26,10 +26,20 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        body: ['Inter', 'sans-serif'],
-        headline: ['Inter', 'sans-serif'],
-        cursive: ['"Dancing Script"', 'cursive'],
-        code: ['monospace'],
+        'proxima': ['"Proxima Nova"', 'system-ui', '-apple-system', 'sans-serif'],
+        'luna': ['"Proxima Nova"', 'system-ui', '-apple-system', 'sans-serif'],
+        body: ['"Proxima Nova"', 'sans-serif'],
+        headline: ['"Proxima Nova"', 'sans-serif'],
+      },
+      fontWeight: {
+        'proxima-light': '300',
+        'proxima-regular': '400', 
+        'proxima-semibold': '600',
+        'proxima-bold': '700',
+      },
+      letterSpacing: {
+        'luna-tight': '-0.025em',
+        'luna-normal': '-0.01em',
       },
       colors: {
         background: 'hsl(var(--background))',

@@ -22,7 +22,7 @@ interface ChatContextType {
   currentChat: ChatThread | null;
   chatThreads: ChatThread[];
   createNewChat: () => string;
-  sendMessage: (content: string) => void;
+  sendMessage: (content: string, chatId: string) => void;
   loadChat: (chatId: string) => void;
   clearCurrentChat: () => void;
 }
@@ -54,11 +54,26 @@ export const ChatProvider = ({ children }: { children: React.ReactNode }) => {
     };
     
     setCurrentChat(newChat);
+    setChatThreads(prev => [newChat, ...prev].sort((a, b) => b.updatedAt.getTime() - a.updatedAt.getTime()));
     return newChatId;
   };
 
-  const sendMessage = async (content: string) => {
-    if (!currentChat) return;
+  const sendMessage = async (content: string, chatId: string) => {
+    let chatToUpdate = chatThreads.find(chat => chat.id === chatId);
+    if (!chatToUpdate) {
+        // This case should ideally not happen if createNewChat is called first
+        // But as a fallback, create it.
+        const newChat: ChatThread = {
+            id: chatId,
+            title: 'New Chat',
+            messages: [],
+            createdAt: new Date(),
+            updatedAt: new Date()
+        };
+        setChatThreads(prev => [newChat, ...prev]);
+        chatToUpdate = newChat;
+    }
+
 
     const userMessage: Message = {
       id: Date.now().toString(),
@@ -68,23 +83,17 @@ export const ChatProvider = ({ children }: { children: React.ReactNode }) => {
     };
 
     const updatedChatWithMessage = {
-      ...currentChat,
-      messages: [...currentChat.messages, userMessage],
-      title: currentChat.messages.length === 0 ? content.slice(0, 50) + '...' : currentChat.title,
+      ...chatToUpdate,
+      messages: [...chatToUpdate.messages, userMessage],
+      title: chatToUpdate.messages.length === 0 ? content.slice(0, 30) + (content.length > 30 ? '...' : '') : chatToUpdate.title,
       updatedAt: new Date()
     };
 
     setCurrentChat(updatedChatWithMessage);
-
+    
     setChatThreads(prev => {
-      const existingIndex = prev.findIndex(chat => chat.id === currentChat.id);
-      if (existingIndex >= 0) {
-        const updated = [...prev];
-        updated[existingIndex] = updatedChatWithMessage;
+        const updated = prev.map(c => c.id === chatId ? updatedChatWithMessage : c);
         return updated.sort((a, b) => b.updatedAt.getTime() - a.updatedAt.getTime());
-      } else {
-        return [updatedChatWithMessage, ...prev].sort((a, b) => b.updatedAt.getTime() - a.updatedAt.getTime());
-      }
     });
 
     const { response, sessionId: newSessionId } = await chat(
@@ -108,20 +117,19 @@ export const ChatProvider = ({ children }: { children: React.ReactNode }) => {
 
     setCurrentChat(finalChat);
     setChatThreads(prev => {
-      const updated = [...prev];
-      const index = updated.findIndex(chat => chat.id === currentChat.id);
-      if (index >= 0) {
-        updated[index] = finalChat;
-      }
-      return updated.sort((a,b) => b.updatedAt.getTime() - a.updatedAt.getTime());
+        const updated = prev.map(c => c.id === chatId ? finalChat : c);
+        return updated.sort((a,b) => b.updatedAt.getTime() - a.updatedAt.getTime());
     });
   };
 
   const loadChat = (chatId: string) => {
-    const chat = chatThreads.find(c => c.id === chatId);
+    let chat = chatThreads.find(c => c.id === chatId);
     if (chat) {
       setCurrentChat(chat);
     } else {
+      // Create a new one if it doesn't exist in state.
+      // This can happen if the user navigates directly to a chat URL
+      // that isn't in the local state.
       const newChat: ChatThread = {
         id: chatId,
         title: 'New Chat',
