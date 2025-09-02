@@ -59,6 +59,13 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
     setIsMounted(true);
   }, []);
 
+  const handleNewChat = () => {
+    // Handle new chat creation
+    console.log('Creating new chat...');
+    // You can navigate to a new chat page or open a modal
+    // router.push('/chat/new') or setShowNewChatModal(true)
+  };
+
   const chatThreads = [
     {
       label: "Next.js 15.3.3 (stale)",
@@ -127,7 +134,11 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             <div className="mt-8 flex flex-col gap-2">
               {links.map((link, idx) => (
                 link.subItems ? (
-                  <ExpandableSidebarLink key={idx} link={link} />
+                  <ExpandableSidebarLink 
+                    key={idx} 
+                    link={link} 
+                    onNewChat={handleNewChat}
+                  />
                 ) : (
                   <SidebarLink key={idx} link={link} />
                 )

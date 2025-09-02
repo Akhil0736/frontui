@@ -3,9 +3,9 @@
 
 import { cn } from "@/lib/utils";
 import Link, { LinkProps } from "next/link";
-import React, { useState, createContext, useContext } from "react";
+import React, { useState, createContext, useContext, useRef, useEffect } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { Menu, X, ChevronRight } from "lucide-react";
+import { Menu, X, ChevronRight, Plus } from "lucide-react";
 
 interface Links {
   label: string;
@@ -198,27 +198,71 @@ export const SidebarLink = ({
 export const ExpandableSidebarLink = ({
   link,
   className,
+  onNewChat,
   ...props
 }: {
   link: Links;
   className?: string;
+  onNewChat?: () => void;
   props?: LinkProps;
 }) => {
   const { open, animate } = useSidebar();
   const [isExpanded, setIsExpanded] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  const handleMouseEnter = () => {
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+    }
+    if (open) {
+      setIsExpanded(true);
+    }
+  };
+
+  const handleMouseLeave = () => {
+    // Add a delay before closing to allow user to move mouse to submenu
+    timeoutRef.current = setTimeout(() => {
+      setIsExpanded(false);
+    }, 300); // 300ms delay
+  };
+
+  const handleNewChatClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (onNewChat) {
+      onNewChat();
+    }
+    // Default behavior - you can customize this
+    console.log('Starting new chat...');
+  };
+
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+    };
+  }, []);
 
   return (
-    <div className="flex flex-col">
-      <div
+    <div
+      ref={containerRef}
+      className="flex flex-col"
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+    >
+      {/* Main Link */}
+      <Link
+        href={link.href}
         className={cn(
           "flex items-center justify-between group/sidebar py-2 cursor-pointer",
           className
         )}
-        onMouseEnter={() => open && setIsExpanded(true)}
-        onMouseLeave={() => setIsExpanded(false)}
         {...props}
       >
-        <Link href={link.href} className="flex items-center gap-2">
+        <div className="flex items-center gap-2">
           {link.icon}
           <motion.span
             animate={{
@@ -229,7 +273,7 @@ export const ExpandableSidebarLink = ({
           >
             {link.label}
           </motion.span>
-        </Link>
+        </div>
         
         {link.subItems && open && (
           <motion.div
@@ -239,8 +283,9 @@ export const ExpandableSidebarLink = ({
             <ChevronRight className="h-4 w-4 text-neutral-400" />
           </motion.div>
         )}
-      </div>
+      </Link>
 
+      {/* Expandable Submenu */}
       <AnimatePresence>
         {isExpanded && link.subItems && open && (
           <motion.div
@@ -250,15 +295,16 @@ export const ExpandableSidebarLink = ({
             transition={{ duration: 0.3, ease: "easeInOut" }}
             className="overflow-hidden ml-6 border-l border-neutral-300 dark:border-neutral-600 pl-2"
           >
-            <div className="py-1 space-y-1">
+            <div className="py-1 space-y-1 max-h-64 overflow-y-auto">
+              {/* Chat Threads */}
               {link.subItems.map((subItem, idx) => (
                 <Link
                   key={idx}
                   href={subItem.href}
-                  className="flex items-center justify-between py-1.5 px-2 rounded-md hover:bg-neutral-200 dark:hover:bg-neutral-700 transition-colors group"
+                  className="flex items-center justify-between py-1.5 px-2 rounded-md hover:bg-neutral-200 dark:hover:bg-neutral-700 transition-colors group cursor-pointer"
                 >
-                  <div className="flex flex-col">
-                    <span className="text-sm text-neutral-600 dark:text-neutral-300 group-hover:text-neutral-800 dark:group-hover:text-neutral-100 truncate max-w-[180px]">
+                  <div className="flex flex-col min-w-0 flex-1">
+                    <span className="text-sm text-neutral-600 dark:text-neutral-300 group-hover:text-neutral-800 dark:group-hover:text-neutral-100 truncate">
                       {subItem.label}
                     </span>
                     {subItem.timestamp && (
@@ -269,6 +315,15 @@ export const ExpandableSidebarLink = ({
                   </div>
                 </Link>
               ))}
+
+              {/* New Chat Button */}
+              <button
+                onClick={handleNewChatClick}
+                className="mt-2 w-full flex items-center justify-center gap-2 py-2 px-2 rounded-md border border-dashed border-neutral-400 dark:border-neutral-600 text-neutral-600 dark:text-neutral-300 hover:bg-neutral-200 dark:hover:bg-neutral-700 hover:border-neutral-500 dark:hover:border-neutral-500 transition-all duration-200 text-sm"
+              >
+                <Plus className="h-4 w-4" />
+                <span>New Chat</span>
+              </button>
             </div>
           </motion.div>
         )}
