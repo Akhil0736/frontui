@@ -125,7 +125,7 @@ export default function AppLayout() {
   ];
 
   return (
-    <div className="relative z-20 h-screen w-full flex bg-transparent">
+    <div className="flex h-screen w-full bg-transparent">
       <Sidebar open={open} setOpen={setOpen}>
         <SidebarBody className="justify-between gap-10">
           <div className="flex flex-col flex-1 overflow-y-auto overflow-x-hidden">
