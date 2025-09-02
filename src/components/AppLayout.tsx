@@ -17,7 +17,6 @@ import {
 } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import { Switch } from '@/components/ui/switch';
-import { BeamsBackground } from './ui/beams-background';
 import ChatInterface from './ChatInterface';
 import { useChatContext } from '@/context/ChatContext';
 
@@ -66,12 +65,7 @@ const LogoIcon = () => {
 export default function AppLayout() {
   const [open, setOpen] = useState(false);
   const { theme, setTheme } = useTheme();
-  const [isMounted, setIsMounted] = useState(false);
   const { chatThreads, createNewChat } = useChatContext();
-
-  useEffect(() => {
-    setIsMounted(true);
-  }, []);
 
   const handleNewChat = (chatId: string) => {
     console.log('New chat created:', chatId);
@@ -129,8 +123,8 @@ export default function AppLayout() {
     },
   ];
 
-  const MainContent = () => (
-    <div className="relative z-20 h-screen w-full flex bg-background dark:bg-transparent">
+  return (
+    <div className="relative z-20 h-screen w-full flex bg-background">
       <Sidebar open={open} setOpen={setOpen}>
         <SidebarBody className="justify-between gap-10">
           <div className="flex flex-col flex-1 overflow-y-auto overflow-x-hidden">
@@ -183,19 +177,4 @@ export default function AppLayout() {
       </div>
     </div>
   );
-
-
-  if (!isMounted) {
-    return <MainContent />;
-  }
-
-  if (theme === 'dark') {
-    return (
-      <BeamsBackground>
-        <MainContent />
-      </BeamsBackground>
-    );
-  }
-
-  return <MainContent />;
 }
