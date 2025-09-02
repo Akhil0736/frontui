@@ -48,31 +48,9 @@ export default function ChatInterface() {
     return (
         <BeamsBackground className="h-full">
             <div className="flex flex-col h-full relative z-10">
-                {/* Welcome Content */}
                 <div className="flex-1 flex items-center justify-center p-4">
-                <motion.div
-                    initial={{ opacity: 0.0, y: 40 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{
-                    delay: 0.3,
-                    duration: 0.8,
-                    ease: "easeInOut",
-                    }}
-                    className="relative flex flex-col gap-6 items-center justify-center px-4 text-center max-w-3xl"
-                >
-                    {/* Main LUNA Title - Using specimen-recommended sizing */}
-                    <div className="luna-title text-6xl md:text-7xl lg:text-8xl font-proxima-semibold text-neutral-800 dark:text-white mb-4 tracking-luna-tight">
-                        LUNA
-                    </div>
-                    
-                    {/* Subtitle - Using Light weight as shown in specimens */}
-                    <div className="luna-subtitle text-xl md:text-2xl font-proxima-light text-neutral-600 dark:text-neutral-300 max-w-2xl tracking-luna-normal">
-                        What can I help you with?
-                    </div>
-                </motion.div>
+                  <LunaLogo />
                 </div>
-
-                {/* Input Area */}
                 <div className="p-6 backdrop-blur-sm">
                     <AIInputField onSend={handleSend} isLoading={isLoading} />
                 </div>

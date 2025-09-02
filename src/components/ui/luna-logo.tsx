@@ -18,7 +18,7 @@ const sizeClasses = {
 
 export function LunaLogo({ className, size = 'lg' }: LunaLogoProps = {}) {
   return (
-    <div className={cn("relative flex items-center justify-center h-full", className)}>
+    <div className={cn("relative flex items-center justify-center", className)}>
       {/* Background glow effect */}
       <motion.div
         className="absolute inset-0 flex items-center justify-center"
