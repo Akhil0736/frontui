@@ -18,7 +18,6 @@ import {
 } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import { Switch } from '@/components/ui/switch';
-import ChatInterface from './ChatInterface';
 import { useChatContext } from '@/context/ChatContext';
 
 function formatTimeAgo(date: Date): string {
@@ -63,7 +62,7 @@ const LogoIcon = () => {
   );
 };
 
-export default function AppLayout() {
+export default function AppLayout({ children }: { children: ReactNode }) {
   const [open, setOpen] = useState(false);
   const { theme, setTheme } = useTheme();
   const { chatThreads, createNewChat } = useChatContext();
@@ -174,7 +173,7 @@ export default function AppLayout() {
         </SidebarBody>
       </Sidebar>
       <div className="flex-1 h-screen overflow-y-auto">
-        <ChatInterface />
+        {children}
       </div>
     </div>
   );

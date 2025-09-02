@@ -3,6 +3,7 @@ import './globals.css';
 import { Toaster } from '@/components/ui/toaster';
 import { ThemeProvider } from 'next-themes';
 import { ChatProvider } from '@/context/ChatContext';
+import AppLayout from '@/components/AppLayout';
 
 export const metadata: Metadata = {
   title: 'Luna Dashboard',
@@ -36,7 +37,7 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <ChatProvider>
-            {children}
+            <AppLayout>{children}</AppLayout>
             <Toaster />
           </ChatProvider>
         </ThemeProvider>

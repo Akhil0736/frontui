@@ -174,52 +174,8 @@ const LunaAnalyticsDashboard: React.FC = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
-      {/* Header */}
-      <header className="sticky top-0 z-50 backdrop-blur-xl bg-background/80 border-b border-border">
-        <div className="max-w-7xl mx-auto px-6 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#f62369] to-pink-500 flex items-center justify-center shadow-lg">
-                  <span className="text-white font-bold text-lg">L</span>
-                </div>
-                <div>
-                  <h1 className="text-xl font-bold text-foreground">Luna Analytics</h1>
-                  <p className="text-sm text-muted-foreground">AI-Powered Instagram Automation</p>
-                </div>
-              </div>
-            </div>
-            
-            <div className="flex items-center gap-3">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                <input
-                  type="text"
-                  placeholder="Search metrics..."
-                  className="pl-10 pr-4 py-2 bg-background/50 border border-border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 backdrop-blur-sm"
-                />
-              </div>
-              
-              <select
-                value={dateRange}
-                onChange={(e) => setDateRange(e.target.value)}
-                className="px-4 py-2 bg-background/50 border border-border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 backdrop-blur-sm"
-              >
-                <option value="7d">Last 7 days</option>
-                <option value="30d">Last 30 days</option>
-                <option value="90d">Last 90 days</option>
-              </select>
-              
-              <button className="p-2 bg-background/50 border border-border rounded-xl hover:bg-accent/50 transition-colors backdrop-blur-sm">
-                <Settings className="w-4 h-4 text-muted-foreground" />
-              </button>
-            </div>
-          </div>
-        </div>
-      </header>
+    <div className="min-h-screen bg-background text-foreground p-6">
 
-      <div className="max-w-7xl mx-auto px-6 py-8">
         {/* Navigation Tabs */}
         <div className="mb-8">
           <div className="flex flex-wrap gap-2 p-1 bg-background/50 rounded-2xl backdrop-blur-sm border border-border">
@@ -553,10 +509,10 @@ const LunaAnalyticsDashboard: React.FC = () => {
             </div>
           </div>
         )}
-      </div>
     </div>
   );
 };
 
 export default LunaAnalyticsDashboard;
+
 
