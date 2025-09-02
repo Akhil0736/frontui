@@ -66,18 +66,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
     // router.push('/chat/new') or setShowNewChatModal(true)
   };
 
-  const chatThreads = [
-    {
-      label: "Next.js 15.3.3 (stale)",
-      href: "/chat/1",
-      timestamp: "2 hours ago"
-    },
-    {
-      label: "Main Analytics Dashboard",
-      href: "/chat/2", 
-      timestamp: "1 day ago"
-    },
-  ];
+  const chatThreads = [];
 
   const links = [
     {
