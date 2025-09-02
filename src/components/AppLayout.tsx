@@ -5,7 +5,7 @@
 import { useState, useEffect, type ReactNode } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
-import { Sidebar, SidebarBody, SidebarLink } from '@/components/ui/sidebar';
+import { Sidebar, SidebarBody, SidebarLink, ExpandableSidebarLink } from '@/components/ui/sidebar';
 import {
   Home as HomeIcon,
   Settings,
@@ -15,6 +15,7 @@ import {
   Sun,
   Moon,
   Target,
+  ChevronRight
 } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import { Switch } from '@/components/ui/switch';
@@ -58,6 +59,18 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
     setIsMounted(true);
   }, []);
 
+  const chatThreads = [
+    {
+      label: "Next.js 15.3.3 (stale)",
+      href: "/chat/1",
+      timestamp: "2 hours ago"
+    },
+    {
+      label: "Main Analytics Dashboard",
+      href: "/chat/2", 
+      timestamp: "1 day ago"
+    },
+  ];
 
   const links = [
     {
@@ -66,6 +79,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       icon: (
         <HomeIcon className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" />
       ),
+      subItems: chatThreads
     },
     {
       label: 'Analytics',
@@ -112,7 +126,11 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             {open ? <Logo /> : <LogoIcon />}
             <div className="mt-8 flex flex-col gap-2">
               {links.map((link, idx) => (
-                <SidebarLink key={idx} link={link} />
+                link.subItems ? (
+                  <ExpandableSidebarLink key={idx} link={link} />
+                ) : (
+                  <SidebarLink key={idx} link={link} />
+                )
               ))}
             </div>
           </div>
