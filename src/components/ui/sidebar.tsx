@@ -1,4 +1,3 @@
-
 "use client";
 
 import { cn } from "@/lib/utils";
@@ -6,6 +5,8 @@ import Link, { LinkProps } from "next/link";
 import React, { useState, createContext, useContext, useRef, useEffect } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Menu, X, ChevronRight, Plus } from "lucide-react";
+import { useRouter } from 'next/navigation';
+import { v4 as uuidv4 } from 'uuid';
 
 interface Links {
   label: string;
@@ -203,13 +204,14 @@ export const ExpandableSidebarLink = ({
 }: {
   link: Links;
   className?: string;
-  onNewChat?: () => void;
+  onNewChat?: (chatId: string) => void;
   props?: LinkProps;
 }) => {
   const { open, animate } = useSidebar();
   const [isExpanded, setIsExpanded] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const router = useRouter();
 
   const handleMouseEnter = () => {
     if (timeoutRef.current) {
@@ -221,23 +223,26 @@ export const ExpandableSidebarLink = ({
   };
 
   const handleMouseLeave = () => {
-    // Add a delay before closing to allow user to move mouse to submenu
     timeoutRef.current = setTimeout(() => {
       setIsExpanded(false);
-    }, 300); // 300ms delay
+    }, 300);
   };
 
   const handleNewChatClick = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
+    
+    const newChatId = uuidv4().slice(0, 8);
+    
+    router.push(`/chat/${newChatId}`);
+    
     if (onNewChat) {
-      onNewChat();
+      onNewChat(newChatId);
     }
-    // Default behavior - you can customize this
-    console.log('Starting new chat...');
+    
+    setIsExpanded(false);
   };
 
-  // Cleanup timeout on unmount
   useEffect(() => {
     return () => {
       if (timeoutRef.current) {
@@ -253,7 +258,6 @@ export const ExpandableSidebarLink = ({
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >
-      {/* Main Link */}
       <Link
         href={link.href}
         className={cn(
@@ -285,9 +289,8 @@ export const ExpandableSidebarLink = ({
         )}
       </Link>
 
-      {/* Expandable Submenu */}
       <AnimatePresence>
-        {isExpanded && link.subItems && open && (
+        {isExpanded && open && (
           <motion.div
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: "auto", opacity: 1 }}
@@ -296,8 +299,15 @@ export const ExpandableSidebarLink = ({
             className="overflow-hidden ml-6 border-l border-neutral-300 dark:border-neutral-600 pl-2"
           >
             <div className="py-1 space-y-1 max-h-64 overflow-y-auto">
-              {/* Chat Threads */}
-              {link.subItems.map((subItem, idx) => (
+              <button
+                onClick={handleNewChatClick}
+                className="w-full flex items-center justify-center gap-2 py-2 px-2 rounded-md border border-dashed border-neutral-400 dark:border-neutral-600 text-neutral-600 dark:text-neutral-300 hover:bg-neutral-200 dark:hover:bg-neutral-700 hover:border-neutral-500 dark:hover:border-neutral-500 transition-all duration-200 text-sm mb-2"
+              >
+                <Plus className="h-4 w-4" />
+                <span>New Chat</span>
+              </button>
+
+              {link.subItems && link.subItems.map((subItem, idx) => (
                 <Link
                   key={idx}
                   href={subItem.href}
@@ -315,15 +325,6 @@ export const ExpandableSidebarLink = ({
                   </div>
                 </Link>
               ))}
-
-              {/* New Chat Button */}
-              <button
-                onClick={handleNewChatClick}
-                className="mt-2 w-full flex items-center justify-center gap-2 py-2 px-2 rounded-md border border-dashed border-neutral-400 dark:border-neutral-600 text-neutral-600 dark:text-neutral-300 hover:bg-neutral-200 dark:hover:bg-neutral-700 hover:border-neutral-500 dark:hover:border-neutral-500 transition-all duration-200 text-sm"
-              >
-                <Plus className="h-4 w-4" />
-                <span>New Chat</span>
-              </button>
             </div>
           </motion.div>
         )}

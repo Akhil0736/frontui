@@ -1,5 +1,3 @@
-
-
 'use client';
 
 import { useState, useEffect, type ReactNode } from 'react';
@@ -20,11 +18,26 @@ import {
 import { useTheme } from 'next-themes';
 import { Switch } from '@/components/ui/switch';
 import { BeamsBackground } from './ui/beams-background';
+import ChatInterface from './ChatInterface';
+import { useChatContext } from '@/context/ChatContext';
+
+function formatTimeAgo(date: Date): string {
+  const now = new Date();
+  const diff = now.getTime() - date.getTime();
+  const hours = Math.floor(diff / (1000 * 60 * 60));
+  const days = Math.floor(hours / 24);
+  
+  if (hours < 1) return 'Just now';
+  if (hours < 24) return `${hours} hours ago`;
+  if (days < 7) return `${days} days ago`;
+  return `${Math.floor(days / 7)} weeks ago`;
+}
+
 
 const Logo = () => {
   return (
     <Link
-      href="#"
+      href="/"
       className="font-normal flex space-x-2 items-center text-sm text-black dark:text-white py-1 relative z-20"
     >
       <div className="h-5 w-6 bg-black dark:bg-white rounded-br-lg rounded-tr-sm rounded-tl-lg rounded-bl-sm flex-shrink-0" />
@@ -42,7 +55,7 @@ const Logo = () => {
 const LogoIcon = () => {
   return (
     <Link
-      href="#"
+      href="/"
       className="font-normal flex space-x-2 items-center text-sm text-black dark:text-white py-1 relative z-20"
     >
       <div className="h-5 w-6 bg-black dark:bg-white rounded-br-lg rounded-tr-sm rounded-tl-lg rounded-bl-sm flex-shrink-0" />
@@ -50,23 +63,25 @@ const LogoIcon = () => {
   );
 };
 
-export default function AppLayout({ children }: { children: React.ReactNode }) {
+export default function AppLayout() {
   const [open, setOpen] = useState(false);
   const { theme, setTheme } = useTheme();
   const [isMounted, setIsMounted] = useState(false);
+  const { chatThreads, createNewChat } = useChatContext();
 
   useEffect(() => {
     setIsMounted(true);
   }, []);
 
-  const handleNewChat = () => {
-    // Handle new chat creation
-    console.log('Creating new chat...');
-    // You can navigate to a new chat page or open a modal
-    // router.push('/chat/new') or setShowNewChatModal(true)
+  const handleNewChat = (chatId: string) => {
+    console.log('New chat created:', chatId);
   };
-
-  const chatThreads = [];
+  
+  const chatThreadsForSidebar = chatThreads.map(chat => ({
+    label: chat.title,
+    href: `/chat/${chat.id}`,
+    timestamp: formatTimeAgo(chat.updatedAt)
+  }));
 
   const links = [
     {
@@ -75,7 +90,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       icon: (
         <HomeIcon className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" />
       ),
-      subItems: chatThreads
+      subItems: chatThreadsForSidebar
     },
     {
       label: 'Analytics',
@@ -163,7 +178,9 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
           </div>
         </SidebarBody>
       </Sidebar>
-      <div className="flex-1 h-screen overflow-y-auto">{children}</div>
+      <div className="flex-1 h-screen overflow-y-auto">
+        <ChatInterface />
+      </div>
     </div>
   );
 
