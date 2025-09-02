@@ -1,15 +1,17 @@
+
 'use client';
 import { useChatContext } from "@/context/ChatContext";
+import { useTheme } from "next-themes";
 import { useParams, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import { AuroraBackground } from '@/components/ui/aurora-background';
 import { AIInputField } from "./ui/ai-input";
 import { AnimatePresence } from "framer-motion";
-import LunaLogo from "./ui/luna-logo";
+import { BeamsBackground } from "./ui/beams-background";
 
 export default function ChatInterface() {
   const { currentChat, sendMessage, loadChat, createNewChat } = useChatContext();
+  const { theme } = useTheme();
   const params = useParams();
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
@@ -42,27 +44,26 @@ export default function ChatInterface() {
   
   const isEmpty = !currentChat || currentChat.messages.length === 0;
 
+  if (isEmpty) {
+    return (
+        <BeamsBackground className="h-full w-full">
+            <div className="flex flex-1 flex-col h-screen bg-transparent relative">
+                <div className="flex-1 overflow-y-auto pb-24">
+                </div>
+                <div className="absolute bottom-0 left-0 w-full p-4 border-t border-transparent">
+                    <AIInputField onSend={handleSend} isLoading={isLoading} />
+                </div>
+            </div>
+        </BeamsBackground>
+    )
+  }
+
   return (
-    <div className="flex flex-1 flex-col h-screen bg-transparent relative">
+    <div className={`flex flex-1 flex-col h-screen relative transition-colors duration-300 ${theme === 'light' ? 'bg-white' : 'bg-black'}`}>
       <div className="flex-1 overflow-y-auto pb-24">
-        {isEmpty ? (
-          <AuroraBackground className="h-full items-center justify-center">
-             <motion.div
-                initial={{ opacity: 0.0, y: 40 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{
-                  delay: 0.3,
-                  duration: 0.8,
-                  ease: "easeInOut",
-                }}
-              >
-                <LunaLogo size="lg"/>
-              </motion.div>
-          </AuroraBackground>
-        ) : (
             <AnimatePresence>
               <div className="space-y-4 max-w-4xl mx-auto w-full pt-8 px-4">
-                  {currentChat.messages.map((message) => (
+                  {currentChat?.messages.map((message) => (
                       <motion.div
                       key={message.id}
                       initial={{ opacity: 0, y: 20 }}
@@ -77,7 +78,13 @@ export default function ChatInterface() {
                           L
                           </div>
                       )}
-                      <div className={'max-w-xl py-4 text-foreground'}>
+                      <div className={`max-w-xl p-4 rounded-2xl ${
+                          message.role === 'user'
+                            ? 'bg-blue-500 text-white'
+                            : theme === 'light'
+                            ? 'bg-neutral-100 text-neutral-800 border border-neutral-200'
+                            : 'bg-neutral-800 text-neutral-200 border border-neutral-700'
+                        }`}>
                           <p className="whitespace-pre-wrap">
                               {message.content}
                           </p>
@@ -86,7 +93,6 @@ export default function ChatInterface() {
                   ))}
               </div>
             </AnimatePresence>
-        )}
       </div>
       <div className="absolute bottom-0 left-0 w-full p-4 border-t border-transparent">
           <AIInputField onSend={handleSend} isLoading={isLoading} />
