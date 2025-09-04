@@ -1,5 +1,13 @@
-
-import * as admin from 'firebase-admin';
+// Server-only: dynamically require firebase-admin to avoid bundling in the client
+let admin: any = null;
+if (typeof window === 'undefined') {
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    admin = require('firebase-admin');
+  } catch (_e) {
+    admin = null;
+  }
+}
 import { routeRequest } from '@/ai/router';
 import type {
   ConversationContext,
@@ -8,7 +16,7 @@ import type {
 } from './AgentTypes';
 
 export class LunaAssistant {
-  private db: admin.firestore.Firestore;
+  private db: any;
   public conversationHistory: ConversationContext[] = [];
   public sessionId: string;
   private userId: string;
@@ -16,8 +24,8 @@ export class LunaAssistant {
   constructor(userId: string, sessionId?: string) {
     this.userId = userId;
     this.sessionId = sessionId || this.generateSessionId();
-    // This assumes Firebase has been initialized elsewhere in the app
-    if (!admin.apps.length) {
+    // This assumes Firebase has been initialized elsewhere in the app (server-only)
+    if (!admin || !admin.apps || !admin.apps.length) {
       console.warn(
         'Firebase Admin SDK not initialized. Conversation history will not be saved.'
       );
@@ -423,7 +431,7 @@ User Query: ${message}`;
 
     if (!snapshot.empty) {
       this.conversationHistory = snapshot.docs
-        .map((doc) => doc.data() as ConversationContext)
+        .map((doc: any) => doc.data() as ConversationContext)
         .reverse();
     }
   }
