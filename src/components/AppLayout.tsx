@@ -108,6 +108,13 @@ export default function AppLayout({ children }: { children: ReactNode }) {
       ),
     },
     {
+      label: 'Actions Test',
+      href: '/actions-test',
+      icon: (
+        <Target className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" />
+      ),
+    },
+    {
       label: 'Billing',
       href: '/billing',
       icon: (

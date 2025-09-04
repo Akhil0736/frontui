@@ -2,6 +2,7 @@
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { RionaClient } from "@/sdk/rionaClient";
+import Link from "next/link";
 
 type TaskStatus = {
   id: string;
@@ -99,6 +100,11 @@ export default function ActionsTestPage() {
   return (
     <div style={{ padding: 24, maxWidth: 800, margin: "0 auto" }}>
       <h1>Riona Actions Test</h1>
+      <div style={{ marginTop: 8 }}>
+        <Link href="/settings" className="text-sm text-blue-600 hover:underline">
+          ← Back to Settings
+        </Link>
+      </div>
 
       <section style={{ marginTop: 24 }}>
         <h2>Configuration</h2>

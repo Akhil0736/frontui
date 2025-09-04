@@ -1,7 +1,8 @@
 
 'use client';
 
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
+import Link from 'next/link';
 import { RionaClient } from '@/sdk/rionaClient';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -57,6 +58,25 @@ const ConnectedInstagramField: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const { toast } = useToast();
+
+  // Prefill connection status based on existing auth cookie
+  useEffect(() => {
+    let mounted = true;
+    (async () => {
+      try {
+        const me = await client.me() as any;
+        if (!mounted) return;
+        if (me && me.username) {
+          setIsConnected(true);
+          setUsername((u) => u || me.username);
+          setMessage('Connected session detected.');
+        }
+      } catch (_e) {
+        // not authenticated yet; ignore
+      }
+    })();
+    return () => { mounted = false; };
+  }, [client]);
 
   const extractSessionId = (input: string) => {
     const trimmed = input.trim();
@@ -146,7 +166,7 @@ const ConnectedInstagramField: React.FC = () => {
             Logout
           </Button>
           <div className="text-xs text-muted-foreground">
-            {isConnected ? 'Status: Connected' : 'Status: Not connected'}
+            {isConnected ? `Status: Connected${username ? ' as @' + username : ''}` : 'Status: Not connected'}
           </div>
         </div>
         {message && (
@@ -172,6 +192,13 @@ const ConnectedInstagramField: React.FC = () => {
           </AccordionItem>
         </Accordion>
       )}
+
+      {/* Quick validation link to Actions Test */}
+      <div className="pt-2">
+        <Link href="/actions-test" className="inline-flex items-center text-xs text-primary hover:underline">
+          Go to Actions Test →
+        </Link>
+      </div>
     </div>
   );
 };
