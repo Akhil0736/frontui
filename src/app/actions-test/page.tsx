@@ -3,6 +3,7 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { RionaClient } from "@/sdk/rionaClient";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 type TaskStatus = {
   id: string;
@@ -13,6 +14,15 @@ type TaskStatus = {
 };
 
 export default function ActionsTestPage() {
+  // Feature gate: hide this page in production unless explicitly enabled
+  const allowed = process.env.NODE_ENV !== 'production' || process.env.NEXT_PUBLIC_SHOW_ACTIONS_TEST === 'true';
+  const router = useRouter();
+  useEffect(() => {
+    if (!allowed) {
+      router.replace('/');
+    }
+  }, [allowed, router]);
+  if (!allowed) return null;
   const [baseURL, setBaseURL] = useState(
     () => process.env.NEXT_PUBLIC_RIONA_API_URL || "http://localhost:3001/api"
   );
