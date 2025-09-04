@@ -77,9 +77,7 @@ export default function AppLayout({ children }: { children: ReactNode }) {
     timestamp: formatTimeAgo(chat.updatedAt)
   }));
 
-  const showActionsTest = process.env.NODE_ENV !== 'production' || process.env.NEXT_PUBLIC_SHOW_ACTIONS_TEST === 'true';
-
-  const baseLinks = [
+  const links = [
     {
       label: 'Home',
       href: '/',
@@ -124,20 +122,6 @@ export default function AppLayout({ children }: { children: ReactNode }) {
       ),
     },
   ];
-
-  const links = showActionsTest
-    ? [
-        ...baseLinks.slice(0, 4),
-        {
-          label: 'Actions Test',
-          href: '/actions-test',
-          icon: (
-            <Target className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" />
-          ),
-        },
-        ...baseLinks.slice(4),
-      ]
-    : baseLinks;
 
   return (
     <div className="flex h-screen w-full bg-transparent">
