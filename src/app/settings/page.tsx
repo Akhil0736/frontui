@@ -1,7 +1,8 @@
 
 'use client';
 
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
+import { RionaClient } from '@/sdk/rionaClient';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -49,103 +50,107 @@ const chromeStorageService = {
 
 // ConnectedInstagramField Component
 const ConnectedInstagramField: React.FC = () => {
-  const [cookie, setCookie] = useState('');
-  const [isConnected, setIsConnected] = useState(false);
+  const client = React.useMemo(() => new RionaClient({ credentials: 'include' }), []);
+  const [sessionId, setSessionId] = useState('');
   const [username, setUsername] = useState('');
-  const [isConnecting, setIsConnecting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [isConnected, setIsConnected] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [message, setMessage] = useState<string | null>(null);
   const { toast } = useToast();
 
+  const extractSessionId = (input: string) => {
+    const trimmed = input.trim();
+    if (trimmed.includes('sessionid')) {
+      // Accept full cookie string; extract sessionid value
+      const match = trimmed.match(/(?:^|;\s*)sessionid=([^;\s]+)/i);
+      return match ? match[1] : '';
+    }
+    return trimmed; // assume raw sessionid value
+  };
+
   const handleConnect = async () => {
-    if (!cookie.includes('sessionid')) {
-      setError('Invalid session cookie. Please make sure it includes "sessionid".');
+    const sid = extractSessionId(sessionId);
+    if (!sid) {
+      setMessage('Please provide a valid Instagram sessionid.');
       return;
     }
-    setError(null);
-    setIsConnecting(true);
-
+    setIsLoading(true);
+    setMessage(null);
     try {
-      const result = await authService.saveSessionCookie(cookie);
-      if (result.success) {
-        setIsConnected(true);
-        setUsername(result.username);
-        setCookie('');
-        toast({
-          title: 'Account Connected',
-          description: `Successfully connected to @${result.username}`,
-          variant: 'default',
-        });
-      }
-    } catch (e) {
-      setError('Failed to connect account. Please check the cookie and try again.');
+      await client.loginWithSession(sid, username || undefined);
+      setIsConnected(true);
+      toast({ title: 'Account Connected', description: 'Session verified and saved.' });
+      setMessage('Connected successfully.');
+    } catch (e: any) {
+      setMessage(e?.message || 'Failed to connect.');
     } finally {
-      setIsConnecting(false);
+      setIsLoading(false);
     }
   };
-  
-  const handleDisconnect = () => {
-    setIsConnected(false);
-    setUsername('');
-    toast({
-        title: 'Account Disconnected',
-        description: `Successfully disconnected your account.`,
-        variant: 'default',
-      });
-  }
+
+  const handleLogout = async () => {
+    setIsLoading(true);
+    setMessage(null);
+    try {
+      await client.logout();
+      setIsConnected(false);
+      toast({ title: 'Logged out' });
+      setMessage('Logged out.');
+    } catch (e: any) {
+      setMessage(e?.message || 'Failed to logout.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
     <div className="space-y-4">
-      <div>
-        <Label htmlFor="instagram-cookie" className="text-sm font-medium text-foreground">
-          {isConnected ? 'Connected Account' : 'Connect Instagram Account'}
+      <div className="space-y-2">
+        <Label htmlFor="instagram-sessionid" className="text-sm font-medium text-foreground">
+          Instagram Session (sessionid) Cookie
         </Label>
-        {isConnected ? (
-          <div className="flex items-center gap-2 mt-2">
-            <div className="flex-1 h-9 px-3 rounded-md bg-white/60 dark:bg-card/50 flex items-center">
-              <CheckCircle className="w-4 h-4 mr-2 text-green-500" />
-              <span className="text-sm font-medium text-foreground">@{username}</span>
-            </div>
-            <Button
-              onClick={handleDisconnect}
-              variant="destructive"
-              size="sm"
-              className="h-9 px-4"
-            >
-              Disconnect
-            </Button>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+          <Input
+            id="instagram-sessionid"
+            value={sessionId}
+            onChange={(e) => setSessionId(e.target.value)}
+            placeholder="Paste your sessionid value or full cookie string"
+            className="h-9 px-3 rounded-md bg-white/60 dark:bg-card/50 backdrop-blur placeholder:text-gray-500"
+          />
+          <Input
+            id="instagram-username"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+            placeholder="Optional: username label"
+            className="h-9 px-3 rounded-md bg-white/60 dark:bg-card/50 backdrop-blur placeholder:text-gray-500"
+          />
+        </div>
+        <div className="flex gap-2 items-center">
+          <Button
+            onClick={handleConnect}
+            disabled={isLoading || !sessionId.trim()}
+            variant="outline"
+            size="sm"
+            className="h-9 px-4 bg-white/60 dark:bg-card/50 backdrop-blur hover:bg-pink-500/10"
+          >
+            {isLoading && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+            {isConnected ? 'Reconnect' : 'Connect'}
+          </Button>
+          <Button
+            onClick={handleLogout}
+            disabled={isLoading || !isConnected}
+            variant="outline"
+            size="sm"
+            className="h-9 px-4 bg-white/60 dark:bg-card/50 backdrop-blur hover:bg-pink-500/10"
+          >
+            Logout
+          </Button>
+          <div className="text-xs text-muted-foreground">
+            {isConnected ? 'Status: Connected' : 'Status: Not connected'}
           </div>
-        ) : (
-          <>
-            <div className="flex gap-2 mt-2">
-              <Input
-                id="instagram-cookie"
-                value={cookie}
-                onChange={(e) => setCookie(e.target.value)}
-                placeholder="Paste your Instagram session cookie here"
-                type="password"
-                className={cn(
-                  "h-9 px-3 rounded-md bg-white/60 dark:bg-card/50 backdrop-blur placeholder:text-gray-500",
-                  error && "border-red-500"
-                )}
-              />
-              <Button
-                onClick={handleConnect}
-                disabled={isConnecting || !cookie}
-                variant="outline"
-                size="sm"
-                className="h-9 px-4 bg-white/60 dark:bg-card/50 backdrop-blur hover:bg-pink-500/10"
-              >
-                {isConnecting && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-                Connect
-              </Button>
-            </div>
-            {error && (
-              <p className="flex items-center text-xs text-red-500 mt-2">
-                <AlertCircle className="w-3 h-3 mr-1" />
-                {error}
-              </p>
-            )}
-          </>
+        </div>
+        {message && (
+          <div className="text-xs text-muted-foreground">{message}</div>
         )}
       </div>
 
@@ -156,14 +161,13 @@ const ConnectedInstagramField: React.FC = () => {
               How to get your session cookie?
             </AccordionTrigger>
             <AccordionContent>
-                <ol className="list-decimal list-inside space-y-2 text-xs text-muted-foreground">
-                    <li>Open Instagram.com in a new tab in your browser and log in.</li>
-                    <li>Open the developer tools (Right-click &gt; Inspect, or F12).</li>
-                    <li>Go to the "Application" (or "Storage" in Firefox) tab.</li>
-                    <li>On the left side, find "Cookies" and select "https://www.instagram.com".</li>
-                    <li>Find the cookie named "sessionid" and copy its entire "Cookie Value".</li>
-                    <li>Paste the copied value into the input field above and click Connect.</li>
-                </ol>
+              <ol className="list-decimal list-inside space-y-2 text-xs text-muted-foreground">
+                <li>Open Instagram.com in a new tab and log in.</li>
+                <li>Open DevTools (Right-click &gt; Inspect, or F12).</li>
+                <li>Go to Application/Storage &gt; Cookies &gt; https://www.instagram.com.</li>
+                <li>Copy the value of the cookie named "sessionid".</li>
+                <li>Paste it above and click Connect.</li>
+              </ol>
             </AccordionContent>
           </AccordionItem>
         </Accordion>
