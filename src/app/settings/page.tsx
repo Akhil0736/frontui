@@ -193,12 +193,14 @@ const ConnectedInstagramField: React.FC = () => {
         </Accordion>
       )}
 
-      {/* Quick validation link to Actions Test */}
-      <div className="pt-2">
-        <Link href="/actions-test" className="inline-flex items-center text-xs text-primary hover:underline">
-          Go to Actions Test →
-        </Link>
-      </div>
+      {/* Quick validation link to Actions Test (hidden in production unless explicitly enabled) */}
+      {((process.env.NODE_ENV !== 'production') || process.env.NEXT_PUBLIC_SHOW_ACTIONS_TEST === 'true') && (
+        <div className="pt-2">
+          <Link href="/actions-test" className="inline-flex items-center text-xs text-primary hover:underline">
+            Go to Actions Test →
+          </Link>
+        </div>
+      )}
     </div>
   );
 };
