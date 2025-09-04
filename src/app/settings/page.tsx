@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState } from 'react';
@@ -7,6 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
 import { 
@@ -17,15 +19,21 @@ import {
   HelpCircle, 
   MessageCircle,
   CheckCircle,
+  AlertCircle,
   Calendar,
   Users
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useToast } from "@/hooks/use-toast"
 
 
 // Mock services
 const authService = {
-  openInstagramAuth: () => console.log('Opening Instagram auth modal'),
+  saveSessionCookie: (cookie: string) => {
+    console.log('Saving session cookie:', cookie)
+    // In a real extension, this would save to chrome.storage.local
+    return Promise.resolve({ success: true, username: 'luna_assistant_pro' });
+  }
 };
 
 const chromeStorageService = {
@@ -39,81 +47,131 @@ const chromeStorageService = {
   })
 };
 
-const useToast = () => ({
-  toast: (message: { title: string; description?: string; variant?: string }) => 
-    console.log('Toast:', message)
-});
-
-// Component interfaces
-interface GeneralSettingsCardProps {
-  className?: string;
-}
-
-interface LicenseInfoCardProps {
-  className?: string;
-}
-
-interface HelpSupportCardProps {
-  className?: string;
-}
-
-interface AboutCardProps {
-  className?: string;
-}
-
 // ConnectedInstagramField Component
 const ConnectedInstagramField: React.FC = () => {
+  const [cookie, setCookie] = useState('');
   const [isConnected, setIsConnected] = useState(false);
-  const [isDetecting, setIsDetecting] = useState(false);
+  const [username, setUsername] = useState('');
+  const [isConnecting, setIsConnecting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const { toast } = useToast();
 
-  const handleLogin = () => {
-    authService.openInstagramAuth();
-  };
+  const handleConnect = async () => {
+    if (!cookie.includes('sessionid')) {
+      setError('Invalid session cookie. Please make sure it includes "sessionid".');
+      return;
+    }
+    setError(null);
+    setIsConnecting(true);
 
-  const handleAutoDetect = async () => {
-    setIsDetecting(true);
-    // Simulate API call
-    setTimeout(() => {
-      setIsDetecting(false);
-      setIsConnected(true);
-    }, 2000);
+    try {
+      const result = await authService.saveSessionCookie(cookie);
+      if (result.success) {
+        setIsConnected(true);
+        setUsername(result.username);
+        setCookie('');
+        toast({
+          title: 'Account Connected',
+          description: `Successfully connected to @${result.username}`,
+          variant: 'default',
+        });
+      }
+    } catch (e) {
+      setError('Failed to connect account. Please check the cookie and try again.');
+    } finally {
+      setIsConnecting(false);
+    }
   };
+  
+  const handleDisconnect = () => {
+    setIsConnected(false);
+    setUsername('');
+    toast({
+        title: 'Account Disconnected',
+        description: `Successfully disconnected your account.`,
+        variant: 'default',
+      });
+  }
 
   return (
-    <div className="space-y-2">
-      <Label htmlFor="instagram-account" className="text-sm font-medium text-foreground">
-        Connected Instagram Account
-      </Label>
-      <div className="flex gap-2">
-        <Input
-          id="instagram-account"
-          value={isConnected ? "@luna_assistant" : ""}
-          placeholder="No account connected"
-          readOnly
-          className="h-9 px-3 rounded-md bg-white/60 dark:bg-card/50 backdrop-blur placeholder:text-gray-500"
-        />
-        <Button
-          onClick={handleLogin}
-          variant="outline"
-          size="sm"
-          className="h-9 px-4 bg-white/60 dark:bg-card/50 backdrop-blur hover:bg-pink-500/10"
-        >
-          Login
-        </Button>
-        <Button
-          onClick={handleAutoDetect}
-          disabled={isDetecting}
-          variant="outline"
-          size="sm"
-          className="h-9 px-4 bg-white/60 dark:bg-card/50 backdrop-blur hover:bg-pink-500/10"
-        >
-          {isDetecting && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-          Auto-Detect
-        </Button>
+    <div className="space-y-4">
+      <div>
+        <Label htmlFor="instagram-cookie" className="text-sm font-medium text-foreground">
+          {isConnected ? 'Connected Account' : 'Connect Instagram Account'}
+        </Label>
+        {isConnected ? (
+          <div className="flex items-center gap-2 mt-2">
+            <div className="flex-1 h-9 px-3 rounded-md bg-white/60 dark:bg-card/50 flex items-center">
+              <CheckCircle className="w-4 h-4 mr-2 text-green-500" />
+              <span className="text-sm font-medium text-foreground">@{username}</span>
+            </div>
+            <Button
+              onClick={handleDisconnect}
+              variant="destructive"
+              size="sm"
+              className="h-9 px-4"
+            >
+              Disconnect
+            </Button>
+          </div>
+        ) : (
+          <>
+            <div className="flex gap-2 mt-2">
+              <Input
+                id="instagram-cookie"
+                value={cookie}
+                onChange={(e) => setCookie(e.target.value)}
+                placeholder="Paste your Instagram session cookie here"
+                type="password"
+                className={cn(
+                  "h-9 px-3 rounded-md bg-white/60 dark:bg-card/50 backdrop-blur placeholder:text-gray-500",
+                  error && "border-red-500"
+                )}
+              />
+              <Button
+                onClick={handleConnect}
+                disabled={isConnecting || !cookie}
+                variant="outline"
+                size="sm"
+                className="h-9 px-4 bg-white/60 dark:bg-card/50 backdrop-blur hover:bg-pink-500/10"
+              >
+                {isConnecting && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+                Connect
+              </Button>
+            </div>
+            {error && (
+              <p className="flex items-center text-xs text-red-500 mt-2">
+                <AlertCircle className="w-3 h-3 mr-1" />
+                {error}
+              </p>
+            )}
+          </>
+        )}
       </div>
+
+      {!isConnected && (
+        <Accordion type="single" collapsible className="w-full">
+          <AccordionItem value="item-1" className="border-b-0">
+            <AccordionTrigger className="text-xs text-muted-foreground hover:no-underline">
+              How to get your session cookie?
+            </AccordionTrigger>
+            <AccordionContent>
+                <ol className="list-decimal list-inside space-y-2 text-xs text-muted-foreground">
+                    <li>Open Instagram.com in a new tab in your browser and log in.</li>
+                    <li>Open the developer tools (Right-click &gt; Inspect, or F12).</li>
+                    <li>Go to the "Application" (or "Storage" in Firefox) tab.</li>
+                    <li>On the left side, find "Cookies" and select "https://www.instagram.com".</li>
+                    <li>Find the cookie named "sessionid" and copy its entire "Cookie Value".</li>
+                    <li>Paste the copied value into the input field above and click Connect.</li>
+                </ol>
+            </AccordionContent>
+          </AccordionItem>
+        </Accordion>
+      )}
     </div>
   );
 };
+
 
 // AutoStartToggle Component
 const AutoStartToggle: React.FC = () => {
@@ -243,7 +301,7 @@ const SaveSettingsButton: React.FC = () => {
 };
 
 // GeneralSettingsCard Component
-const GeneralSettingsCard: React.FC<GeneralSettingsCardProps> = ({ className }) => {
+const GeneralSettingsCard: React.FC<{className?: string}> = ({ className }) => {
   return (
     <Card className={cn("bg-card/80 backdrop-blur-md", className)}>
       <CardHeader>
@@ -263,7 +321,7 @@ const GeneralSettingsCard: React.FC<GeneralSettingsCardProps> = ({ className }) 
 };
 
 // LicenseInfoCard Component
-const LicenseInfoCard: React.FC<LicenseInfoCardProps> = ({ className }) => {
+const LicenseInfoCard: React.FC<{className?: string}> = ({ className }) => {
   const settings = chromeStorageService.getStoredSettings();
 
   return (
@@ -302,7 +360,7 @@ const LicenseInfoCard: React.FC<LicenseInfoCardProps> = ({ className }) => {
 };
 
 // HelpSupportCard Component
-const HelpSupportCard: React.FC<HelpSupportCardProps> = ({ className }) => {
+const HelpSupportCard: React.FC<{className?: string}> = ({ className }) => {
   const supportLinks = [
     { icon: FileText, label: 'Documentation', href: '#' },
     { icon: HelpCircle, label: 'FAQ', href: '#' },
@@ -336,7 +394,7 @@ const HelpSupportCard: React.FC<HelpSupportCardProps> = ({ className }) => {
 };
 
 // AboutCard Component
-const AboutCard: React.FC<AboutCardProps> = ({ className }) => {
+const AboutCard: React.FC<{className?: string}> = ({ className }) => {
   return (
     <Card className={cn("bg-card/80 backdrop-blur-md", className)}>
       <CardHeader>
@@ -362,21 +420,25 @@ const AboutCard: React.FC<AboutCardProps> = ({ className }) => {
 export default function Settings() {
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-background font-sans">
-      <div className="max-w-5xl mx-auto px-6 py-8">
-        <div className="grid grid-cols-1 md:grid-cols-[1fr_280px] gap-6">
-          {/* Left Column - General Settings */}
-          <div>
-            <GeneralSettingsCard />
-          </div>
-          
-          {/* Right Column - License, Help, About */}
-          <div className="space-y-6">
-            <LicenseInfoCard />
-            <HelpSupportCard />
-            <AboutCard />
-          </div>
+      <main className="flex-1 p-6">
+        <div className="max-w-5xl mx-auto px-6 py-8">
+            <div className="grid grid-cols-1 md:grid-cols-[1fr_280px] gap-6">
+            {/* Left Column - General Settings */}
+            <div>
+                <GeneralSettingsCard />
+            </div>
+            
+            {/* Right Column - License, Help, About */}
+            <div className="space-y-6">
+                <LicenseInfoCard />
+                <HelpSupportCard />
+                <AboutCard />
+            </div>
+            </div>
         </div>
-      </div>
+      </main>
     </div>
   );
 };
+
+      
