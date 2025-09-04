@@ -4,7 +4,6 @@ import { Toaster } from '@/components/ui/toaster';
 import { ThemeProvider } from 'next-themes';
 import { ChatProvider } from '@/context/ChatContext';
 import AppLayout from '@/components/AppLayout';
-import { SpeedInsights } from '@vercel/speed-insights/next';
 
 export const metadata: Metadata = {
   title: 'Luna Dashboard',
@@ -31,7 +30,7 @@ export default function RootLayout({
             <Toaster />
           </ChatProvider>
         </ThemeProvider>
-        <SpeedInsights />
+        {/** SpeedInsights removed to avoid missing module in local dev */}
       </body>
     </html>
   );
