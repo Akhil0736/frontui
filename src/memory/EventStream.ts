@@ -2,44 +2,34 @@
 'use server';
 
 import { ActionRecord } from "@/agents/AgentTypes";
-import { firestore } from 'firebase-admin';
+import { createClient } from '@/lib/supabase/server';
 
 /**
- * Manages the agent's memory by logging all significant events to Firestore.
+ * Manages the agent's memory by logging all significant events to Supabase.
  * This stream is crucial for learning, debugging, and providing
  * progress updates to the user.
  */
 export class EventStream {
-  private db: firestore.Firestore;
-
-  constructor(private userId: string) {
-    // This assumes Firebase has been initialized elsewhere in the app
-    // For local development, you might need to initialize it here if not done globally
-    if (!firestore.getApps().length) {
-        // This is a simplification. In a real app, you'd have a centralized initialization.
-        // firestore.initializeApp(); 
-        console.warn("Firebase Admin SDK not initialized. EventStream will not work.");
-        // @ts-ignore
-        this.db = { collection: () => ({ add: async () => {}, where: () => ({ get: async () => ({ docs: [] })}) }) };
-
-    } else {
-        this.db = firestore();
-    }
-  }
+  constructor(private userId: string) {}
 
   /**
    * Records a successfully executed action and its results.
    */
   async recordAction(record: ActionRecord): Promise<void> {
     try {
-        await this.db.collection('luna_events').add({
-            userId: this.userId,
-            eventType: 'action_completed',
-            eventData: record,
-            timestamp: firestore.FieldValue.serverTimestamp()
+        const supabase = await createClient();
+        const { error } = await supabase.from('luna_events').insert({
+            user_id: this.userId,
+            event_type: 'action_completed',
+            event_data: record,
+            timestamp: new Date().toISOString()
         });
+        
+        if (error) {
+            console.error("Failed to record action to Supabase", error);
+        }
     } catch (e) {
-        console.error("Failed to record action to Firestore", e);
+        console.error("Failed to record action to Supabase", e);
     }
   }
 
@@ -48,14 +38,19 @@ export class EventStream {
    */
   async logEvent(eventType: string, details: any): Promise<void> {
     try {
-        await this.db.collection('luna_events').add({
-            userId: this.userId,
-            eventType: eventType,
-            eventData: details,
-            timestamp: firestore.FieldValue.serverTimestamp()
+        const supabase = await createClient();
+        const { error } = await supabase.from('luna_events').insert({
+            user_id: this.userId,
+            event_type: eventType,
+            event_data: details,
+            timestamp: new Date().toISOString()
         });
+        
+        if (error) {
+            console.error(`Failed to log event "${eventType}" to Supabase`, error);
+        }
     } catch (e) {
-        console.error(`Failed to log event "${eventType}" to Firestore`, e);
+        console.error(`Failed to log event "${eventType}" to Supabase`, e);
     }
   }
 
@@ -67,14 +62,22 @@ export class EventStream {
   async getRecentEvents(hours: number = 24): Promise<any[]> {
     try {
         const since = new Date(Date.now() - hours * 60 * 60 * 1000);
-        const query = await this.db.collection('luna_events')
-          .where('userId', '==', this.userId)
-          .where('timestamp', '>', since)
-          .orderBy('timestamp', 'desc')
-          .get();
-        return query.docs.map(doc => doc.data());
+        const supabase = await createClient();
+        const { data, error } = await supabase
+          .from('luna_events')
+          .select('*')
+          .eq('user_id', this.userId)
+          .gt('timestamp', since.toISOString())
+          .order('timestamp', { ascending: false });
+        
+        if (error) {
+            console.error("Failed to get recent events from Supabase", error);
+            return [];
+        }
+        
+        return data || [];
     } catch(e) {
-        console.error("Failed to get recent events from Firestore", e);
+        console.error("Failed to get recent events from Supabase", e);
         return [];
     }
   }

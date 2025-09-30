@@ -1,13 +1,4 @@
-// Server-only: dynamically require firebase-admin to avoid bundling in the client
-let admin: any = null;
-if (typeof window === 'undefined') {
-  try {
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    admin = require('firebase-admin');
-  } catch (_e) {
-    admin = null;
-  }
-}
+import { createClient } from '@/lib/supabase/server';
 import { routeRequest } from '@/ai/router';
 import type {
   ConversationContext,
@@ -16,7 +7,6 @@ import type {
 } from './AgentTypes';
 
 export class LunaAssistant {
-  private db: any;
   public conversationHistory: ConversationContext[] = [];
   public sessionId: string;
   private userId: string;
@@ -24,22 +14,8 @@ export class LunaAssistant {
   constructor(userId: string, sessionId?: string) {
     this.userId = userId;
     this.sessionId = sessionId || this.generateSessionId();
-    // This assumes Firebase has been initialized elsewhere in the app (server-only)
-    if (!admin || !admin.apps || !admin.apps.length) {
-      console.warn(
-        'Firebase Admin SDK not initialized. Conversation history will not be saved.'
-      );
-      // @ts-ignore
-      this.db = {
-        collection: () => ({
-          add: async () => {},
-          where: () => ({ get: async () => ({ docs: [] }) }),
-        }),
-      };
-    } else {
-      this.db = admin.firestore();
-      this.loadConversationHistory();
-    }
+    // Load conversation history on initialization
+    this.loadConversationHistory();
   }
 
   /**
@@ -419,30 +395,56 @@ User Query: ${message}`;
   }
 
   private async loadConversationHistory(): Promise<void> {
-    if (!this.db) return;
-    // Load from Firestore
-    const snapshot = await this.db
-      .collection('conversation_history')
-      .where('userId', '==', this.userId)
-      .where('sessionId', '==', this.sessionId)
-      .orderBy('timestamp', 'desc')
-      .limit(10)
-      .get();
+    try {
+      const supabase = await createClient();
+      const { data, error } = await supabase
+        .from('conversation_history')
+        .select('*')
+        .eq('user_id', this.userId)
+        .eq('session_id', this.sessionId)
+        .order('timestamp', { ascending: false })
+        .limit(10);
 
-    if (!snapshot.empty) {
-      this.conversationHistory = snapshot.docs
-        .map((doc: any) => doc.data() as ConversationContext)
-        .reverse();
+      if (error) {
+        console.error('Error loading conversation history:', error);
+        return;
+      }
+
+      if (data && data.length > 0) {
+        this.conversationHistory = data
+          .map((row: any) => ({
+            query: row.query,
+            entities: row.entities,
+            intent: row.intent,
+            timestamp: new Date(row.timestamp),
+            sessionId: row.session_id,
+          }))
+          .reverse();
+      }
+    } catch (error) {
+      console.error('Failed to load conversation history:', error);
     }
   }
 
   private async saveConversationContext(
     context: ConversationContext
   ): Promise<void> {
-    if (!this.db) return;
-    await this.db.collection('conversation_history').add({
-      ...context,
-      userId: this.userId,
-    });
+    try {
+      const supabase = await createClient();
+      const { error } = await supabase.from('conversation_history').insert({
+        user_id: this.userId,
+        session_id: context.sessionId,
+        query: context.query,
+        entities: context.entities,
+        intent: context.intent,
+        timestamp: context.timestamp.toISOString(),
+      });
+
+      if (error) {
+        console.error('Error saving conversation context:', error);
+      }
+    } catch (error) {
+      console.error('Failed to save conversation context:', error);
+    }
   }
 }

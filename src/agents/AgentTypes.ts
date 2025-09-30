@@ -23,3 +23,13 @@ export interface AmbiguitySignal {
   multipleMatches?: string[];
   clarificationNeeded: string;
 }
+
+export interface ActionRecord {
+  actionType: string;
+  timestamp: Date | string;
+  input?: any;
+  output?: any;
+  success: boolean;
+  error?: string;
+  metadata?: Record<string, any>;
+}
