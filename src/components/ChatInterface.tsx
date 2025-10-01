@@ -5,7 +5,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { BeamsBackground } from '@/components/ui/beams-background';
-import { Send, Paperclip, Mic } from 'lucide-react';
+import { Send, Paperclip, Mic, Loader2 } from 'lucide-react';
 import AIInputField from "./ui/ai-input";
 import { LunaLogo } from "./ui/luna-logo";
 
@@ -89,9 +89,71 @@ export default function ChatInterface() {
                     }`}
                 >
                     <div className="whitespace-pre-wrap">{message.content}</div>
+                    {message.role === 'assistant' && (
+                      <div className="mt-3 space-y-2 text-sm">
+                        {typeof message.confidence === 'number' && (
+                          <div className="text-neutral-500 dark:text-neutral-400">
+                            <span className="font-semibold">Confidence:</span> {Math.round(message.confidence)}%
+                          </div>
+                        )}
+                        {message.modulesUsed?.length ? (
+                          <div className="text-neutral-500 dark:text-neutral-400">
+                            <span className="font-semibold">Modules:</span> {message.modulesUsed.join(', ')}
+                          </div>
+                        ) : null}
+                        {message.queryType && (
+                          <div className="text-neutral-500 dark:text-neutral-400">
+                            <span className="font-semibold">Query Type:</span> {message.queryType}
+                          </div>
+                        )}
+                        {message.citations && message.citations.length > 0 && (
+                          <div className="text-neutral-500 dark:text-neutral-400">
+                            <span className="font-semibold">Citations:</span>
+                            <ul className="mt-1 space-y-1 list-disc list-inside">
+                              {message.citations.map((citation, index) => (
+                                <li key={index} className="break-words">
+                                  {typeof citation === 'string' ? citation : JSON.stringify(citation)}
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+                        {message.isFallback && (
+                          <div className="text-yellow-600 dark:text-yellow-400">
+                            This is a fallback response while Luna reconnects.
+                          </div>
+                        )}
+                        {message.error && (
+                          <div className="text-red-600 dark:text-red-400">
+                            Error: {message.error}
+                          </div>
+                        )}
+                      </div>
+                    )}
                 </div>
                 </motion.div>
             ))}
+            {isLoading && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3 }}
+                className="flex justify-start"
+              >
+                <div
+                  className={`max-w-[80%] p-4 rounded-2xl font-proxima-regular border ${
+                    theme === 'light'
+                      ? 'bg-neutral-50 text-neutral-500 border-neutral-200'
+                      : 'bg-neutral-900 text-neutral-400 border-neutral-700'
+                  }`}
+                >
+                  <div className="flex items-center gap-2">
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    <span>Luna is crafting your strategy...</span>
+                  </div>
+                </div>
+              </motion.div>
+            )}
             </div>
       </div>
 

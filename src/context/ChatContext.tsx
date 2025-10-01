@@ -1,13 +1,18 @@
 'use client';
-import React, { createContext, useContext, useState, useEffect } from 'react';
-import { useRouter, useParams } from 'next/navigation';
-import { chat } from '@/ai/flows/chat';
+import React, { createContext, useContext, useState } from 'react';
+import { useRouter } from 'next/navigation';
 
 interface Message {
   id: string;
   content: string;
   role: 'user' | 'assistant';
   timestamp: Date;
+  confidence?: number;
+  modulesUsed?: string[];
+  citations?: unknown[];
+  queryType?: string;
+  isFallback?: boolean;
+  error?: string;
 }
 
 interface ChatThread {
@@ -41,7 +46,6 @@ export const ChatProvider = ({ children }: { children: React.ReactNode }) => {
   const [currentChat, setCurrentChat] = useState<ChatThread | null>(null);
   const [chatThreads, setChatThreads] = useState<ChatThread[]>([]);
   const router = useRouter();
-  const [sessionId, setSessionId] = useState<string>(() => `session_${Date.now()}`);
 
   const createNewChat = (): string => {
     const newChatId = Date.now().toString(36) + Math.random().toString(36).substring(2);
@@ -96,18 +100,71 @@ export const ChatProvider = ({ children }: { children: React.ReactNode }) => {
         return updated.sort((a, b) => b.updatedAt.getTime() - a.updatedAt.getTime());
     });
 
-    const { response, sessionId: newSessionId } = await chat(
-        content,
-        sessionId
-      );
-    setSessionId(newSessionId);
+    let lunaData: any = null;
+    let lunaError: string | null = null;
+
+    try {
+      const response = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ query: content }),
+      });
+
+      const json = await response.json().catch(() => null);
+      lunaData = json;
+
+      if (!response.ok) {
+        const message = json?.error || json?.message || `Luna request failed with status ${response.status}`;
+        throw new Error(message);
+      }
+
+      if (!json || typeof json.response !== 'string') {
+        throw new Error('Unexpected response format from Luna.');
+      }
+    } catch (error: any) {
+      console.error('Luna chat request failed:', error);
+      lunaError = error?.message ?? 'Unknown error connecting to Luna.';
+      lunaData = lunaData || {
+        response:
+          "I'm having trouble reaching Luna right now, but I'm still here for you. Let's try again in a moment.",
+        isFallback: true,
+      };
+      lunaData.error = lunaError;
+    }
 
     const aiResponse: Message = {
       id: (Date.now() + 1).toString(),
-      content: response,
+      content:
+        typeof lunaData?.response === 'string'
+          ? lunaData.response
+          : "I'm having trouble reaching Luna right now, but I'm still here for you. Let's try again in a moment.",
       role: 'assistant',
-      timestamp: new Date()
+      timestamp: new Date(),
     };
+
+    if (typeof lunaData?.confidence === 'number') {
+      aiResponse.confidence = lunaData.confidence;
+    }
+
+    if (Array.isArray(lunaData?.modules_used)) {
+      aiResponse.modulesUsed = lunaData.modules_used.filter((module: unknown): module is string => typeof module === 'string');
+    }
+
+    if (Array.isArray(lunaData?.citations)) {
+      aiResponse.citations = lunaData.citations;
+    }
+
+    if (typeof lunaData?.query_type === 'string') {
+      aiResponse.queryType = lunaData.query_type;
+    }
+
+    if (typeof lunaData?.error === 'string') {
+      aiResponse.error = lunaData.error;
+    }
+
+    if (lunaData?.isFallback) {
+      aiResponse.isFallback = true;
+    }
 
     const finalChat = {
       ...updatedChatWithMessage,
